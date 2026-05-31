@@ -617,6 +617,52 @@
 </head>
 <body>
 
+<!-- TELA DE AUTH -->
+<div id="auth-screen" style="display:none;position:fixed;inset:0;background:#111111;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;font-family:'Barlow',sans-serif;">
+  <div style="width:100%;max-width:380px;">
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;letter-spacing:0.1em;color:#F5A623;">GASTOSΙΑ</div>
+      <div style="font-size:13px;color:#888;margin-top:4px;">Controle financeiro inteligente</div>
+    </div>
+    <!-- Card -->
+    <div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:16px;padding:28px 24px;">
+      <div style="display:flex;gap:8px;margin-bottom:24px;">
+        <button id="tab-login" onclick="switchAuthTab('login')"
+          style="flex:1;padding:10px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;background:#F5A623;color:#111;">
+          ENTRAR
+        </button>
+        <button id="tab-register" onclick="switchAuthTab('register')"
+          style="flex:1;padding:10px;border:1px solid #2A2A2A;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;background:transparent;color:#888;">
+          CADASTRAR
+        </button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Email</label>
+          <input id="auth-email" type="email" placeholder="seu@email.com"
+            style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:15px;padding:12px 14px;outline:none;box-sizing:border-box;"
+            onkeydown="if(event.key==='Enter')document.getElementById('auth-pass').focus()" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Senha</label>
+          <input id="auth-pass" type="password" placeholder="••••••"
+            style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:15px;padding:12px 14px;outline:none;box-sizing:border-box;"
+            onkeydown="if(event.key==='Enter')document.getElementById('auth-btn').click()" />
+        </div>
+        <div id="auth-err" style="color:#F44336;font-size:12px;min-height:16px;"></div>
+        <button id="auth-btn" onclick="authLogin()"
+          style="width:100%;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:0.06em;cursor:pointer;">
+          ENTRAR
+        </button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:#555;">Seus dados ficam protegidos e sincronizados</div>
+  </div>
+</div>
+
+<div id="app-root" style="display:none;">
+
 <!-- AI AUTO BADGE -->
 <div class="ai-auto-badge" id="ai-auto-badge">
   <div class="ai-auto-dot"></div>
@@ -1481,6 +1527,77 @@
 const SUPA_URL = 'https://vfrgmjhguzukraqsmduo.supabase.co';
 const SUPA_KEY = 'sb_publishable_zWIDdXlUEP3hGwih7bD8JA_eNB911je';
 const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+let currentUser = null;
+
+// Auth: verifica sessão atual
+async function initAuth() {
+  const { data: { session } } = await supa.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-root').style.display = '';
+    supaLoadAll();
+  } else {
+    document.getElementById('auth-screen').style.display = '';
+    document.getElementById('app-root').style.display = 'none';
+  }
+}
+
+function switchAuthTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('tab-login').style.background = isLogin ? '#F5A623' : 'transparent';
+  document.getElementById('tab-login').style.color = isLogin ? '#111' : '#888';
+  document.getElementById('tab-login').style.border = isLogin ? 'none' : '1px solid #2A2A2A';
+  document.getElementById('tab-register').style.background = isLogin ? 'transparent' : '#F5A623';
+  document.getElementById('tab-register').style.color = isLogin ? '#888' : '#111';
+  document.getElementById('tab-register').style.border = isLogin ? '1px solid #2A2A2A' : 'none';
+  const btn = document.getElementById('auth-btn');
+  btn.textContent = isLogin ? 'ENTRAR' : 'CADASTRAR';
+  btn.onclick = isLogin ? authLogin : authRegister;
+  document.getElementById('auth-err').textContent = '';
+}
+
+async function authLogin() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const err   = document.getElementById('auth-err');
+  if (!email || !pass) { err.textContent = 'Preencha email e senha.'; return; }
+  err.textContent = '';
+  document.getElementById('auth-btn').disabled = true;
+  const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
+  document.getElementById('auth-btn').disabled = false;
+  if (error) { err.textContent = error.message; return; }
+  currentUser = data.user;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-root').style.display = '';
+  supaLoadAll();
+}
+
+async function authRegister() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const err   = document.getElementById('auth-err');
+  if (!email || !pass) { err.textContent = 'Preencha email e senha.'; return; }
+  if (pass.length < 6) { err.textContent = 'Senha mínima: 6 caracteres.'; return; }
+  err.textContent = '';
+  document.getElementById('auth-btn').disabled = true;
+  const { data, error } = await supa.auth.signUp({ email, password: pass });
+  document.getElementById('auth-btn').disabled = false;
+  if (error) { err.textContent = error.message; return; }
+  currentUser = data.user;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-root').style.display = '';
+  supaLoadAll();
+}
+
+async function authLogout() {
+  await supa.auth.signOut();
+  currentUser = null;
+  expenses = []; incomes = [];
+  localStorage.clear();
+  document.getElementById('auth-screen').style.display = '';
+  document.getElementById('app-root').style.display = 'none';
+}
 
 async function supaLoadAll() {
   try {
@@ -1501,16 +1618,16 @@ async function supaLoadAll() {
     const novosGastos = localExp.filter(e => e.id && !remoteIds.has(e.id));
     const novasRendas = localInc.filter(i => i.id && !remoteIncIds.has(i.id));
 
-    if (novosGastos.length > 0) {
+    if (novosGastos.length > 0 && currentUser) {
       await supa.from('gastos').upsert(novosGastos.map(e => ({
         id: e.id, data: e.data, categoria: e.categoria, valor: e.valor,
         fornecedor: e.fornecedor||'', pagamento: e.pagamento||'',
-        descricao: e.descricao||'', imagem: e.imagem||null
+        descricao: e.descricao||'', imagem: e.imagem||null, user_id: currentUser.id
       })));
     }
-    if (novasRendas.length > 0) {
+    if (novasRendas.length > 0 && currentUser) {
       await supa.from('rendas').upsert(novasRendas.map(i => ({
-        id: i.id, mes: i.mes, tipo: i.tipo, valor: i.valor
+        id: i.id, mes: i.mes, tipo: i.tipo, valor: i.valor, user_id: currentUser.id
       })));
     }
 
@@ -1541,11 +1658,13 @@ async function supaLoadAll() {
 }
 
 async function supaSaveExpense(exp) {
+  if (!currentUser) return;
   try {
     await supa.from('gastos').upsert({
       id: exp.id, data: exp.data, categoria: exp.categoria, valor: exp.valor,
       fornecedor: exp.fornecedor||'', pagamento: exp.pagamento||'',
-      descricao: exp.descricao||'', imagem: exp.imagem||null
+      descricao: exp.descricao||'', imagem: exp.imagem||null,
+      user_id: currentUser.id
     });
   } catch(e) { console.warn('Supabase save expense:', e); }
 }
@@ -1555,9 +1674,11 @@ async function supaDeleteExpense(id) {
 }
 
 async function supaSaveIncome(inc) {
+  if (!currentUser) return;
   try {
     await supa.from('rendas').upsert({
-      id: inc.id, mes: inc.mes, tipo: inc.tipo, valor: inc.valor
+      id: inc.id, mes: inc.mes, tipo: inc.tipo, valor: inc.valor,
+      user_id: currentUser.id
     });
   } catch(e) { console.warn('Supabase save income:', e); }
 }
@@ -4777,6 +4898,7 @@ function generateAdvancedPDF(filterMonth = null, filterYear = null) {
     <span style="color:#2A2A2A;font-size:14px">·</span>
     <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#F5A623;letter-spacing:1.5px">RitmoProd</span>
   </footer>
+</div><!-- /app-root -->
 </body></html>`;
     w.document.write(html);
     w.document.close();
@@ -5008,11 +5130,10 @@ function init() {
 
   // Modo automático: analisa em background ao abrir
   autoRunAI();
-  // Carrega dados do Supabase (sync entre dispositivos)
-  supaLoadAll();
 }
 
 init();
+initAuth();
 
 // ═══════════════════════════════════════════════════════════════════
 // PWA: SERVICE WORKER + MANIFEST
