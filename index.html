@@ -1600,6 +1600,81 @@ const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 let currentUser = null;
 
 // Auth: verifica sessão atual
+async function supaLoadAll() {
+  if (!currentUser) { console.warn('supaLoadAll: sem currentUser'); return; }
+  console.log('supaLoadAll: uid=', currentUser.id);
+
+  // 1. Carrega localStorage imediatamente (exibe rápido)
+  const localExp = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  const localInc = JSON.parse(localStorage.getItem(INCOME_KEY) || '[]');
+  if (localExp.length > 0) {
+    expenses = localExp;
+    incomes = localInc;
+    renderHome();
+    if (typeof renderIncomeList === 'function') renderIncomeList();
+  }
+
+  try {
+    // 2. Adota órfãos no Supabase
+    const upd = await supa.from('gastos').update({ user_id: currentUser.id }).is('user_id', null);
+    console.log('adotar gastos:', upd);
+    await supa.from('rendas').update({ user_id: currentUser.id }).is('user_id', null);
+
+    // 3. Busca do Supabase
+    const gRes = await supa.from('gastos').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
+    await carregarCartoes();
+    const rRes = await supa.from('rendas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
+    console.log('supabase gastos:', gRes.data?.length, gRes.error);
+    console.log('supabase rendas:', rRes.data?.length, rRes.error);
+
+    // 4. Sobe dados locais que não estão no Supabase
+    const remoteIds = new Set((gRes.data||[]).map(r => r.id));
+    const remoteIncIds = new Set((rRes.data||[]).map(r => r.id));
+    const novosGastos = localExp.filter(e => e.id && !remoteIds.has(e.id));
+    const novasRendas = localInc.filter(i => i.id && !remoteIncIds.has(i.id));
+    console.log('novos para subir:', novosGastos.length, novasRendas.length);
+
+    if (novosGastos.length > 0) {
+      const r = await supa.from('gastos').upsert(novosGastos.map(e => ({
+        id: e.id, data: e.data, categoria: e.categoria, valor: e.valor,
+        fornecedor: e.fornecedor||'', pagamento: e.pagamento||'',
+        descricao: e.descricao||'', imagem: e.imagem||null, user_id: currentUser.id
+      })));
+      console.log('upsert gastos:', r.error);
+    }
+    if (novasRendas.length > 0) {
+      await supa.from('rendas').upsert(novasRendas.map(i => ({
+        id: i.id, mes: i.mes, tipo: i.tipo, valor: i.valor, user_id: currentUser.id
+      })));
+    }
+
+    // 5. Busca final
+    const g2 = await supa.from('gastos').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
+    const r2 = await supa.from('rendas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
+    console.log('final gastos:', g2.data?.length);
+
+    if (g2.data && g2.data.length > 0) {
+      expenses = g2.data.map(r => ({
+        id: r.id, data: r.data, categoria: r.categoria, valor: r.valor,
+        fornecedor: r.fornecedor||'', pagamento: r.pagamento||'',
+        descricao: r.descricao||'', imagem: r.imagem||null, criadoEm: r.criado_em
+      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+    }
+    if (r2.data && r2.data.length > 0) {
+      incomes = r2.data.map(r => ({
+        id: r.id, mes: r.mes, tipo: r.tipo, valor: r.valor, criadoEm: r.criado_em
+      }));
+      localStorage.setItem(INCOME_KEY, JSON.stringify(incomes));
+    }
+
+    renderHome();
+    if (typeof renderIncomeList === 'function') renderIncomeList();
+    const relPage = document.getElementById('page-relatorio');
+    if (relPage && relPage.classList.contains('active')) renderRelatorio();
+
+  } catch(e) { console.error('supaLoadAll erro:', e); }
+}
 async function initAuth() {
   const { data: { session } } = await supa.auth.getSession();
   if (session) {
@@ -1719,81 +1794,6 @@ const STORAGE_KEY = 'gastos_ia_v1';
 const INCOME_KEY  = 'gastos_ia_income_v1';
 const INSIGHTS_KEY = 'gastos_ia_insights_v1';
 
-async function supaLoadAll() {
-  if (!currentUser) { console.warn('supaLoadAll: sem currentUser'); return; }
-  console.log('supaLoadAll: uid=', currentUser.id);
-
-  // 1. Carrega localStorage imediatamente (exibe rápido)
-  const localExp = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  const localInc = JSON.parse(localStorage.getItem(INCOME_KEY) || '[]');
-  if (localExp.length > 0) {
-    expenses = localExp;
-    incomes = localInc;
-    renderHome();
-    if (typeof renderIncomeList === 'function') renderIncomeList();
-  }
-
-  try {
-    // 2. Adota órfãos no Supabase
-    const upd = await supa.from('gastos').update({ user_id: currentUser.id }).is('user_id', null);
-    console.log('adotar gastos:', upd);
-    await supa.from('rendas').update({ user_id: currentUser.id }).is('user_id', null);
-
-    // 3. Busca do Supabase
-    const gRes = await supa.from('gastos').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
-    await carregarCartoes();
-    const rRes = await supa.from('rendas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
-    console.log('supabase gastos:', gRes.data?.length, gRes.error);
-    console.log('supabase rendas:', rRes.data?.length, rRes.error);
-
-    // 4. Sobe dados locais que não estão no Supabase
-    const remoteIds = new Set((gRes.data||[]).map(r => r.id));
-    const remoteIncIds = new Set((rRes.data||[]).map(r => r.id));
-    const novosGastos = localExp.filter(e => e.id && !remoteIds.has(e.id));
-    const novasRendas = localInc.filter(i => i.id && !remoteIncIds.has(i.id));
-    console.log('novos para subir:', novosGastos.length, novasRendas.length);
-
-    if (novosGastos.length > 0) {
-      const r = await supa.from('gastos').upsert(novosGastos.map(e => ({
-        id: e.id, data: e.data, categoria: e.categoria, valor: e.valor,
-        fornecedor: e.fornecedor||'', pagamento: e.pagamento||'',
-        descricao: e.descricao||'', imagem: e.imagem||null, user_id: currentUser.id
-      })));
-      console.log('upsert gastos:', r.error);
-    }
-    if (novasRendas.length > 0) {
-      await supa.from('rendas').upsert(novasRendas.map(i => ({
-        id: i.id, mes: i.mes, tipo: i.tipo, valor: i.valor, user_id: currentUser.id
-      })));
-    }
-
-    // 5. Busca final
-    const g2 = await supa.from('gastos').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
-    const r2 = await supa.from('rendas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
-    console.log('final gastos:', g2.data?.length);
-
-    if (g2.data && g2.data.length > 0) {
-      expenses = g2.data.map(r => ({
-        id: r.id, data: r.data, categoria: r.categoria, valor: r.valor,
-        fornecedor: r.fornecedor||'', pagamento: r.pagamento||'',
-        descricao: r.descricao||'', imagem: r.imagem||null, criadoEm: r.criado_em
-      }));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
-    }
-    if (r2.data && r2.data.length > 0) {
-      incomes = r2.data.map(r => ({
-        id: r.id, mes: r.mes, tipo: r.tipo, valor: r.valor, criadoEm: r.criado_em
-      }));
-      localStorage.setItem(INCOME_KEY, JSON.stringify(incomes));
-    }
-
-    renderHome();
-    if (typeof renderIncomeList === 'function') renderIncomeList();
-    const relPage = document.getElementById('page-relatorio');
-    if (relPage && relPage.classList.contains('active')) renderRelatorio();
-
-  } catch(e) { console.error('supaLoadAll erro:', e); }
-}
 
 const CAT_ICONS = {
   'Alimentação':'🍽','Transporte':'🚗','Saúde':'🏥','Moradia':'🏠',
@@ -5684,8 +5684,8 @@ async function associarGastosCartao(cartaoId) {
     '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;color:#F5A623;margin-bottom:14px;text-transform:uppercase;">Associar ao ' + c.nome + '</div>' +
     '<div id="lista-assoc">' + lista + '</div>' +
     '<div style="display:flex;gap:8px;margin-top:14px;">' +
-    '<button onclick="document.getElementById('overlay-assoc').remove()" style="flex:1;background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:12px;font-family:Barlow Condensed,sans-serif;font-weight:700;cursor:pointer;">Cancelar</button>' +
-    '<button onclick="confirmarAssociacao('' + cartaoId + '')" style="flex:2;background:#F5A623;color:#111;border:none;border-radius:8px;padding:12px;font-family:Barlow Condensed,sans-serif;font-weight:700;cursor:pointer;">Associar Selecionados</button>' +
+    '<button onclick="document.getElementById(&apos;overlay-assoc&apos;).remove()" style="flex:1;background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:12px;font-family:Barlow Condensed,sans-serif;font-weight:700;cursor:pointer;">Cancelar</button>' +
+    '<button onclick="confirmarAssociacao(&apos;' + cartaoId + '&apos;)" style="flex:2;background:#F5A623;color:#111;border:none;border-radius:8px;padding:12px;font-family:Barlow Condensed,sans-serif;font-weight:700;cursor:pointer;">Associar Selecionados</button>' +
     '</div></div>';
   document.body.appendChild(overlay);
 }
