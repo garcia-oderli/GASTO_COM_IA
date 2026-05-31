@@ -1067,6 +1067,28 @@
 </div>
 
 <!-- ═══ CONFIG PAGE ═══ -->
+
+<div class="page" id="page-relatorio">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="page-title">Relatório Mensal</div>
+        <div class="page-subtitle" id="rel-subtitle">Carregando...</div>
+      </div>
+      <button onclick="imprimirRelatorio()" style="display:flex;align-items:center;gap:6px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;">
+        🖨️ PDF
+      </button>
+    </div>
+    <!-- Seletor de mês -->
+    <div style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+      <button onclick="relMesAnterior()" style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;padding:8px 14px;cursor:pointer;font-size:18px;">‹</button>
+      <div id="rel-mes-label" style="flex:1;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.06em;"></div>
+      <button onclick="relMesProximo()" style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;padding:8px 14px;cursor:pointer;font-size:18px;">›</button>
+    </div>
+  </div>
+  <div id="rel-content" style="padding:0 16px 100px;"></div>
+</div>
+
 <div class="page" id="page-config">
   <div class="settings-section" style="margin-top:16px;">
     <div class="settings-title">Inteligência Artificial</div>
@@ -1246,6 +1268,10 @@
   <div class="nav-item" id="nav-orcamentos" onclick="showPage('orcamentos',null,'nav-orcamentos')">
     <span class="nav-icon">🎯</span>
     <span>Orçamentos</span>
+  </div>
+  <div class="nav-item" id="nav-relatorio" onclick="showPage('relatorio',null,'nav-relatorio')">
+    <span class="nav-icon">📄</span>
+    <span>Relatório</span>
   </div>
   <div class="nav-item" id="nav-config" onclick="showPage('config',null,'nav-config')">
     <span class="nav-icon">⚙️</span>
@@ -2178,7 +2204,7 @@ function autoClassify(fornecedor) {
 // UI: PAGE NAV
 // ═══════════════════════════════════════════════════════════════════
 const tabEls = document.querySelectorAll('.tab');
-const pageIds = ['home','gastos','analise','insights','orcamentos','config'];
+const pageIds = ['home','gastos','analise','insights','orcamentos','relatorio','config'];
 
 // ═══ FUNÇÕES DO SISTEMA DE CAMADAS ═══════════════════════════════════════════
 
@@ -2334,6 +2360,7 @@ function showPage(name, tabEl, navId) {
   if (name === 'analise')  renderAnalise();
   if (name === 'insights') renderInsightsPage();
   if (name === 'orcamentos') initBudgetPage();
+  if (name === 'relatorio') renderRelatorio();
 }
 
 // ═══════════════════════════════════════════════════════════════════
