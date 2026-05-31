@@ -1610,41 +1610,43 @@ async function authLogout() {
 }
 
 async function supaLoadAll() {
+  if (!currentUser) return;
   try {
+    // 1. Adota registros sem dono (migração)
+    await supa.from('gastos').update({ user_id: currentUser.id }).is('user_id', null);
+    await supa.from('rendas').update({ user_id: currentUser.id }).is('user_id', null);
+
+    // 2. Carrega dados do usuário
     const [gRes, rRes] = await Promise.all([
-      supa.from('gastos').select('*').order('criado_em', { ascending: false }),
-      supa.from('rendas').select('*').order('criado_em', { ascending: false })
+      supa.from('gastos').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false }),
+      supa.from('rendas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false })
     ]);
 
-    const remoteGastos = gRes.data || [];
-    const remoteRendas = rRes.data || [];
-
-    // Migra dados do localStorage para Supabase (primeira vez em cada dispositivo)
+    // 3. Migra localStorage → Supabase (se houver dados locais novos)
     const localExp = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     const localInc = JSON.parse(localStorage.getItem(INCOME_KEY) || '[]');
-    const remoteIds = new Set(remoteGastos.map(r => r.id));
-    const remoteIncIds = new Set(remoteRendas.map(r => r.id));
-
+    const remoteIds = new Set((gRes.data||[]).map(r => r.id));
+    const remoteIncIds = new Set((rRes.data||[]).map(r => r.id));
     const novosGastos = localExp.filter(e => e.id && !remoteIds.has(e.id));
     const novasRendas = localInc.filter(i => i.id && !remoteIncIds.has(i.id));
 
-    if (novosGastos.length > 0 && currentUser) {
+    if (novosGastos.length > 0) {
       await supa.from('gastos').upsert(novosGastos.map(e => ({
         id: e.id, data: e.data, categoria: e.categoria, valor: e.valor,
         fornecedor: e.fornecedor||'', pagamento: e.pagamento||'',
         descricao: e.descricao||'', imagem: e.imagem||null, user_id: currentUser.id
       })));
     }
-    if (novasRendas.length > 0 && currentUser) {
+    if (novasRendas.length > 0) {
       await supa.from('rendas').upsert(novasRendas.map(i => ({
         id: i.id, mes: i.mes, tipo: i.tipo, valor: i.valor, user_id: currentUser.id
       })));
     }
 
-    // Recarrega tudo do Supabase após migração
+    // 4. Busca final com tudo consolidado
     const [g2, r2] = await Promise.all([
-      supa.from('gastos').select('*').order('criado_em', { ascending: false }),
-      supa.from('rendas').select('*').order('criado_em', { ascending: false })
+      supa.from('gastos').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false }),
+      supa.from('rendas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false })
     ]);
 
     if (g2.data && g2.data.length > 0) {
@@ -1664,7 +1666,6 @@ async function supaLoadAll() {
 
     renderHome();
     if (typeof renderIncomeList === 'function') renderIncomeList();
-    // Re-render relatório se estiver ativo
     const relPage = document.getElementById('page-relatorio');
     if (relPage && relPage.classList.contains('active')) renderRelatorio();
   } catch(e) { console.warn('Supabase load:', e); }
