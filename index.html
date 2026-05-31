@@ -5583,8 +5583,8 @@ function renderCartoes() {
 
       // Botões
       html += '<div style="display:flex;gap:8px;margin-top:12px;">';
-      html += '<button onclick="editarCartao('' + c.id + '')" style="flex:1;background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:10px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">✏️ Editar</button>';
-      html += '<button onclick="associarGastosCartao('' + c.id + '')" style="flex:2;background:' + c.cor + ';color:#111;border:none;border-radius:8px;padding:10px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">🔗 Associar Gastos</button>';
+      html += '<button onclick="editarCartao(&apos;' + c.id + '&apos;)" style="flex:1;background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:10px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">✏️ Editar</button>';
+      html += '<button onclick="associarGastosCartao(&apos;' + c.id + '&apos;)" style="flex:2;background:' + c.cor + ';color:#111;border:none;border-radius:8px;padding:10px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">🔗 Associar Gastos</button>';
       html += '</div>';
 
       html += '</div></div>'; // fecha padding + card
@@ -5593,8 +5593,6 @@ function renderCartoes() {
     el.innerHTML = html;
   });
 }
-
-var corCartaoSelecionada = '#F5A623';
 
 function selecionarCorCartao(cor) {
   corCartaoSelecionada = cor;
