@@ -1411,13 +1411,19 @@
       </div>
       <div class="field">
         <label>Forma de Pagamento</label>
-        <select id="f-pagamento">
+        <select id="f-pagamento" onchange="toggleCampoCartao()">
           <option value="">Não informado</option>
           <option value="Dinheiro">💵 Dinheiro</option>
           <option value="Débito">💳 Débito</option>
           <option value="Crédito">💳 Crédito</option>
           <option value="Pix">⚡ Pix</option>
           <option value="Vale Refeição">🎫 Vale Refeição</option>
+        </select>
+      </div>
+      <div class="field" id="field-cartao" style="display:none;">
+        <label>Cartão</label>
+        <select id="f-cartao">
+          <option value="">Selecionar cartão...</option>
         </select>
       </div>
       <div class="field">
@@ -2145,13 +2151,24 @@ if (document.readyState === 'loading') {
 }
 
 // ─── Persistência ────────────────────────────────────────────────
-function saveExpenses()  { 
+function saveExpenses()  {
   try { DataLayerManager.createBackup('SAVE_EXPENSES'); } catch(e) {}
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+  } catch(e) {
+    // Quota exceeded: limpa backups e tenta de novo
+    try { localStorage.removeItem(DataLayerManager.LAYER_BACKUP); } catch(e2) {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses)); } catch(e3) {}
+  }
 }
-function saveIncomes()   { 
+function saveIncomes()   {
   try { DataLayerManager.createBackup('SAVE_INCOMES'); } catch(e) {}
-  localStorage.setItem(INCOME_KEY, JSON.stringify(incomes));
+  try {
+    localStorage.setItem(INCOME_KEY, JSON.stringify(incomes));
+  } catch(e) {
+    try { localStorage.removeItem(DataLayerManager.LAYER_BACKUP); } catch(e2) {}
+    try { localStorage.setItem(INCOME_KEY, JSON.stringify(incomes)); } catch(e3) {}
+  }
 }
 function saveInsightsCache(data) {
   localStorage.setItem(INSIGHTS_KEY, JSON.stringify({ data, ts: Date.now() }));
@@ -3789,6 +3806,7 @@ function openAddModal() {
   document.getElementById('f-fornecedor').value = '';
   document.getElementById('f-pagamento').value = '';
   document.getElementById('f-parcelas').value = '1';
+  if (document.getElementById('f-cartao')) { document.getElementById('f-cartao').value = ''; document.getElementById('field-cartao').style.display = 'none'; }
   document.getElementById('f-descricao').value = '';
   currentImageBase64 = null;
   document.getElementById('no-api-banner').classList.toggle('show', !getApiKey());
@@ -4297,6 +4315,7 @@ function saveExpense() {
       pagamento:  document.getElementById('f-pagamento').value,
       descricao:  document.getElementById('f-descricao').value,
       imagem: currentImageBase64 ? 'data:image/jpeg;base64,'+currentImageBase64 : null,
+      cartao_id: document.getElementById('f-cartao') ? (document.getElementById('f-cartao').value || null) : null,
       criadoEm: new Date().toISOString()
     };
 
@@ -5721,6 +5740,23 @@ async function confirmarAssociacao(cartaoId) {
 // ═══════════════════════════════════════════════════════════════════
 // RELATÓRIO MENSAL
 // ═══════════════════════════════════════════════════════════════════
+function toggleCampoCartao() {
+  var pag = document.getElementById('f-pagamento').value;
+  var fieldCartao = document.getElementById('field-cartao');
+  var selectCartao = document.getElementById('f-cartao');
+  if (pag === 'Crédito' || pag === 'Débito') {
+    fieldCartao.style.display = '';
+    // Popula com cartões cadastrados
+    selectCartao.innerHTML = '<option value="">Nenhum (sem cartão)</option>';
+    cartoes.forEach(function(c) {
+      selectCartao.innerHTML += '<option value="' + c.id + '">' + c.nome + ' •' + (c.final||'??') + '</option>';
+    });
+  } else {
+    fieldCartao.style.display = 'none';
+    selectCartao.value = '';
+  }
+}
+
 var relAno = new Date().getFullYear();
 var relMes = new Date().getMonth();
 
