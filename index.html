@@ -5370,6 +5370,144 @@ function delRecorrente(e, i) {
 
 setTimeout(() => renderRecorrentes(), 300);
 
+// ═══════════════════════════════════════════════════════════════════
+// RELATÓRIO MENSAL
+// ═══════════════════════════════════════════════════════════════════
+let relAno = new Date().getFullYear();
+let relMes = new Date().getMonth();
+
+const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const CAT_COLORS = {
+  'Alimentação':'#F5A623','Transporte':'#4A9EDF','Saúde':'#4CAF50',
+  'Moradia':'#9C27B0','Lazer':'#FF9800','Educação':'#00BCD4',
+  'Seguros':'#795548','Assinaturas':'#607D8B','Viagem':'#E91E63','Outros':'#888888'
+};
+
+function relMesAnterior() {
+  relMes--;
+  if (relMes < 0) { relMes = 11; relAno--; }
+  renderRelatorio();
+}
+function relMesProximo() {
+  relMes++;
+  if (relMes > 11) { relMes = 0; relAno++; }
+  renderRelatorio();
+}
+
+function renderRelatorio() {
+  const label = MONTH_NAMES[relMes] + ' ' + relAno;
+  const elLabel = document.getElementById('rel-mes-label');
+  const elSub = document.getElementById('rel-subtitle');
+  const elContent = document.getElementById('rel-content');
+  if (!elLabel || !elContent) return;
+
+  elLabel.textContent = label;
+  if (elSub) elSub.textContent = label;
+
+  const gastosMes = expenses.filter(function(e) {
+    const d = new Date(e.data + 'T00:00:00');
+    return d.getFullYear() === relAno && d.getMonth() === relMes;
+  });
+
+  const mesKey = relAno + '-' + String(relMes+1).padStart(2,'0');
+  const rendaMes = incomes.filter(function(i){ return i.mes === mesKey; }).reduce(function(s,i){ return s + Number(i.valor); }, 0);
+
+  const totalGastos = gastosMes.reduce(function(s,e){ return s + Number(e.valor); }, 0);
+  const saldo = rendaMes - totalGastos;
+  const pctGasto = rendaMes > 0 ? Math.min((totalGastos/rendaMes)*100, 100) : 0;
+  const saldoColor = saldo >= 0 ? '#4CAF50' : '#F44336';
+
+  function fmt(v) { return 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function fmtN(v) { return Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+  // Por categoria
+  var porCat = {};
+  gastosMes.forEach(function(e) {
+    var c = e.categoria || 'Outros';
+    porCat[c] = (porCat[c] || 0) + Number(e.valor);
+  });
+  var cats = Object.entries(porCat).sort(function(a,b){ return b[1]-a[1]; });
+
+  // Por dia
+  var porDia = {};
+  gastosMes.forEach(function(e) {
+    if (!porDia[e.data]) porDia[e.data] = [];
+    porDia[e.data].push(e);
+  });
+  var diasOrdenados = Object.keys(porDia).sort(function(a,b){ return b.localeCompare(a); });
+
+  var html = '';
+
+  // KPIs
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">';
+  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;"><div style="font-size:10px;color:#888;font-family:Barlow Condensed,sans-serif;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Renda</div><div style="font-size:22px;font-weight:700;color:#4CAF50;font-family:IBM Plex Mono,monospace;">' + fmtN(rendaMes) + '</div></div>';
+  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;"><div style="font-size:10px;color:#888;font-family:Barlow Condensed,sans-serif;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Gastos</div><div style="font-size:22px;font-weight:700;color:#F44336;font-family:IBM Plex Mono,monospace;">' + fmtN(totalGastos) + '</div></div>';
+  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;"><div style="font-size:10px;color:#888;font-family:Barlow Condensed,sans-serif;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Saldo</div><div style="font-size:22px;font-weight:700;color:' + saldoColor + ';font-family:IBM Plex Mono,monospace;">' + fmtN(saldo) + '</div></div>';
+  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;"><div style="font-size:10px;color:#888;font-family:Barlow Condensed,sans-serif;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Comprometido</div><div style="font-size:22px;font-weight:700;color:#F5A623;font-family:IBM Plex Mono,monospace;">' + pctGasto.toFixed(0) + '%</div></div>';
+  html += '</div>';
+
+  // Barra de comprometimento
+  if (rendaMes > 0) {
+    var barColor = pctGasto > 90 ? '#F44336' : pctGasto > 70 ? '#FF9800' : '#4CAF50';
+    html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:20px;">';
+    html += '<div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-size:12px;color:#888;">Orçamento utilizado</span><span style="font-size:12px;color:#F5A623;font-weight:700;">' + pctGasto.toFixed(1) + '%</span></div>';
+    html += '<div style="height:8px;background:#2A2A2A;border-radius:4px;overflow:hidden;"><div style="height:100%;width:' + pctGasto + '%;background:' + barColor + ';border-radius:4px;"></div></div>';
+    html += '<div style="display:flex;justify-content:space-between;margin-top:6px;"><span style="font-size:10px;color:#555;">' + fmt(totalGastos) + ' gastos</span><span style="font-size:10px;color:#555;">' + fmt(rendaMes) + ' renda</span></div>';
+    html += '</div>';
+  }
+
+  // Categorias
+  if (cats.length > 0) {
+    html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:20px;">';
+    html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#F5A623;margin-bottom:14px;">Por Categoria</div>';
+    cats.forEach(function(entry) {
+      var cat = entry[0], val = entry[1];
+      var pct = totalGastos > 0 ? (val/totalGastos*100) : 0;
+      var cor = CAT_COLORS[cat] || '#888888';
+      html += '<div style="margin-bottom:10px;">';
+      html += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:13px;color:#F5F5F5;">' + cat + '</span><div style="text-align:right;"><span style="font-size:13px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(val) + '</span><span style="font-size:10px;color:#555;margin-left:6px;">' + pct.toFixed(0) + '%</span></div></div>';
+      html += '<div style="height:4px;background:#2A2A2A;border-radius:2px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + cor + ';border-radius:2px;"></div></div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Lançamentos
+  if (gastosMes.length > 0) {
+    html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;overflow:hidden;margin-bottom:20px;">';
+    html += '<div style="padding:14px 16px;border-bottom:1px solid #2A2A2A;"><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#F5A623;">Lançamentos (' + gastosMes.length + ')</div></div>';
+    diasOrdenados.forEach(function(dia) {
+      var itens = porDia[dia];
+      var totalDia = itens.reduce(function(s,e){ return s+Number(e.valor); }, 0);
+      var parts = dia.split('-');
+      var dataFmt = parts[2]+'/'+parts[1]+'/'+parts[0];
+      html += '<div style="border-bottom:1px solid #1A1A1A;">';
+      html += '<div style="display:flex;justify-content:space-between;padding:8px 16px;background:#222222;"><span style="font-size:11px;color:#888;font-family:IBM Plex Mono,monospace;">' + dataFmt + '</span><span style="font-size:11px;color:#888;font-family:IBM Plex Mono,monospace;">' + fmt(totalDia) + '</span></div>';
+      itens.forEach(function(e) {
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-top:1px solid #1A1A1A;">';
+        html += '<div><div style="font-size:13px;color:#F5F5F5;">' + (e.fornecedor||e.categoria||'—') + '</div><div style="font-size:11px;color:#888;">' + e.categoria + (e.pagamento?' · '+e.pagamento:'') + '</div></div>';
+        html += '<span style="font-size:14px;color:#F44336;font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(e.valor) + '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    });
+    html += '<div style="display:flex;justify-content:space-between;padding:14px 16px;background:#222222;"><span style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;color:#F5F5F5;letter-spacing:0.06em;text-transform:uppercase;">TOTAL</span><span style="font-family:IBM Plex Mono,monospace;font-weight:700;font-size:16px;color:#F44336;">' + fmt(totalGastos) + '</span></div>';
+    html += '</div>';
+  } else {
+    html += '<div style="text-align:center;padding:40px;color:#555;font-size:14px;">Nenhum gasto em ' + label + '</div>';
+  }
+
+  elContent.innerHTML = html;
+}
+
+function imprimirRelatorio() {
+  var label = MONTH_NAMES[relMes] + ' ' + relAno;
+  var relHtml = document.getElementById('rel-content').innerHTML;
+  var win = window.open('', '_blank');
+  win.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatorio ' + label + '</title><style>@import url(https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Barlow:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap);*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;color:#111;font-family:Barlow,sans-serif;padding:24px}h1{font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px}.sub{font-size:13px;color:#888;margin-bottom:24px}@media print{body{padding:12mm}@page{size:A4 portrait;margin:12mm}}</style></head><body><h1>Relatorio Mensal</h1><div class="sub">' + label + '</div><style>[style*="background:#1C1C1C"],[style*="background:#222222"],[style*="background:#222"],[style*="background:#2A2A2A"]{background:#f8f8f8!important;border-color:#ddd!important}[style*="color:#F5F5F5"]{color:#111!important}[style*="color:#888"],[style*="color:#555"]{color:#666!important}</style>' + relHtml + '<script>window.onload=function(){window.print();}<\/script></body></html>');
+  win.document.close();
+}
+
 </script>
 
   <footer style="display:flex;align-items:center;gap:8px;padding:12px 20px;border-top:0.5px solid #2A2A2A;background:#111111;margin-top:40px">
