@@ -5645,6 +5645,13 @@ async function salvarCartao() {
   if (!nome) { err.textContent = 'Informe o nome do cartão.'; return; }
   if (!fechamento || !vencimento) { err.textContent = 'Informe os dias de fechamento e vencimento.'; return; }
 
+  // Verifica duplicata
+  var duplicado = cartoes.find(function(c) {
+    if (cartaoEditandoId && c.id === cartaoEditandoId) return false;
+    return c.nome.toLowerCase() === nome.toLowerCase() && (c.final||'') === final;
+  });
+  if (duplicado) { err.textContent = 'Já existe um cartão com esse nome e final cadastrado.'; return; }
+
   var payload = {
     nome: nome, final: final, limite: limite,
     dia_fechamento: fechamento, dia_vencimento: vencimento,
