@@ -1763,15 +1763,19 @@ async function authLogout() {
 
 
 async function supaSaveExpense(exp) {
-  if (!currentUser) return;
+  if (!currentUser) { console.warn('supaSaveExpense: sem currentUser'); return; }
+  if (!exp || !exp.id) { console.warn('supaSaveExpense: exp inválido', exp); return; }
   try {
-    await supa.from('gastos').upsert({
-      id: exp.id, data: exp.data, categoria: exp.categoria, valor: exp.valor,
+    const { error } = await supa.from('gastos').upsert({
+      id: exp.id, data: exp.data, categoria: exp.categoria, valor: Number(exp.valor)||0,
       fornecedor: exp.fornecedor||'', pagamento: exp.pagamento||'',
-      descricao: exp.descricao||'', imagem: exp.imagem||null,
+      descricao: exp.descricao||'', imagem: null,
+      cartao_id: exp.cartao_id||null,
       user_id: currentUser.id
     });
-  } catch(e) { console.warn('Supabase save expense:', e); }
+    if (error) console.error('supaSaveExpense error:', error);
+    else console.log('supaSaveExpense OK:', exp.id, exp.fornecedor, exp.valor);
+  } catch(e) { console.error('supaSaveExpense exception:', e); }
 }
 
 async function supaDeleteExpense(id) {
@@ -4334,7 +4338,9 @@ function saveExpense() {
       // Usar API segura de adição
       const newExpense = DataLayerManager.addExpense(expenseData);
       saveExpenses();
-      supaSaveExpense(newExpense);
+      supaSaveExpense(newExpense).then(function() {
+        console.log('Gasto enviado ao Supabase');
+      });
       closeModal('add-modal');
       renderHome();
       showToast('✓ Gasto salvo!');
