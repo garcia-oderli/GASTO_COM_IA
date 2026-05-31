@@ -4323,10 +4323,11 @@ function saveExpense() {
     if (totalParcelas > 1) {
       addParcelasAuto(expenseData, totalParcelas);
       saveExpenses();
+      // Sobe parcelas para Supabase
+      expenses.slice(0, totalParcelas).forEach(function(e) { supaSaveExpense(e); });
       closeModal('add-modal');
       renderHome();
-      showToast(`✓ Compra em ${totalParcelas}x salva! Parcelas criadas automaticamente.`);
-      syncSilent();
+      showToast('✓ Compra em ' + totalParcelas + 'x salva!');
     } else {
       // Usar API segura de adição
       const newExpense = DataLayerManager.addExpense(expenseData);
