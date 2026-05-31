@@ -1610,32 +1610,45 @@ async function authLogout() {
 }
 
 async function supaLoadAll() {
-  if (!currentUser) return;
+  if (!currentUser) { console.warn('supaLoadAll: sem currentUser'); return; }
+  console.log('supaLoadAll: uid=', currentUser.id);
+
+  // 1. Carrega localStorage imediatamente (exibe rápido)
+  const localExp = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  const localInc = JSON.parse(localStorage.getItem(INCOME_KEY) || '[]');
+  if (localExp.length > 0) {
+    expenses = localExp;
+    incomes = localInc;
+    renderHome();
+    if (typeof renderIncomeList === 'function') renderIncomeList();
+  }
+
   try {
-    // 1. Adota registros sem dono (migração)
-    await supa.from('gastos').update({ user_id: currentUser.id }).is('user_id', null);
+    // 2. Adota órfãos no Supabase
+    const upd = await supa.from('gastos').update({ user_id: currentUser.id }).is('user_id', null);
+    console.log('adotar gastos:', upd);
     await supa.from('rendas').update({ user_id: currentUser.id }).is('user_id', null);
 
-    // 2. Carrega dados do usuário
-    const [gRes, rRes] = await Promise.all([
-      supa.from('gastos').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false }),
-      supa.from('rendas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false })
-    ]);
+    // 3. Busca do Supabase
+    const gRes = await supa.from('gastos').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
+    const rRes = await supa.from('rendas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
+    console.log('supabase gastos:', gRes.data?.length, gRes.error);
+    console.log('supabase rendas:', rRes.data?.length, rRes.error);
 
-    // 3. Migra localStorage → Supabase (se houver dados locais novos)
-    const localExp = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const localInc = JSON.parse(localStorage.getItem(INCOME_KEY) || '[]');
+    // 4. Sobe dados locais que não estão no Supabase
     const remoteIds = new Set((gRes.data||[]).map(r => r.id));
     const remoteIncIds = new Set((rRes.data||[]).map(r => r.id));
     const novosGastos = localExp.filter(e => e.id && !remoteIds.has(e.id));
     const novasRendas = localInc.filter(i => i.id && !remoteIncIds.has(i.id));
+    console.log('novos para subir:', novosGastos.length, novasRendas.length);
 
     if (novosGastos.length > 0) {
-      await supa.from('gastos').upsert(novosGastos.map(e => ({
+      const r = await supa.from('gastos').upsert(novosGastos.map(e => ({
         id: e.id, data: e.data, categoria: e.categoria, valor: e.valor,
         fornecedor: e.fornecedor||'', pagamento: e.pagamento||'',
         descricao: e.descricao||'', imagem: e.imagem||null, user_id: currentUser.id
       })));
+      console.log('upsert gastos:', r.error);
     }
     if (novasRendas.length > 0) {
       await supa.from('rendas').upsert(novasRendas.map(i => ({
@@ -1643,11 +1656,10 @@ async function supaLoadAll() {
       })));
     }
 
-    // 4. Busca final com tudo consolidado
-    const [g2, r2] = await Promise.all([
-      supa.from('gastos').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false }),
-      supa.from('rendas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false })
-    ]);
+    // 5. Busca final
+    const g2 = await supa.from('gastos').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
+    const r2 = await supa.from('rendas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
+    console.log('final gastos:', g2.data?.length);
 
     if (g2.data && g2.data.length > 0) {
       expenses = g2.data.map(r => ({
@@ -1668,7 +1680,8 @@ async function supaLoadAll() {
     if (typeof renderIncomeList === 'function') renderIncomeList();
     const relPage = document.getElementById('page-relatorio');
     if (relPage && relPage.classList.contains('active')) renderRelatorio();
-  } catch(e) { console.warn('Supabase load:', e); }
+
+  } catch(e) { console.error('supaLoadAll erro:', e); }
 }
 
 async function supaSaveExpense(exp) {
