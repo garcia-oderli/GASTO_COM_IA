@@ -4348,7 +4348,10 @@ function saveExpense() {
       closeModal('add-modal');
       renderHome();
       showToast('✓ Gasto salvo!');
-      supaSaveExpense(newExpense);
+      supaSaveExpense(newExpense).then(function() {
+        // Recarrega do Supabase após confirmar save
+        setTimeout(function() { supaLoadAll(); }, 800);
+      });
     }
     
     // Invalida cache de insights para forçar reanálise
