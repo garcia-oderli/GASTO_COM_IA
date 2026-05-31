@@ -1661,6 +1661,9 @@ async function supaLoadAll() {
 
     renderHome();
     if (typeof renderIncomeList === 'function') renderIncomeList();
+    // Re-render relatório se estiver ativo
+    const relPage = document.getElementById('page-relatorio');
+    if (relPage && relPage.classList.contains('active')) renderRelatorio();
   } catch(e) { console.warn('Supabase load:', e); }
 }
 
@@ -2344,23 +2347,23 @@ function showRestoreModal() {
 
 function showPage(name, tabEl, navId) {
   pageIds.forEach(p => {
-    document.getElementById('page-'+p).classList.remove('active');
-    document.getElementById('nav-'+p).classList.remove('active');
+    const pg = document.getElementById('page-'+p);
+    const nv = document.getElementById('nav-'+p);
+    if (pg) pg.classList.remove('active');
+    if (nv) nv.classList.remove('active');
   });
   tabEls.forEach(t => t.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  document.getElementById('nav-'+name).classList.add('active');
+  const activePage = document.getElementById('page-'+name);
+  const activeNav  = document.getElementById('nav-'+name);
+  if (activePage) activePage.classList.add('active');
+  if (activeNav)  activeNav.classList.add('active');
   if (tabEl) tabEl.classList.add('active');
-  else {
-    const idx = pageIds.indexOf(name);
-    if (tabEls[idx]) tabEls[idx].classList.add('active');
-  }
-  if (name === 'home')     renderHome();
-  if (name === 'gastos')   renderAll();
-  if (name === 'analise')  renderAnalise();
-  if (name === 'insights') renderInsightsPage();
+  if (name === 'home')       renderHome();
+  if (name === 'gastos')     renderAll();
+  if (name === 'analise')    renderAnalise();
+  if (name === 'insights')   renderInsightsPage();
   if (name === 'orcamentos') initBudgetPage();
-  if (name === 'relatorio') renderRelatorio();
+  if (name === 'relatorio')  renderRelatorio();
 }
 
 // ═══════════════════════════════════════════════════════════════════
