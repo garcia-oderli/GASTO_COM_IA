@@ -1068,6 +1068,72 @@
 
 <!-- ═══ CONFIG PAGE ═══ -->
 
+<div class="page" id="page-cartoes">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="page-title">Cartões</div>
+        <div class="page-subtitle" id="cartoes-subtitle">Fatura e limites</div>
+      </div>
+      <button onclick="abrirModalCartao()" style="display:flex;align-items:center;gap:6px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;">
+        + Cartão
+      </button>
+    </div>
+  </div>
+  <div id="cartoes-content" style="padding:0 16px 100px;"></div>
+</div>
+
+<!-- MODAL CARTÃO -->
+<div id="modal-cartao" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9000;display:none;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:16px;padding:24px;width:100%;max-width:380px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.08em;text-transform:uppercase;" id="modal-cartao-title">Novo Cartão</div>
+      <button onclick="fecharModalCartao()" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Nome / Banco</label>
+        <input id="c-nome" placeholder="Ex: Santander Free" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Final</label>
+          <input id="c-final" placeholder="4 dígitos" maxlength="4" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Limite (R$)</label>
+          <input id="c-limite" type="number" placeholder="0,00" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Dia Fechamento</label>
+          <input id="c-fechamento" type="number" min="1" max="31" placeholder="8" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Dia Vencimento</label>
+          <input id="c-vencimento" type="number" min="1" max="31" placeholder="13" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Cor</label>
+        <div style="display:flex;gap:8px;">
+          <div id="cor-F5A623" onclick="selecionarCorCartao('#F5A623')" style="width:28px;height:28px;border-radius:50%;background:#F5A623;cursor:pointer;border:2px solid #F5A623;"></div>
+          <div id="cor-4A9EDF" onclick="selecionarCorCartao('#4A9EDF')" style="width:28px;height:28px;border-radius:50%;background:#4A9EDF;cursor:pointer;border:2px solid transparent;"></div>
+          <div id="cor-4CAF50" onclick="selecionarCorCartao('#4CAF50')" style="width:28px;height:28px;border-radius:50%;background:#4CAF50;cursor:pointer;border:2px solid transparent;"></div>
+          <div id="cor-F44336" onclick="selecionarCorCartao('#F44336')" style="width:28px;height:28px;border-radius:50%;background:#F44336;cursor:pointer;border:2px solid transparent;"></div>
+          <div id="cor-9C27B0" onclick="selecionarCorCartao('#9C27B0')" style="width:28px;height:28px;border-radius:50%;background:#9C27B0;cursor:pointer;border:2px solid transparent;"></div>
+        </div>
+      </div>
+    </div>
+    <div id="modal-cartao-err" style="color:#F44336;font-size:12px;margin-top:8px;min-height:16px;"></div>
+    <button onclick="salvarCartao()" style="width:100%;margin-top:16px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
+      SALVAR CARTÃO
+    </button>
+  </div>
+</div>
+
+
 <div class="page" id="page-relatorio">
   <div class="page-header">
     <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -1268,6 +1334,10 @@
   <div class="nav-item" id="nav-orcamentos" onclick="showPage('orcamentos',null,'nav-orcamentos')">
     <span class="nav-icon">🎯</span>
     <span>Orçamentos</span>
+  </div>
+  <div class="nav-item" id="nav-cartoes" onclick="showPage('cartoes',null,'nav-cartoes')">
+    <span class="nav-icon">💳</span>
+    <span>Cartões</span>
   </div>
   <div class="nav-item" id="nav-relatorio" onclick="showPage('relatorio',null,'nav-relatorio')">
     <span class="nav-icon">📄</span>
@@ -1671,6 +1741,7 @@ async function supaLoadAll() {
 
     // 3. Busca do Supabase
     const gRes = await supa.from('gastos').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
+    await carregarCartoes();
     const rRes = await supa.from('rendas').select('*').eq('user_id', currentUser.id).order('criado_em', { ascending: false });
     console.log('supabase gastos:', gRes.data?.length, gRes.error);
     console.log('supabase rendas:', rRes.data?.length, rRes.error);
@@ -2226,7 +2297,7 @@ function autoClassify(fornecedor) {
 // UI: PAGE NAV
 // ═══════════════════════════════════════════════════════════════════
 const tabEls = document.querySelectorAll('.tab');
-const pageIds = ['home','gastos','analise','insights','orcamentos','relatorio','config'];
+const pageIds = ['home','gastos','analise','insights','orcamentos','relatorio','cartoes','config'];
 
 // ═══ FUNÇÕES DO SISTEMA DE CAMADAS ═══════════════════════════════════════════
 
@@ -2383,6 +2454,7 @@ function showPage(name, tabEl, navId) {
   if (name === 'insights')   renderInsightsPage();
   if (name === 'orcamentos') initBudgetPage();
   if (name === 'relatorio')  renderRelatorio();
+  if (name === 'cartoes')    renderCartoes();
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -5389,6 +5461,257 @@ function delRecorrente(e, i) {
 }
 
 setTimeout(() => renderRecorrentes(), 300);
+
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO CARTÕES
+// ═══════════════════════════════════════════════════════════════════
+var cartoes = [];
+var cartaoEditandoId = null;
+var corCartaoSelecionada = '#F5A623';
+
+async function carregarCartoes() {
+  if (!currentUser) return;
+  const { data } = await supa.from('cartoes').select('*').eq('user_id', currentUser.id).eq('ativo', true).order('criado_em');
+  cartoes = data || [];
+}
+
+function renderCartoes() {
+  carregarCartoes().then(function() {
+    var el = document.getElementById('cartoes-content');
+    if (!el) return;
+
+    var now = new Date();
+    var hoje = now.getDate();
+    var anoAtual = now.getFullYear();
+    var mesAtual = now.getMonth(); // 0-11
+
+    var html = '';
+
+    if (cartoes.length === 0) {
+      html = '<div style="text-align:center;padding:60px 20px;color:#555;"><div style="font-size:48px;margin-bottom:16px;">💳</div><div style="font-size:14px;">Nenhum cartão cadastrado</div><div style="font-size:12px;margin-top:8px;color:#444;">Clique em "+ Cartão" para adicionar</div></div>';
+      el.innerHTML = html;
+      return;
+    }
+
+    cartoes.forEach(function(c) {
+      // Calcula ciclo atual da fatura
+      // Se hoje >= dia_fechamento → ciclo atual é do fechamento atual até próximo fechamento
+      var diaFech = c.dia_fechamento || 8;
+      var diaVenc = c.dia_vencimento || 13;
+
+      // Início do ciclo atual
+      var inicioCiclo, fimCiclo, dataVenc;
+      if (hoje >= diaFech) {
+        // Ciclo aberto: do fechamento deste mês até fechamento do próximo
+        inicioCiclo = new Date(anoAtual, mesAtual, diaFech);
+        fimCiclo = new Date(anoAtual, mesAtual + 1, diaFech - 1);
+        dataVenc = new Date(anoAtual, mesAtual + 1, diaVenc);
+      } else {
+        // Ciclo anterior ainda vigente (ainda não fechou)
+        inicioCiclo = new Date(anoAtual, mesAtual - 1, diaFech);
+        fimCiclo = new Date(anoAtual, mesAtual, diaFech - 1);
+        dataVenc = new Date(anoAtual, mesAtual, diaVenc);
+      }
+
+      // Gastos do ciclo associados a este cartão
+      var gastosCiclo = expenses.filter(function(e) {
+        if (e.cartao_id !== c.id) return false;
+        var d = new Date(e.data + 'T00:00:00');
+        return d >= inicioCiclo && d <= fimCiclo;
+      });
+
+      var totalFatura = gastosCiclo.reduce(function(s, e) { return s + Number(e.valor); }, 0);
+      var limiteUsado = c.limite > 0 ? (totalFatura / c.limite * 100) : 0;
+      var disponivel = c.limite - totalFatura;
+
+      var diasVenc = Math.ceil((dataVenc - now) / (1000 * 60 * 60 * 24));
+      var corBarra = limiteUsado > 80 ? '#F44336' : limiteUsado > 60 ? '#FF9800' : '#4CAF50';
+      var alertaVenc = diasVenc <= 5 ? '<span style="font-size:10px;background:rgba(244,67,54,0.15);color:#F44336;border:1px solid rgba(244,67,54,0.3);border-radius:4px;padding:2px 6px;margin-left:8px;">vence em ' + diasVenc + 'd</span>' : '';
+
+      var fmt = function(v) { return 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); };
+
+      html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:14px;overflow:hidden;margin-bottom:16px;">';
+
+      // Header do cartão
+      html += '<div style="background:linear-gradient(135deg,' + c.cor + '22 0%,#1C1C1C 100%);border-bottom:1px solid #2A2A2A;padding:16px;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
+      html += '<div>';
+      html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:18px;color:#F5F5F5;letter-spacing:0.06em;">' + c.nome + '</div>';
+      html += '<div style="font-family:IBM Plex Mono,monospace;font-size:12px;color:#888;margin-top:2px;">•••• •••• •••• ' + (c.final||'????') + '</div>';
+      html += '</div>';
+      html += '<div style="text-align:right;">';
+      html += '<div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.08em;">Fatura atual' + alertaVenc + '</div>';
+      html += '<div style="font-family:IBM Plex Mono,monospace;font-size:22px;font-weight:700;color:' + c.cor + ';">' + fmt(totalFatura) + '</div>';
+      html += '</div>';
+      html += '</div>';
+      html += '</div>';
+
+      // Barra de limite
+      html += '<div style="padding:14px 16px;">';
+      html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">';
+      html += '<span style="font-size:11px;color:#888;">Limite utilizado</span>';
+      html += '<span style="font-size:11px;color:' + corBarra + ';font-weight:700;">' + limiteUsado.toFixed(0) + '%</span>';
+      html += '</div>';
+      html += '<div style="height:6px;background:#2A2A2A;border-radius:3px;overflow:hidden;margin-bottom:10px;">';
+      html += '<div style="height:100%;width:' + Math.min(limiteUsado, 100) + '%;background:' + corBarra + ';border-radius:3px;transition:width 0.5s;"></div>';
+      html += '</div>';
+
+      // Infos
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">';
+      html += '<div style="background:#111;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;color:#555;text-transform:uppercase;margin-bottom:4px;">Disponível</div><div style="font-size:13px;font-weight:700;color:#4CAF50;font-family:IBM Plex Mono,monospace;">' + fmt(disponivel) + '</div></div>';
+      html += '<div style="background:#111;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;color:#555;text-transform:uppercase;margin-bottom:4px;">Fecha dia</div><div style="font-size:18px;font-weight:700;color:#F5F5F5;font-family:Barlow Condensed,sans-serif;">' + diaFech + '</div></div>';
+      html += '<div style="background:#111;border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;color:#555;text-transform:uppercase;margin-bottom:4px;">Vence dia</div><div style="font-size:18px;font-weight:700;color:' + (diasVenc <= 5 ? '#F44336' : '#F5F5F5') + ';font-family:Barlow Condensed,sans-serif;">' + diaVenc + '</div></div>';
+      html += '</div>';
+
+      // Gastos do ciclo
+      if (gastosCiclo.length > 0) {
+        html += '<div style="border-top:1px solid #2A2A2A;padding-top:10px;">';
+        html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Lançamentos do ciclo (' + gastosCiclo.length + ')</div>';
+        gastosCiclo.slice(0, 5).forEach(function(e) {
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1A1A1A;">';
+          html += '<div><div style="font-size:13px;color:#F5F5F5;">' + (e.fornecedor || e.categoria || '—') + '</div><div style="font-size:11px;color:#555;">' + e.data.split('-').reverse().join('/') + ' · ' + e.categoria + '</div></div>';
+          html += '<span style="font-family:IBM Plex Mono,monospace;font-size:13px;color:#F44336;font-weight:600;">R$ ' + Number(e.valor).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</span>';
+          html += '</div>';
+        });
+        if (gastosCiclo.length > 5) {
+          html += '<div style="font-size:11px;color:#555;text-align:center;padding-top:6px;">+ ' + (gastosCiclo.length - 5) + ' lançamentos</div>';
+        }
+        html += '</div>';
+      } else {
+        html += '<div style="text-align:center;padding:12px;color:#555;font-size:12px;">Nenhum gasto neste ciclo</div>';
+      }
+
+      // Botões
+      html += '<div style="display:flex;gap:8px;margin-top:12px;">';
+      html += '<button onclick="editarCartao('' + c.id + '')" style="flex:1;background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:10px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">✏️ Editar</button>';
+      html += '<button onclick="associarGastosCartao('' + c.id + '')" style="flex:2;background:' + c.cor + ';color:#111;border:none;border-radius:8px;padding:10px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">🔗 Associar Gastos</button>';
+      html += '</div>';
+
+      html += '</div></div>'; // fecha padding + card
+    });
+
+    el.innerHTML = html;
+  });
+}
+
+var corCartaoSelecionada = '#F5A623';
+
+function selecionarCorCartao(cor) {
+  corCartaoSelecionada = cor;
+  ['F5A623','4A9EDF','4CAF50','F44336','9C27B0'].forEach(function(c) {
+    var el = document.getElementById('cor-' + c);
+    if (el) el.style.border = ('#' + c === cor) ? '2px solid white' : '2px solid transparent';
+  });
+}
+
+function abrirModalCartao() {
+  cartaoEditandoId = null;
+  document.getElementById('modal-cartao-title').textContent = 'Novo Cartão';
+  document.getElementById('c-nome').value = '';
+  document.getElementById('c-final').value = '';
+  document.getElementById('c-limite').value = '';
+  document.getElementById('c-fechamento').value = '';
+  document.getElementById('c-vencimento').value = '';
+  document.getElementById('modal-cartao-err').textContent = '';
+  selecionarCorCartao('#F5A623');
+  document.getElementById('modal-cartao').style.display = 'flex';
+}
+
+function fecharModalCartao() {
+  document.getElementById('modal-cartao').style.display = 'none';
+}
+
+function editarCartao(id) {
+  var c = cartoes.find(function(x) { return x.id === id; });
+  if (!c) return;
+  cartaoEditandoId = id;
+  document.getElementById('modal-cartao-title').textContent = 'Editar Cartão';
+  document.getElementById('c-nome').value = c.nome || '';
+  document.getElementById('c-final').value = c.final || '';
+  document.getElementById('c-limite').value = c.limite || '';
+  document.getElementById('c-fechamento').value = c.dia_fechamento || '';
+  document.getElementById('c-vencimento').value = c.dia_vencimento || '';
+  selecionarCorCartao(c.cor || '#F5A623');
+  document.getElementById('modal-cartao-err').textContent = '';
+  document.getElementById('modal-cartao').style.display = 'flex';
+}
+
+async function salvarCartao() {
+  var nome = document.getElementById('c-nome').value.trim();
+  var final = document.getElementById('c-final').value.trim();
+  var limite = Number(document.getElementById('c-limite').value);
+  var fechamento = Number(document.getElementById('c-fechamento').value);
+  var vencimento = Number(document.getElementById('c-vencimento').value);
+  var err = document.getElementById('modal-cartao-err');
+
+  if (!nome) { err.textContent = 'Informe o nome do cartão.'; return; }
+  if (!fechamento || !vencimento) { err.textContent = 'Informe os dias de fechamento e vencimento.'; return; }
+
+  var payload = {
+    nome: nome, final: final, limite: limite,
+    dia_fechamento: fechamento, dia_vencimento: vencimento,
+    cor: corCartaoSelecionada, user_id: currentUser.id, ativo: true
+  };
+
+  if (cartaoEditandoId) {
+    await supa.from('cartoes').update(payload).eq('id', cartaoEditandoId);
+  } else {
+    await supa.from('cartoes').insert(payload);
+  }
+
+  fecharModalCartao();
+  renderCartoes();
+  showToast('✓ Cartão salvo!');
+}
+
+// Modal para associar gastos sem cartão a um cartão
+async function associarGastosCartao(cartaoId) {
+  var semCartao = expenses.filter(function(e) { return !e.cartao_id; });
+  if (semCartao.length === 0) { showToast('Todos os gastos já estão associados.'); return; }
+
+  var c = cartoes.find(function(x) { return x.id === cartaoId; });
+  var lista = semCartao.map(function(e) {
+    return '<label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1A1A1A;cursor:pointer;">' +
+      '<input type="checkbox" value="' + e.id + '" style="width:16px;height:16px;accent-color:#F5A623;" />' +
+      '<div><div style="font-size:13px;color:#F5F5F5;">' + (e.fornecedor||e.categoria||'—') + '</div>' +
+      '<div style="font-size:11px;color:#555;">' + e.data.split('-').reverse().join('/') + ' · R$ ' + Number(e.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}) + '</div></div>' +
+      '</label>';
+  }).join('');
+
+  // Cria modal temporário
+  var overlay = document.createElement('div');
+  overlay.id = 'overlay-assoc';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.innerHTML = '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:14px;padding:20px;width:100%;max-width:400px;max-height:80vh;overflow-y:auto;">' +
+    '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;color:#F5A623;margin-bottom:14px;text-transform:uppercase;">Associar ao ' + c.nome + '</div>' +
+    '<div id="lista-assoc">' + lista + '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:14px;">' +
+    '<button onclick="document.getElementById('overlay-assoc').remove()" style="flex:1;background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:12px;font-family:Barlow Condensed,sans-serif;font-weight:700;cursor:pointer;">Cancelar</button>' +
+    '<button onclick="confirmarAssociacao('' + cartaoId + '')" style="flex:2;background:#F5A623;color:#111;border:none;border-radius:8px;padding:12px;font-family:Barlow Condensed,sans-serif;font-weight:700;cursor:pointer;">Associar Selecionados</button>' +
+    '</div></div>';
+  document.body.appendChild(overlay);
+}
+
+async function confirmarAssociacao(cartaoId) {
+  var checks = document.querySelectorAll('#lista-assoc input[type=checkbox]:checked');
+  if (checks.length === 0) { showToast('Selecione pelo menos um gasto.'); return; }
+
+  var ids = Array.from(checks).map(function(c) { return c.value; });
+
+  // Atualiza no Supabase
+  await supa.from('gastos').update({ cartao_id: cartaoId }).in('id', ids);
+
+  // Atualiza local
+  expenses.forEach(function(e) {
+    if (ids.includes(e.id)) e.cartao_id = cartaoId;
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+
+  document.getElementById('overlay-assoc').remove();
+  showToast('✓ ' + ids.length + ' gasto(s) associado(s)!');
+  renderCartoes();
+}
+
 
 // ═══════════════════════════════════════════════════════════════════
 // RELATÓRIO MENSAL
