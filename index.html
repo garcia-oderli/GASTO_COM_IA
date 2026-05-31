@@ -685,7 +685,6 @@
     <span class="logo-version">v3.0</span>
   </div>
   <div class="header-actions">
-    <button class="header-btn" onclick="syncSheets()" style="border-color:rgba(245,166,35,0.3);color:var(--accent)">☁ Sheets</button>
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
   </div>
 </header>
@@ -1148,26 +1147,7 @@
     </div>
   </div>
 
-  <div class="settings-section">
-    <div class="settings-title">Google Sheets</div>
-    <div class="settings-card">
-      <div class="settings-row" style="flex-direction:column; align-items:flex-start;">
-        <div class="settings-row-left" style="margin-bottom:12px;">
-          <div class="settings-row-icon" style="background:rgba(16,185,129,0.15);">☁</div>
-          <div>
-            <div class="settings-row-label">URL do Apps Script</div>
-            <div class="settings-row-desc">Para sincronizar automaticamente</div>
-          </div>
-        </div>
-        <div class="api-key-wrap" style="width:100%;">
-          <input type="text" id="sheets-url-input" placeholder="https://script.google.com/..." />
-          <button onclick="saveSheetUrl()">Salvar</button>
-        </div>
-        <button id="sheets-test-btn" onclick="testSheetUrl()" style="margin-top:10px;width:100%;padding:10px;background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.3);border-radius:12px;font-weight:600;cursor:pointer;font-size:13px;">🔗 Testar Conexão</button>
-        <div id="sheets-test-result" style="margin-top:8px;font-size:12px;display:none;padding:8px 12px;border-radius:8px;"></div>
-      </div>
-    </div>
-  </div>
+
 
   <div class="settings-section">
     <div class="settings-title">Dados</div>
@@ -1193,13 +1173,7 @@
         </div>
         <span class="settings-arrow">›</span>
       </div>
-      <div class="settings-row" onclick="syncSheets()">
-        <div class="settings-row-left">
-          <div class="settings-row-icon" style="background:rgba(20,184,166,0.15);">☁</div>
-          <div><div class="settings-row-label">Sincronizar Sheets</div><div class="settings-row-desc">Enviar dados para Google Sheets</div></div>
-        </div>
-        <span class="settings-arrow">›</span>
-      </div>
+
       <div class="settings-row" onclick="runFullAIAnalysis()">
         <div class="settings-row-left">
           <div class="settings-row-icon" style="background:rgba(245,166,35,0.15);">🤖</div>
@@ -2065,7 +2039,6 @@ function saveInsightsCache(data) {
   cachedInsights = { data, ts: Date.now() };
 }
 function getApiKey()   { return localStorage.getItem('gastosIa_apiKey') || ''; }
-function getSheetUrl() { return localStorage.getItem('gastosIa_sheetUrl') || ''; }
 function getOrcamento(){ return parseFloat(localStorage.getItem('gastosIa_orcamento') || '0'); }
 function getOllamaProvider() { return localStorage.getItem('gastosIa_ollamaProvider') || 'claude'; }
 function getOllamaUrl() { return localStorage.getItem('gastosIa_ollamaUrl') || 'http://localhost:11434'; }
@@ -4525,75 +4498,11 @@ function importJSONFile(file) {
 // ═══════════════════════════════════════════════════════════════════
 // GOOGLE SHEETS SYNC
 // ═══════════════════════════════════════════════════════════════════
-async function syncSheets() {
-  const url = getSheetUrl();
-  if (!url) { showToast('⚠️ Configure a URL do Apps Script em Config'); return; }
-  showToast('☁ Sincronizando...');
-  try {
-    const payload = {
-      gastos: expenses.map(e => ({
-        id:e.id, data:e.data, valor:e.valor, categoria:e.categoria,
-        fornecedor:e.fornecedor||'', pagamento:e.pagamento||'', descricao:e.descricao||''
-      })),
-      rendas: incomes.map(i => ({
-        id:i.id, mes:i.mes, valor:i.valor, tipo:i.tipo
-      }))
-    };
-    const encoded = encodeURIComponent(JSON.stringify(payload));
-    const resp = await fetch(url + '?action=sync&payload=' + encoded);
-    const data = await resp.json();
-    if (data.status === 'ok') showToast('✓ Sincronizado com Google Sheets!');
-    else showToast('⚠️ Erro na sincronização');
-  } catch(e) { showToast('⚠️ Erro na sincronização'); }
-}
 
-// Auto-push silencioso após qualquer save
-async function autoSyncPush() {
-  const url = getSheetUrl();
-  if (!url) return;
-  try {
-    const payload = {
-      gastos: expenses.map(e => ({
-        id:e.id, data:e.data, valor:e.valor, categoria:e.categoria,
-        fornecedor:e.fornecedor||'', pagamento:e.pagamento||'', descricao:e.descricao||''
-      })),
-      rendas: incomes.map(i => ({
-        id:i.id, mes:i.mes, valor:i.valor, tipo:i.tipo
-      }))
-    };
-    const encoded = encodeURIComponent(JSON.stringify(payload));
-    await fetch(url + '?action=sync&payload=' + encoded);
-  } catch(e) {}
-}
 
-// Auto-pull ao abrir o app
-async function autoSyncPull() {
-  const url = getSheetUrl();
-  if (!url) return;
-  try {
-    const resp = await fetch(url + '?action=pull');
-    const data = await resp.json();
-    if (data && data.gastos && Array.isArray(data.gastos) && data.gastos.length > 0) {
-      // Merge: mantém locais + traz do Sheets (sem duplicar por id)
-      const localIds = new Set(expenses.map(e => e.id));
-      const novos = data.gastos.filter(e => e.id && !localIds.has(e.id));
-      if (novos.length > 0) {
-        expenses.push(...novos);
-        try { DataLayerManager.createBackup('AUTO_PULL'); } catch(e) {}
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
-      }
-    }
-    if (data && data.rendas && Array.isArray(data.rendas) && data.rendas.length > 0) {
-      const localIds = new Set(incomes.map(i => i.id));
-      const novas = data.rendas.filter(i => i.id && !localIds.has(i.id));
-      if (novas.length > 0) {
-        incomes.push(...novas);
-        localStorage.setItem(INCOME_KEY, JSON.stringify(incomes));
-      }
-    }
-    renderHome();
-  } catch(e) {}
-}
+
+
+
 
 // ═══════════════════════════════════════════════════════════════════
 // CONFIG
@@ -5010,50 +4919,11 @@ function saveApiKey() {
   showToast('✓ API Key salva!');
 }
 
-function saveSheetUrl() {
-  const url = document.getElementById('sheets-url-input').value.trim();
-  localStorage.setItem('gastosIa_sheetUrl', url);
-  showToast('✓ URL salva!');
-}
 
-async function testSheetUrl() {
-  const url = document.getElementById("sheets-url-input").value.trim();
-  const resultEl = document.getElementById("sheets-test-result");
-  const btn = document.getElementById("sheets-test-btn");
-  if (!url) { showToast("Cole a URL antes de testar"); return; }
-  btn.textContent = "Testando...";
-  btn.disabled = true;
-  resultEl.style.display = "none";
-  try {
-    const resp = await fetch(url + (url.includes("?") ? "&" : "?") + "action=ping");
-    const data = await resp.json();
-    if (data.status === "ok") {
-      resultEl.style.cssText = "margin-top:8px;font-size:12px;padding:8px 12px;border-radius:8px;display:block;background:rgba(16,185,129,0.1);color:#34d399;border:1px solid rgba(16,185,129,0.3)";
-      resultEl.textContent = "Conexao OK - Apps Script respondendo!";
-    } else { throw new Error("resposta inesperada"); }
-  } catch(e) {
-    resultEl.style.cssText = "margin-top:8px;font-size:12px;padding:8px 12px;border-radius:8px;display:block;background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.3)";
-    resultEl.textContent = "Erro - verifique a URL e permissoes do script";
-  }
-  btn.textContent = "Testar Conexao";
-  btn.disabled = false;
-}
 
-async function syncSilent() {
-  const url = getSheetUrl();
-  if (!url || !expenses.length) return;
-  try {
-    const payload = expenses.map(e => ({
-      id: e.id, data: e.data, valor: e.valor,
-      categoria: e.categoria, fornecedor: e.fornecedor||"",
-      pagamento: e.pagamento||"", descricao: e.descricao||""
-    }));
-    const encoded = encodeURIComponent(JSON.stringify(payload));
-    const resp = await fetch(url + '?action=sync&payload=' + encoded);
-    const data = await resp.json();
-    if (data.status === 'ok') showToast("☁ Sincronizado com Sheets!");
-  } catch(e) { console.warn("Sync sheets falhou:", e); }
-}
+
+
+async 
 
 function saveOllamaSettings() {
   const provider = document.getElementById('provider-select').value;
@@ -5116,8 +4986,7 @@ function init() {
   renderHome();
   const savedKey = getApiKey();
   if (savedKey) document.getElementById('api-key-input').value = savedKey;
-  const savedUrl = getSheetUrl();
-  if (savedUrl) document.getElementById('sheets-url-input').value = savedUrl;
+
   const savedBudget = getOrcamento();
   if (savedBudget > 0) document.getElementById('budget-input').value = savedBudget;
 
