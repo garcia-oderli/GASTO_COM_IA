@@ -1488,20 +1488,53 @@ async function supaLoadAll() {
       supa.from('gastos').select('*').order('criado_em', { ascending: false }),
       supa.from('rendas').select('*').order('criado_em', { ascending: false })
     ]);
-    if (gRes.data && gRes.data.length > 0) {
-      expenses = gRes.data.map(r => ({
+
+    const remoteGastos = gRes.data || [];
+    const remoteRendas = rRes.data || [];
+
+    // Migra dados do localStorage para Supabase (primeira vez em cada dispositivo)
+    const localExp = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const localInc = JSON.parse(localStorage.getItem(INCOME_KEY) || '[]');
+    const remoteIds = new Set(remoteGastos.map(r => r.id));
+    const remoteIncIds = new Set(remoteRendas.map(r => r.id));
+
+    const novosGastos = localExp.filter(e => e.id && !remoteIds.has(e.id));
+    const novasRendas = localInc.filter(i => i.id && !remoteIncIds.has(i.id));
+
+    if (novosGastos.length > 0) {
+      await supa.from('gastos').upsert(novosGastos.map(e => ({
+        id: e.id, data: e.data, categoria: e.categoria, valor: e.valor,
+        fornecedor: e.fornecedor||'', pagamento: e.pagamento||'',
+        descricao: e.descricao||'', imagem: e.imagem||null
+      })));
+    }
+    if (novasRendas.length > 0) {
+      await supa.from('rendas').upsert(novasRendas.map(i => ({
+        id: i.id, mes: i.mes, tipo: i.tipo, valor: i.valor
+      })));
+    }
+
+    // Recarrega tudo do Supabase após migração
+    const [g2, r2] = await Promise.all([
+      supa.from('gastos').select('*').order('criado_em', { ascending: false }),
+      supa.from('rendas').select('*').order('criado_em', { ascending: false })
+    ]);
+
+    if (g2.data && g2.data.length > 0) {
+      expenses = g2.data.map(r => ({
         id: r.id, data: r.data, categoria: r.categoria, valor: r.valor,
         fornecedor: r.fornecedor||'', pagamento: r.pagamento||'',
         descricao: r.descricao||'', imagem: r.imagem||null, criadoEm: r.criado_em
       }));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
     }
-    if (rRes.data && rRes.data.length > 0) {
-      incomes = rRes.data.map(r => ({
+    if (r2.data && r2.data.length > 0) {
+      incomes = r2.data.map(r => ({
         id: r.id, mes: r.mes, tipo: r.tipo, valor: r.valor, criadoEm: r.criado_em
       }));
       localStorage.setItem(INCOME_KEY, JSON.stringify(incomes));
     }
+
     renderHome();
     if (typeof renderIncomeList === 'function') renderIncomeList();
   } catch(e) { console.warn('Supabase load:', e); }
