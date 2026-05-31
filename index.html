@@ -1840,11 +1840,13 @@ if (document.readyState === 'loading') {
 // ─── Persistência ────────────────────────────────────────────────
 function saveExpenses()  { 
   try { DataLayerManager.createBackup('SAVE_EXPENSES'); } catch(e) { console.warn('Backup ignorado:', e); }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses)); 
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+  autoSyncPush();
 }
 function saveIncomes()   { 
   try { DataLayerManager.createBackup('SAVE_INCOMES'); } catch(e) { console.warn('Backup ignorado:', e); }
-  localStorage.setItem(INCOME_KEY, JSON.stringify(incomes)); 
+  localStorage.setItem(INCOME_KEY, JSON.stringify(incomes));
+  autoSyncPush();
 }
 function saveInsightsCache(data) {
   localStorage.setItem(INSIGHTS_KEY, JSON.stringify({ data, ts: Date.now() }));
@@ -4312,19 +4314,71 @@ function importJSONFile(file) {
 async function syncSheets() {
   const url = getSheetUrl();
   if (!url) { showToast('⚠️ Configure a URL do Apps Script em Config'); return; }
-  if (!expenses.length) { showToast('⚠️ Nenhum gasto para sincronizar'); return; }
   showToast('☁ Sincronizando...');
   try {
-    const payload = expenses.map(e => ({
-      id:e.id, data:e.data, valor:e.valor, categoria:e.categoria,
-      fornecedor:e.fornecedor||'', pagamento:e.pagamento||'', descricao:e.descricao||''
-    }));
+    const payload = {
+      gastos: expenses.map(e => ({
+        id:e.id, data:e.data, valor:e.valor, categoria:e.categoria,
+        fornecedor:e.fornecedor||'', pagamento:e.pagamento||'', descricao:e.descricao||''
+      })),
+      rendas: incomes.map(i => ({
+        id:i.id, mes:i.mes, valor:i.valor, tipo:i.tipo
+      }))
+    };
     const encoded = encodeURIComponent(JSON.stringify(payload));
     const resp = await fetch(url + '?action=sync&payload=' + encoded);
     const data = await resp.json();
     if (data.status === 'ok') showToast('✓ Sincronizado com Google Sheets!');
     else showToast('⚠️ Erro na sincronização');
   } catch(e) { showToast('⚠️ Erro na sincronização'); }
+}
+
+// Auto-push silencioso após qualquer save
+async function autoSyncPush() {
+  const url = getSheetUrl();
+  if (!url) return;
+  try {
+    const payload = {
+      gastos: expenses.map(e => ({
+        id:e.id, data:e.data, valor:e.valor, categoria:e.categoria,
+        fornecedor:e.fornecedor||'', pagamento:e.pagamento||'', descricao:e.descricao||''
+      })),
+      rendas: incomes.map(i => ({
+        id:i.id, mes:i.mes, valor:i.valor, tipo:i.tipo
+      }))
+    };
+    const encoded = encodeURIComponent(JSON.stringify(payload));
+    await fetch(url + '?action=sync&payload=' + encoded);
+  } catch(e) {}
+}
+
+// Auto-pull ao abrir o app
+async function autoSyncPull() {
+  const url = getSheetUrl();
+  if (!url) return;
+  try {
+    const resp = await fetch(url + '?action=pull');
+    const data = await resp.json();
+    if (data && data.gastos && Array.isArray(data.gastos) && data.gastos.length > 0) {
+      // Merge: mantém locais + traz do Sheets (sem duplicar por id)
+      const localIds = new Set(expenses.map(e => e.id));
+      const novos = data.gastos.filter(e => e.id && !localIds.has(e.id));
+      if (novos.length > 0) {
+        expenses.push(...novos);
+        try { DataLayerManager.createBackup('AUTO_PULL'); } catch(e) {}
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+      }
+    }
+    if (data && data.rendas && Array.isArray(data.rendas) && data.rendas.length > 0) {
+      const localIds = new Set(incomes.map(i => i.id));
+      const novas = data.rendas.filter(i => i.id && !localIds.has(i.id));
+      if (novas.length > 0) {
+        incomes.push(...novas);
+        localStorage.setItem(INCOME_KEY, JSON.stringify(incomes));
+      }
+    }
+    renderHome();
+  } catch(e) {}
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -4868,6 +4922,8 @@ function init() {
 
   // Modo automático: analisa em background ao abrir
   autoRunAI();
+  // Auto-pull: sincroniza dados do Sheets ao abrir
+  autoSyncPull();
 }
 
 init();
