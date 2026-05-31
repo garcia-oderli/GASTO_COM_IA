@@ -4972,9 +4972,7 @@ function saveApiKey() {
 
 
 
-async 
-
-function saveOllamaSettings() {
+async function saveOllamaSettings() {
   const provider = document.getElementById('provider-select').value;
   const url = document.getElementById('ollama-url-input').value.trim();
   const model = document.getElementById('ollama-model-input').value.trim();
@@ -5395,10 +5393,10 @@ setTimeout(() => renderRecorrentes(), 300);
 // ═══════════════════════════════════════════════════════════════════
 // RELATÓRIO MENSAL
 // ═══════════════════════════════════════════════════════════════════
-let relAno = new Date().getFullYear();
-let relMes = new Date().getMonth();
+var relAno = new Date().getFullYear();
+var relMes = new Date().getMonth();
 
-const MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 function relMesAnterior() {
   relMes--;
   if (relMes < 0) { relMes = 11; relAno--; }
