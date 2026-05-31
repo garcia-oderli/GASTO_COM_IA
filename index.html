@@ -1763,19 +1763,26 @@ async function authLogout() {
 
 
 async function supaSaveExpense(exp) {
-  if (!currentUser) { console.warn('supaSaveExpense: sem currentUser'); return; }
-  if (!exp || !exp.id) { console.warn('supaSaveExpense: exp inválido', exp); return; }
+  if (!currentUser || !exp || !exp.id) return;
   try {
-    const { error } = await supa.from('gastos').upsert({
-      id: exp.id, data: exp.data, categoria: exp.categoria, valor: Number(exp.valor)||0,
-      fornecedor: exp.fornecedor||'', pagamento: exp.pagamento||'',
-      descricao: exp.descricao||'', imagem: null,
-      cartao_id: exp.cartao_id||null,
+    const payload = {
+      id: String(exp.id),
+      data: String(exp.data || ''),
+      categoria: String(exp.categoria || 'Outros'),
+      valor: Number(exp.valor) || 0,
+      fornecedor: String(exp.fornecedor || ''),
+      pagamento: String(exp.pagamento || ''),
+      descricao: String(exp.descricao || ''),
+      imagem: null,
+      cartao_id: exp.cartao_id || null,
       user_id: currentUser.id
-    });
-    if (error) console.error('supaSaveExpense error:', error);
-    else console.log('supaSaveExpense OK:', exp.id, exp.fornecedor, exp.valor);
-  } catch(e) { console.error('supaSaveExpense exception:', e); }
+    };
+    const { error } = await supa.from('gastos').upsert(payload);
+    if (error) {
+      console.error('supaSaveExpense error:', error);
+      showToast('⚠️ Erro ao salvar na nuvem: ' + error.message);
+    }
+  } catch(e) { console.error('supaSaveExpense:', e); }
 }
 
 async function supaDeleteExpense(id) {
@@ -4338,12 +4345,10 @@ function saveExpense() {
       // Usar API segura de adição
       const newExpense = DataLayerManager.addExpense(expenseData);
       saveExpenses();
-      supaSaveExpense(newExpense).then(function() {
-        console.log('Gasto enviado ao Supabase');
-      });
       closeModal('add-modal');
       renderHome();
       showToast('✓ Gasto salvo!');
+      supaSaveExpense(newExpense);
     }
     
     // Invalida cache de insights para forçar reanálise
