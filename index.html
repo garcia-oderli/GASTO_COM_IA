@@ -1476,6 +1476,63 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const SUPA_URL = 'https://vfrgmjhguzukraqsmduo.supabase.co';
+const SUPA_KEY = 'sb_publishable_zWIDdXlUEP3hGwih7bD8JA_eNB911je';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+async function supaLoadAll() {
+  try {
+    const [gRes, rRes] = await Promise.all([
+      supa.from('gastos').select('*').order('criado_em', { ascending: false }),
+      supa.from('rendas').select('*').order('criado_em', { ascending: false })
+    ]);
+    if (gRes.data && gRes.data.length > 0) {
+      expenses = gRes.data.map(r => ({
+        id: r.id, data: r.data, categoria: r.categoria, valor: r.valor,
+        fornecedor: r.fornecedor||'', pagamento: r.pagamento||'',
+        descricao: r.descricao||'', imagem: r.imagem||null, criadoEm: r.criado_em
+      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+    }
+    if (rRes.data && rRes.data.length > 0) {
+      incomes = rRes.data.map(r => ({
+        id: r.id, mes: r.mes, tipo: r.tipo, valor: r.valor, criadoEm: r.criado_em
+      }));
+      localStorage.setItem(INCOME_KEY, JSON.stringify(incomes));
+    }
+    renderHome();
+    if (typeof renderIncomeList === 'function') renderIncomeList();
+  } catch(e) { console.warn('Supabase load:', e); }
+}
+
+async function supaSaveExpense(exp) {
+  try {
+    await supa.from('gastos').upsert({
+      id: exp.id, data: exp.data, categoria: exp.categoria, valor: exp.valor,
+      fornecedor: exp.fornecedor||'', pagamento: exp.pagamento||'',
+      descricao: exp.descricao||'', imagem: exp.imagem||null
+    });
+  } catch(e) { console.warn('Supabase save expense:', e); }
+}
+
+async function supaDeleteExpense(id) {
+  try { await supa.from('gastos').delete().eq('id', id); } catch(e) {}
+}
+
+async function supaSaveIncome(inc) {
+  try {
+    await supa.from('rendas').upsert({
+      id: inc.id, mes: inc.mes, tipo: inc.tipo, valor: inc.valor
+    });
+  } catch(e) { console.warn('Supabase save income:', e); }
+}
+
+async function supaDeleteIncome(id) {
+  try { await supa.from('rendas').delete().eq('id', id); } catch(e) {}
+}
+</script>
 <script>
 // ═══════════════════════════════════════════════════════════════════
 // DATA LAYER
@@ -1786,15 +1843,11 @@ const DataLayerManager = (() => {
   const deleteExpense = (id) => {
     const idx = expenses.findIndex(e => e.id === id);
     if (idx === -1) throw new Error('Gasto não encontrado');
-    
-    // Backup antes de deletar
-    createBackup('DELETE_EXPENSE_PRE');
-    
+    try { createBackup('DELETE_EXPENSE_PRE'); } catch(e) {}
     const deleted = expenses[idx];
     expenses.splice(idx, 1);
-    
     logAudit('DELETE_EXPENSE', 'Gasto deletado', { id, deleted });
-    
+    supaDeleteExpense(id);
     return { success: true, deleted };
   };
   
@@ -1839,14 +1892,12 @@ if (document.readyState === 'loading') {
 
 // ─── Persistência ────────────────────────────────────────────────
 function saveExpenses()  { 
-  try { DataLayerManager.createBackup('SAVE_EXPENSES'); } catch(e) { console.warn('Backup ignorado:', e); }
+  try { DataLayerManager.createBackup('SAVE_EXPENSES'); } catch(e) {}
   localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
-  autoSyncPush();
 }
 function saveIncomes()   { 
-  try { DataLayerManager.createBackup('SAVE_INCOMES'); } catch(e) { console.warn('Backup ignorado:', e); }
+  try { DataLayerManager.createBackup('SAVE_INCOMES'); } catch(e) {}
   localStorage.setItem(INCOME_KEY, JSON.stringify(incomes));
-  autoSyncPush();
 }
 function saveInsightsCache(data) {
   localStorage.setItem(INSIGHTS_KEY, JSON.stringify({ data, ts: Date.now() }));
@@ -2474,6 +2525,7 @@ function addIncome() {
     // Usar API segura de adição
     const newIncome = DataLayerManager.addIncome(incomeData);
     saveIncomes();
+    supaSaveIncome(newIncome);
     document.getElementById('income-valor').value = '';
     document.getElementById('income-mes').value = new Date().toISOString().slice(0,7);
     renderIncomeList();
@@ -2488,6 +2540,7 @@ function addIncome() {
 function deleteIncome(id) {
   incomes = incomes.filter(i => i.id !== id);
   saveIncomes();
+  supaDeleteIncome(id);
   renderIncomeList();
   renderHome();
   showToast('🗑️ Renda removida');
@@ -4004,10 +4057,10 @@ function saveExpense() {
       // Usar API segura de adição
       const newExpense = DataLayerManager.addExpense(expenseData);
       saveExpenses();
+      supaSaveExpense(newExpense);
       closeModal('add-modal');
       renderHome();
       showToast('✓ Gasto salvo!');
-      syncSilent();
     }
     
     // Invalida cache de insights para forçar reanálise
@@ -4922,8 +4975,8 @@ function init() {
 
   // Modo automático: analisa em background ao abrir
   autoRunAI();
-  // Auto-pull: sincroniza dados do Sheets ao abrir
-  autoSyncPull();
+  // Carrega dados do Supabase (sync entre dispositivos)
+  supaLoadAll();
 }
 
 init();
