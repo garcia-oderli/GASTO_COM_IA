@@ -1536,6 +1536,7 @@ async function initAuth() {
     currentUser = session.user;
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('app-root').style.display = '';
+    try { await supa.rpc('adotar_registros_sem_dono'); } catch(e) {}
     supaLoadAll();
   } else {
     document.getElementById('auth-screen').style.display = '';
@@ -1577,6 +1578,8 @@ async function authLogin() {
   currentUser = data.user;
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-root').style.display = '';
+  // Adota registros sem user_id (migração de dados anteriores)
+  try { await supa.rpc('adotar_registros_sem_dono'); } catch(e) {}
   supaLoadAll();
 }
 
