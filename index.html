@@ -651,7 +651,7 @@
             onkeydown="if(event.key==='Enter')document.getElementById('auth-btn').click()" />
         </div>
         <div id="auth-err" style="color:#F44336;font-size:12px;min-height:16px;"></div>
-        <button id="auth-btn" onclick="authLogin()"
+        <button id="auth-btn" onclick="handleAuthBtn()"
           style="width:100%;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:0.06em;cursor:pointer;">
           ENTRAR
         </button>
@@ -1543,7 +1543,15 @@ async function initAuth() {
   }
 }
 
+let authTab = 'login';
+
+function handleAuthBtn() {
+  if (authTab === 'login') authLogin();
+  else authRegister();
+}
+
 function switchAuthTab(tab) {
+  authTab = tab;
   const isLogin = tab === 'login';
   document.getElementById('tab-login').style.background = isLogin ? '#F5A623' : 'transparent';
   document.getElementById('tab-login').style.color = isLogin ? '#111' : '#888';
@@ -1553,7 +1561,6 @@ function switchAuthTab(tab) {
   document.getElementById('tab-register').style.border = isLogin ? '1px solid #2A2A2A' : 'none';
   const btn = document.getElementById('auth-btn');
   btn.textContent = isLogin ? 'ENTRAR' : 'CADASTRAR';
-  btn.onclick = isLogin ? authLogin : authRegister;
   document.getElementById('auth-err').textContent = '';
 }
 
