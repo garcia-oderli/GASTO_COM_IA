@@ -2102,13 +2102,15 @@ const DataLayerManager = (() => {
   // Deletar gasto com registro
   const deleteExpense = (id) => {
     const idx = expenses.findIndex(e => e.id === id);
-    if (idx === -1) throw new Error('Gasto não encontrado');
-    try { createBackup('DELETE_EXPENSE_PRE'); } catch(e) {}
-    const deleted = expenses[idx];
-    expenses.splice(idx, 1);
-    logAudit('DELETE_EXPENSE', 'Gasto deletado', { id, deleted });
+    if (idx !== -1) {
+      try { createBackup('DELETE_EXPENSE_PRE'); } catch(e) {}
+      const deleted = expenses[idx];
+      expenses.splice(idx, 1);
+      logAudit('DELETE_EXPENSE', 'Gasto deletado', { id, deleted });
+    }
+    // Deleta do Supabase independente de estar no array local
     supaDeleteExpense(id);
-    return { success: true, deleted };
+    return { success: true };
   };
   
   // API pública
