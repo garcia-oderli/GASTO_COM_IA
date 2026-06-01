@@ -3831,8 +3831,11 @@ dz.addEventListener('drop', e=>{
 
 async function analyzeImage(base64, mimeType) {
   const status = document.getElementById('ai-status');
+  const saveBtn = document.querySelector('#add-modal .btn-primary');
+
   status.classList.add('show');
   status.querySelector('.ai-text').textContent = 'Analisando nota com IA...';
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Aguarde IA...'; }
 
   const prompt = `Você é um assistente especializado em extrair dados de notas fiscais e recibos brasileiros.
 
@@ -3855,15 +3858,12 @@ Regras:
 
   try {
     const provider = getOllamaProvider();
-    
+
     if (provider === 'ollama') {
-      // Ollama não suporta imagens nativamente, usa fallback local
       showToast('⚠️ OCR com Ollama não suportado. Preencha manualmente ou use Claude.');
-      status.classList.remove('show');
       return;
     }
-    
-    // Usar Claude para análise de imagens
+
     if (!getApiKey()) throw new Error('API Key não configurada');
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -3896,11 +3896,13 @@ Regras:
     if (json.pagamento)  document.getElementById('f-pagamento').value = json.pagamento;
     if (json.descricao)  document.getElementById('f-descricao').value = json.descricao;
     status.querySelector('.ai-text').textContent = '✓ Dados extraídos! Verifique e confirme.';
-    setTimeout(()=>status.classList.remove('show'), 3000);
+    setTimeout(() => status.classList.remove('show'), 3000);
   } catch(err) {
     status.querySelector('.ai-text').textContent = '⚠️ Erro na extração. Preencha manualmente.';
-    setTimeout(()=>status.classList.remove('show'), 3000);
+    setTimeout(() => status.classList.remove('show'), 3000);
     console.error(err);
+  } finally {
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Salvar Gasto'; }
   }
 }
 
@@ -4257,13 +4259,16 @@ function addParcelasAuto(baseExpense, totalParcelas) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+let _savingExpense = false;
 function saveExpense() {
+  if (_savingExpense) return;
   const valor = parseFloat(document.getElementById('f-valor').value);
   const data  = document.getElementById('f-data').value;
   if (!valor || valor <= 0) { showToast('⚠️ Informe o valor do gasto'); return; }
   if (!data) { showToast('⚠️ Informe a data'); return; }
 
   const totalParcelas = parseInt(document.getElementById('f-parcelas').value) || 1;
+  _savingExpense = true;
 
   try {
     const expenseData = {
@@ -4303,6 +4308,8 @@ function saveExpense() {
   } catch (err) {
     showToast('❌ Erro ao salvar: ' + err.message);
     console.error('Erro ao adicionar gasto:', err);
+  } finally {
+    _savingExpense = false;
   }
 }
 
