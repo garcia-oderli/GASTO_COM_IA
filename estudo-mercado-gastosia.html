@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>GastosIA — Estudo de Mercado & Projeção de Ganhos 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f8f9fa;
+    color: #1a1a2e;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 60px 70px;
+  }
+
+  /* CAPA */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+    color: #fff;
+    padding: 80px 70px;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(245,166,35,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover-badge {
+    display: inline-block;
+    background: rgba(245,166,35,0.15);
+    border: 1px solid rgba(245,166,35,0.4);
+    color: #F5A623;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 32px;
+    width: fit-content;
+  }
+  .cover h1 {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .cover h1 span { color: #F5A623; }
+  .cover .subtitle {
+    font-size: 20px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 48px;
+    font-weight: 400;
+  }
+  .cover-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 48px;
+  }
+  .cover-stat {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .cover-stat .num {
+    font-size: 28px;
+    font-weight: 800;
+    color: #F5A623;
+    margin-bottom: 4px;
+  }
+  .cover-stat .label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .cover-footer {
+    margin-top: auto;
+    padding-top: 60px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: rgba(255,255,255,0.4);
+    font-size: 12px;
+  }
+
+  /* CONTEÚDO */
+  .section { margin-bottom: 48px; page-break-inside: avoid; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f0f0f0;
+  }
+  .section-number {
+    width: 32px; height: 32px;
+    background: #F5A623;
+    color: #fff;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .section-title { font-size: 20px; font-weight: 700; color: #1a1a2e; }
+
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: #1a1a2e; }
+  h3 { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: #333; }
+  p { margin-bottom: 12px; color: #444; }
+
+  /* TABELAS */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+  thead tr { background: #1a1a2e; color: #fff; }
+  thead th { padding: 10px 14px; text-align: left; font-weight: 600; }
+  tbody tr:nth-child(even) { background: #f8f9fa; }
+  tbody td { padding: 10px 14px; border-bottom: 1px solid #eee; }
+  tbody td strong { color: #1a1a2e; }
+
+  /* HIGHLIGHT BOXES */
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(245,166,35,0.08), rgba(245,166,35,0.03));
+    border: 1px solid rgba(245,166,35,0.3);
+    border-left: 4px solid #F5A623;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .highlight-box .title { font-weight: 700; font-size: 13px; color: #F5A623; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .highlight-box p { margin: 0; color: #333; font-size: 13px; }
+
+  .info-box {
+    background: #f0f7ff;
+    border: 1px solid #c3d9f5;
+    border-left: 4px solid #3b82f6;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .info-box p { margin: 0; color: #1e40af; font-size: 13px; }
+
+  .danger-box {
+    background: #fff0f0;
+    border: 1px solid #ffd0d0;
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .danger-box p { margin: 0; color: #991b1b; font-size: 13px; }
+
+  /* CENÁRIOS */
+  .scenarios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .scenario-card {
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .scenario-card.conservador { background: #f0fdf4; border: 2px solid #86efac; }
+  .scenario-card.realista { background: #fefce8; border: 2px solid #fde047; }
+  .scenario-card.otimista { background: #fff7ed; border: 2px solid #fb923c; }
+  .scenario-card .emoji { font-size: 28px; margin-bottom: 8px; }
+  .scenario-card .name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .scenario-card.conservador .name { color: #16a34a; }
+  .scenario-card.realista .name { color: #ca8a04; }
+  .scenario-card.otimista .name { color: #ea580c; }
+  .scenario-card .metric { font-size: 22px; font-weight: 800; margin-bottom: 2px; color: #1a1a2e; }
+  .scenario-card .metric-label { font-size: 11px; color: #666; margin-bottom: 12px; }
+  .scenario-card .detail { font-size: 12px; color: #555; text-align: left; line-height: 1.8; }
+  .scenario-card .detail span { display: block; }
+  .scenario-card .detail strong { color: #1a1a2e; }
+
+  /* CONCORRENTES */
+  .competitor-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+  .competitor-card {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .competitor-card .comp-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; color: #1a1a2e; }
+  .competitor-card .comp-users { font-size: 12px; color: #F5A623; font-weight: 600; margin-bottom: 8px; }
+  .competitor-card .comp-detail { font-size: 12px; color: #555; line-height: 1.7; }
+
+  /* COMPARATIVO */
+  .compare-table th:first-child { width: 200px; }
+  .check { color: #16a34a; font-weight: 700; }
+  .cross { color: #ef4444; font-weight: 700; }
+  .neutral { color: #666; }
+
+  /* ROADMAP */
+  .roadmap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .roadmap-item {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px;
+    position: relative;
+  }
+  .roadmap-item .phase {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #F5A623;
+    margin-bottom: 6px;
+  }
+  .roadmap-item .phase-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #1a1a2e; }
+  .roadmap-item ul { font-size: 11px; color: #555; padding-left: 14px; line-height: 1.9; }
+
+  /* FONTES */
+  .sources { background: #f8f9fa; border-radius: 8px; padding: 16px; margin-top: 32px; }
+  .sources h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 10px; }
+  .sources a { display: block; font-size: 11px; color: #3b82f6; text-decoration: none; margin-bottom: 4px; }
+
+  /* PAGE BREAK */
+  .page-break { page-break-before: always; }
+
+  /* PRINT */
+  @media print {
+    body { background: #fff; }
+    .page { padding: 40px 50px; }
+    .cover { min-height: auto; padding: 60px 50px; }
+    .page-break { page-break-before: always; }
+  }
+</style>
+</head>
+<body>
+
+<!-- CAPA -->
+<div class="cover">
+  <div class="cover-badge">📊 Estudo de Mercado — Junho 2026</div>
+  <h1>Gastosクラ<br><span>Projeção de Mercado</span></h1>
+  <div style="font-size:52px; font-weight:800; line-height:1.1; margin-bottom:12px; color:#fff;">
+    GastosIA<br><span style="color:#F5A623;">Projeção de Mercado</span>
+  </div>
+  <div class="subtitle">Análise do setor de apps de controle financeiro pessoal no Brasil,<br>benchmarks de concorrentes e cenários de monetização</div>
+
+  <div class="cover-stats">
+    <div class="cover-stat">
+      <div class="num">183M</div>
+      <div class="label">Brasileiros online</div>
+    </div>
+    <div class="cover-stat">
+      <div class="num">19%</div>
+      <div class="label">Usam app financeiro</div>
+    </div>
+    <div class="cover-stat">
+      <div class="num">R$200M+</div>
+      <div class="label">Valuation Guiabolso (exit)</div>
+    </div>
+    <div class="cover-stat">
+      <div class="num">80,2%</div>
+      <div class="label">Famílias endividadas</div>
+    </div>
+    <div class="cover-stat">
+      <div class="num">USD 4,73B</div>
+      <div class="label">Fintech Brasil 2024</div>
+    </div>
+    <div class="cover-stat">
+      <div class="num">25%</div>
+      <div class="label">CAGR mercado global</div>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <span>GastosIA — Documento Confidencial</span>
+    <span>Junho 2026 · Gerado com Claude AI</span>
+  </div>
+</div>
+
+<!-- CONTEÚDO PRINCIPAL -->
+<div class="page">
+
+  <!-- SEÇÃO 1: CONTEXTO DE MERCADO -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Contexto de Mercado</div>
+    </div>
+
+    <p>O Brasil é o <strong>líder absoluto em fintechs na América Latina</strong>, concentrando 58,7% de todo o ecossistema regional. Com mais de 1.700 fintechs ativas e um mercado avaliado em USD 4,73 bilhões em 2024 (rumo a USD 17,58 bilhões até 2033), o país oferece uma janela de oportunidade única para apps de gestão financeira pessoal.</p>
+
+    <div class="highlight-box">
+      <div class="title">🔑 A Oportunidade Oculta</div>
+      <p>81% dos brasileiros usam apps bancários pelo celular, mas apenas <strong>19% usam ferramentas dedicadas de controle financeiro</strong>. Isso representa <strong>~110 milhões de pessoas</strong> que acessam o banco pelo smartphone mas não gerenciam seus gastos ativamente — um mercado endereçável enorme e subatendido.</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Indicador</th>
+          <th>Dado</th>
+          <th>Fonte</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Brasileiros com smartphone</td><td><strong>217 milhões (102% da pop.)</strong></td><td>DataReportal 2025</td></tr>
+        <tr><td>Usuários de internet</td><td><strong>183 milhões (86,2%)</strong></td><td>DataReportal 2025</td></tr>
+        <tr><td>Acesso via celular</td><td><strong>98,4% dos internautas</strong></td><td>DataReportal 2025</td></tr>
+        <tr><td>Usam app bancário</td><td><strong>81%</strong></td><td>Let's Money / Exame</td></tr>
+        <tr><td>Usam app de gestão financeira pessoal</td><td><strong>apenas 19–20%</strong></td><td>Exame / Bússola</td></tr>
+        <tr><td>Famílias brasileiras endividadas (fev/2026)</td><td><strong>80,2%</strong></td><td>PEIC/CNC</td></tr>
+        <tr><td>Sentem controle sobre as próprias finanças</td><td><strong>apenas 39%</strong></td><td>Pesquisa Creditas 2026</td></tr>
+        <tr><td>Mercado fintech Brasil (2024)</td><td><strong>USD 4,73 bilhões</strong></td><td>IMARC Group</td></tr>
+        <tr><td>Projeção fintech Brasil (2033)</td><td><strong>USD 17,58 bilhões</strong></td><td>IMARC Group</td></tr>
+        <tr><td>Mercado global personal finance apps (2026)</td><td><strong>USD 207,69 bilhões</strong></td><td>The Business Research Co.</td></tr>
+        <tr><td>CAGR mercado global (2026–2030)</td><td><strong>25,0–25,2% ao ano</strong></td><td>CoinLaw / Business Research</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SEÇÃO 2: PANORAMA DOS CONCORRENTES -->
+  <div class="section page-break">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Panorama dos Concorrentes</div>
+    </div>
+
+    <div class="competitor-grid">
+      <div class="competitor-card">
+        <div class="comp-name">📱 Mobills</div>
+        <div class="comp-users">10 milhões+ de usuários</div>
+        <div class="comp-detail">
+          Freemium · R$8,40–19,90/mês<br>
+          Plano PRO com IA no WhatsApp<br>
+          Empresa privada (Ceará)<br>
+          Sem receita divulgada publicamente
+        </div>
+      </div>
+      <div class="competitor-card">
+        <div class="comp-name">📊 Organizze</div>
+        <div class="comp-users">1–2 milhões de usuários</div>
+        <div class="comp-detail">
+          Só assinatura (sem freemium)<br>
+          R$19,90–45/mês · Open Finance<br>
+          15+ anos de mercado (Santa Catarina)<br>
+          Sem receita divulgada publicamente
+        </div>
+      </div>
+      <div class="competitor-card">
+        <div class="comp-name">🤖 Meu Assessor</div>
+        <div class="comp-users">150.000 usuários (autodeclarado)</div>
+        <div class="comp-detail">
+          WhatsApp + IA · R$19,90–39,90/mês<br>
+          Hotmart · Open Finance · Tittanium INC<br>
+          Felipe Titto (R$185M fortune)<br>
+          ARR estimado ~R$45M
+        </div>
+      </div>
+      <div class="competitor-card">
+        <div class="comp-name">💬 Jota (jota.ai)</div>
+        <div class="comp-users">150.000 usuários · R$2B TPV</div>
+        <div class="comp-detail">
+          WhatsApp-native · Conta digital + Pix<br>
+          Seed: <strong>US$8,9M</strong> (MAYA Capital + HOF)<br>
+          Meta do TPV 2026: R$10 bilhões<br>
+          Único player com VC confirmado
+        </div>
+      </div>
+      <div class="competitor-card">
+        <div class="comp-name">🏦 Guiabolso</div>
+        <div class="comp-users">6 milhões de usuários (2021)</div>
+        <div class="comp-detail">
+          Descontinuado em 2022<br>
+          <strong>Vendido ao PicPay por R$150–200M</strong><br>
+          Precursor do Open Banking no Brasil<br>
+          Referência de valuation de saída
+        </div>
+      </div>
+      <div class="competitor-card">
+        <div class="comp-name">💰 Minhas Economias</div>
+        <div class="comp-users">Usuários não divulgados</div>
+        <div class="comp-detail">
+          100% gratuito · Monetização via ads<br>
+          Open Finance integrado<br>
+          Módulo para empresas<br>
+          Sem dados de receita públicos
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:24px;">Preços praticados no mercado (2025–2026)</h3>
+    <table>
+      <thead>
+        <tr><th>App</th><th>Plano Mensal</th><th>Plano Anual (equiv./mês)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Mobills</td><td>R$19,90/mês</td><td>R$8,40–9,99/mês</td></tr>
+        <tr><td>Organizze</td><td>R$32,90–45/mês</td><td>R$19,90–39,90/mês</td></tr>
+        <tr><td>Meu Assessor</td><td>R$39,90/mês</td><td>R$19,90–29,90/mês</td></tr>
+        <tr><td>Financinha</td><td>R$16,90/mês</td><td>—</td></tr>
+        <tr><td>FinFlux</td><td>R$10/mês</td><td>—</td></tr>
+        <tr><td><strong>Média do mercado</strong></td><td><strong>R$15–33/mês</strong></td><td><strong>R$10–21/mês</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SEÇÃO 3: BENCHMARKS DE CONVERSÃO -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Benchmarks de Conversão Freemium → Pago</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Segmento</th><th>Taxa de Conversão</th><th>Fonte</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Média geral do mercado de apps</td><td>2% – 5%</td><td>First Page Sage 2026</td></tr>
+        <tr><td>Apps de finanças e contabilidade</td><td><strong>5% – 8%</strong></td><td>Business of Apps</td></tr>
+        <tr><td>SaaS freemium geral</td><td>5,6% (mediana)</td><td>First Page Sage 2026</td></tr>
+        <tr><td>Free trial com cartão de crédito</td><td>30% – 60%</td><td>Crazy Egg</td></tr>
+        <tr><td>Free trial sem cartão</td><td>10% – 15%</td><td>RevenueCat 2025</td></tr>
+        <tr><td>Ativação em 7 dias (fintech apps)</td><td>76% dos instaladores</td><td>CleverTap</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box">
+      <p>💡 <strong>Apps de finanças convertem acima da média</strong> (5–8% vs. 2–5% geral) porque resolvem uma dor real e recorrente. O usuário que organiza suas finanças tem alta retenção e baixo churn.</p>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 4: PROJEÇÕES DE RECEITA -->
+  <div class="section page-break">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Projeções de Receita — GastosIA</div>
+    </div>
+
+    <div class="highlight-box">
+      <div class="title">📐 Premissas Base</div>
+      <p>Ticket médio: <strong>R$19,90/mês</strong> (alinhado ao mercado, conservador) · Modelo freemium com IA limitada no gratuito · Crescimento orgânico via scan de nota fiscal + WhatsApp como diferencial</p>
+    </div>
+
+    <div class="scenarios">
+      <div class="scenario-card conservador">
+        <div class="emoji">🐢</div>
+        <div class="name">Conservador</div>
+        <div class="metric">R$71k</div>
+        <div class="metric-label">ARR — 12 meses</div>
+        <div class="detail">
+          <span><strong>Usuários cadastrados:</strong> 10.000</span>
+          <span><strong>Conversão (3%):</strong> 300 pagantes</span>
+          <span><strong>MRR:</strong> R$5.970/mês</span>
+          <span><strong>ARR:</strong> R$71.640/ano</span>
+          <span><strong>Crescimento:</strong> orgânico, sem marketing pago</span>
+        </div>
+      </div>
+      <div class="scenario-card realista">
+        <div class="emoji">🚀</div>
+        <div class="name">Realista</div>
+        <div class="metric">R$597k</div>
+        <div class="metric-label">ARR — 12 meses</div>
+        <div class="detail">
+          <span><strong>Usuários cadastrados:</strong> 50.000</span>
+          <span><strong>Conversão (5%):</strong> 2.500 pagantes</span>
+          <span><strong>MRR:</strong> R$49.750/mês</span>
+          <span><strong>ARR:</strong> R$597.000/ano</span>
+          <span><strong>Crescimento:</strong> lançamento + Product Hunt</span>
+        </div>
+      </div>
+      <div class="scenario-card otimista">
+        <div class="emoji">🔥</div>
+        <div class="name">Otimista</div>
+        <div class="metric">R$2,8M</div>
+        <div class="metric-label">ARR — 24 meses</div>
+        <div class="detail">
+          <span><strong>Usuários cadastrados:</strong> 200.000</span>
+          <span><strong>Conversão (6%):</strong> 12.000 pagantes</span>
+          <span><strong>MRR:</strong> R$238.800/mês</span>
+          <span><strong>ARR:</strong> R$2,86M/ano</span>
+          <span><strong>Valuation (10× ARR):</strong> ~R$28M</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>Curva de crescimento projetada (usuários pagantes)</h3>
+    <table>
+      <thead>
+        <tr><th>Período</th><th>Cenário Conservador</th><th>Cenário Realista</th><th>Cenário Otimista</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Mês 3</td><td>50 pagantes / R$995/mês</td><td>300 pagantes / R$5.970/mês</td><td>800 pagantes / R$15.920/mês</td></tr>
+        <tr><td>Mês 6</td><td>150 pagantes / R$2.985/mês</td><td>900 pagantes / R$17.910/mês</td><td>3.000 pagantes / R$59.700/mês</td></tr>
+        <tr><td>Mês 12</td><td>300 pagantes / R$5.970/mês</td><td>2.500 pagantes / R$49.750/mês</td><td>8.000 pagantes / R$159.200/mês</td></tr>
+        <tr><td>Mês 24</td><td>600 pagantes / R$11.940/mês</td><td>6.000 pagantes / R$119.400/mês</td><td><strong>12.000 pagantes / R$238.800/mês</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SEÇÃO 5: VALUATION E SAÍDA -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Valuation e Potencial de Saída (M&A)</div>
+    </div>
+
+    <div class="highlight-box">
+      <div class="title">🏆 Referência: Guiabolso → PicPay</div>
+      <p>O Guiabolso foi adquirido pelo PicPay em 2021 por <strong>R$150–200 milhões</strong> com 6 milhões de usuários. Isso equivale a <strong>~R$27–33 por usuário</strong>. Com um produto de qualidade superior (IA nativa, scan de nota fiscal), o múltiplo pode ser maior.</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Base de Usuários</th><th>Valuation (R$27/usuário)</th><th>Valuation (R$50/usuário)</th><th>Valuation (10× ARR)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>100.000 usuários</td><td>R$2,7M</td><td>R$5M</td><td>—</td></tr>
+        <tr><td>500.000 usuários</td><td>R$13,5M</td><td>R$25M</td><td>—</td></tr>
+        <tr><td>1.000.000 usuários</td><td><strong>R$27M</strong></td><td><strong>R$50M</strong></td><td>—</td></tr>
+        <tr><td>Cenário Otimista (ARR R$2,8M)</td><td>—</td><td>—</td><td><strong>R$28M</strong></td></tr>
+        <tr><td>Cenário com WhatsApp (ARR R$10M+)</td><td>—</td><td>—</td><td><strong>R$100M+</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box">
+      <p>💡 <strong>Jota.ai</strong> levantou <strong>US$8,9M (Seed)</strong> em 2024 com 150k usuários, sem receita de assinatura expressiva — o valor foi baseado em crescimento de TPV e potencial. O GastosIA com receita recorrente teria valuation comparável ou superior na mesma base de usuários.</p>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 6: COMPARATIVO GASTOSIA vs CONCORRENTES -->
+  <div class="section page-break">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">GastosIA vs Concorrentes — Análise Competitiva</div>
+    </div>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Funcionalidade</th>
+          <th>GastosIA</th>
+          <th>Mobills</th>
+          <th>Organizze</th>
+          <th>Meu Assessor</th>
+          <th>Jota</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Scan de nota fiscal com IA</td><td class="check">✅ Claude</td><td class="cross">❌</td><td class="cross">❌</td><td class="check">✅</td><td class="cross">❌</td></tr>
+        <tr><td>Gratuito / Open Source base</td><td class="check">✅</td><td class="neutral">Parcial</td><td class="cross">❌</td><td class="cross">❌</td><td class="neutral">Parcial</td></tr>
+        <tr><td>Dados 100% próprios (Supabase)</td><td class="check">✅</td><td class="cross">❌</td><td class="cross">❌</td><td class="cross">❌</td><td class="cross">❌</td></tr>
+        <tr><td>PWA / funciona offline</td><td class="check">✅</td><td class="neutral">App nativo</td><td class="neutral">App nativo</td><td class="cross">❌</td><td class="cross">❌</td></tr>
+        <tr><td>WhatsApp nativo</td><td class="cross">❌</td><td class="neutral">PRO apenas</td><td class="cross">❌</td><td class="check">✅</td><td class="check">✅</td></tr>
+        <tr><td>Open Finance (conexão bancária)</td><td class="cross">❌</td><td class="cross">❌</td><td class="check">✅</td><td class="check">✅</td><td class="check">✅</td></tr>
+        <tr><td>Projeção / orçamento</td><td class="check">✅</td><td class="check">✅</td><td class="check">✅</td><td class="neutral">Parcial</td><td class="cross">❌</td></tr>
+        <tr><td>Análise por IA (insights)</td><td class="check">✅ Claude</td><td class="cross">❌</td><td class="cross">❌</td><td class="check">✅</td><td class="neutral">Parcial</td></tr>
+        <tr><td>Preço de entrada</td><td class="check">R$0 (grátis)</td><td class="neutral">R$8,40/mês</td><td class="cross">R$19,90/mês</td><td class="cross">R$19,90/mês</td><td class="check">Grátis</td></tr>
+        <tr><td>VC / investimento captado</td><td class="cross">Bootstrapped</td><td class="cross">Bootstrapped</td><td class="cross">Bootstrapped</td><td class="cross">Bootstrapped</td><td class="check">US$8,9M</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box">
+      <div class="title">🎯 Diferencial único do GastosIA</div>
+      <p>É o único app que combina <strong>scan de nota fiscal com Claude AI + dados 100% próprios do usuário + PWA gratuito</strong>. Concorrentes cobram pelo recurso de IA ou não o oferecem. Isso é a vantagem competitiva mais clara para monetização premium.</p>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 7: ROADMAP DE MONETIZAÇÃO -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Roadmap Sugerido de Monetização</div>
+    </div>
+
+    <div class="roadmap">
+      <div class="roadmap-item">
+        <div class="phase">Fase 1 · Mês 1–3</div>
+        <div class="phase-title">🌱 Lançamento Freemium</div>
+        <ul>
+          <li>Plano gratuito: 5 scans/mês</li>
+          <li>Plano Pro R$19,90: scans ilimitados</li>
+          <li>Lançamento no Product Hunt</li>
+          <li>Landing page pública</li>
+        </ul>
+      </div>
+      <div class="roadmap-item">
+        <div class="phase">Fase 2 · Mês 3–6</div>
+        <div class="phase-title">📱 WhatsApp Bot</div>
+        <ul>
+          <li>Bot via Evolution API</li>
+          <li>Registro de gastos por áudio</li>
+          <li>Foto da nota → salva automático</li>
+          <li>Diferenciar do Meu Assessor</li>
+        </ul>
+      </div>
+      <div class="roadmap-item">
+        <div class="phase">Fase 3 · Mês 6–12</div>
+        <div class="phase-title">🏦 Open Finance</div>
+        <ul>
+          <li>Integração Pluggy / Belvo</li>
+          <li>Importação automática de extrato</li>
+          <li>Plano Conectado R$29,90/mês</li>
+          <li>Meta: 2.500 pagantes</li>
+        </ul>
+      </div>
+      <div class="roadmap-item">
+        <div class="phase">Fase 4 · Mês 12–24</div>
+        <div class="phase-title">🏢 B2B / RH</div>
+        <ul>
+          <li>Licença empresas R$5–15/func.</li>
+          <li>Benefício de educação financeira</li>
+          <li>Relatórios para o RH</li>
+          <li>Meta: captação seed</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top:20px;">
+      <p>💡 <strong>Estratégia B2B2C:</strong> Empresas pagam pelo benefício de saúde financeira dos funcionários. Ticket B2B: R$5–15/funcionário/mês. Uma empresa de 500 funcionários = R$2.500–7.500/mês de receita recorrente — equivalente a 125–375 clientes PF.</p>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 8: RISCOS E MITIGAÇÕES -->
+  <div class="section page-break">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Riscos e Mitigações</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Risco</th><th>Probabilidade</th><th>Mitigação</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Custo da API Claude escalar com usuários</td>
+          <td>Alta</td>
+          <td>Limite de scans no plano gratuito; cobrir custo no plano pago</td>
+        </tr>
+        <tr>
+          <td>Concorrente grande (Nubank, Inter) lançar feature similar</td>
+          <td>Média</td>
+          <td>Dados próprios do usuário = diferencial de privacidade; nicho de IA dedicada</td>
+        </tr>
+        <tr>
+          <td>Meta banir número no WhatsApp (Evolution API)</td>
+          <td>Alta</td>
+          <td>Migrar para WhatsApp Business API Oficial ao atingir 1.000 usuários</td>
+        </tr>
+        <tr>
+          <td>Baixa conversão freemium → pago</td>
+          <td>Média</td>
+          <td>Free trial de 14 dias com todas as funcionalidades; não pedir cartão antecipado</td>
+        </tr>
+        <tr>
+          <td>LGPD — dados financeiros sensíveis</td>
+          <td>Baixa</td>
+          <td>Supabase com RLS, dados por user_id; já conforme</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SEÇÃO 9: CONCLUSÃO -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div class="section-title">Conclusão</div>
+    </div>
+
+    <p>O GastosIA está posicionado num mercado com <strong>crescimento acima de 25% ao ano</strong>, onde apenas 19% dos brasileiros utilizam ferramentas dedicadas de gestão financeira — apesar de 81% acessarem o banco pelo celular.</p>
+
+    <p>Com a base técnica já construída (scan com Claude AI, Supabase, PWA, orçamento, relatórios), o caminho para monetização é direto: modelo freemium com scans limitados no gratuito e assinatura Pro a R$19,90/mês.</p>
+
+    <div class="highlight-box">
+      <div class="title">📈 Resumo da Projeção</div>
+      <p>
+        <strong>12 meses (realista):</strong> ~R$597k ARR · 2.500 clientes pagantes<br>
+        <strong>24 meses (otimista):</strong> ~R$2,8M ARR · Valuation ~R$28M<br>
+        <strong>Com WhatsApp + Open Finance:</strong> Potencial de R$100M+ em valuation de saída
+      </p>
+    </div>
+
+    <p>O <strong>Guiabolso foi vendido por R$150–200 milhões</strong> com 6 milhões de usuários em 2021 — sem IA nativa. Um produto com scan de IA e diferencial de privacidade (dados do próprio usuário) tem potencial de valuation comparável com bem menos usuários.</p>
+
+    <div class="danger-box">
+      <p>⚠️ <strong>Próximo passo crítico:</strong> A integração com WhatsApp é o maior diferencial ainda ausente. Sem ela, o produto compete apenas como PWA contra apps nativos com muito mais marketing e distribuição. O WhatsApp bot posicionaria o GastosIA como produto único no mercado.</p>
+    </div>
+  </div>
+
+  <!-- FONTES -->
+  <div class="sources">
+    <h4>Fontes e Referências</h4>
+    <a href="https://www.imarcgroup.com/brazil-fintech-market">IMARC Group — Brazil Fintech Market</a>
+    <a href="https://datareportal.com/reports/digital-2025-brazil">DataReportal — Digital 2025 Brazil</a>
+    <a href="https://www.thebusinessresearchcompany.com/report/personal-finance-apps-global-market-report">The Business Research Co. — Personal Finance Apps Global Market</a>
+    <a href="https://www.pwc.com.br/pt/estudos/setores-atividade/financeiro/2025/pesquisa-fintechs-de-credito-digital-2025.html">PwC Brasil — Pesquisa Fintechs de Crédito Digital 2025</a>
+    <a href="https://finsidersbrasil.com.br/noticias-sobre-fintechs/guiabolso-comprado-pelo-picpay-sera-encerrado-em-novembro-finsiders/">Finsiders — Guiabolso adquirido pelo PicPay</a>
+    <a href="https://firstpagesage.com/seo-blog/saas-freemium-conversion-rates/">First Page Sage — SaaS Freemium Conversion Rates 2026</a>
+    <a href="https://www.businessofapps.com/data/finance-app-benchmarks/">Business of Apps — Finance App Benchmarks 2026</a>
+    <a href="https://www.letsmoney.com.br/startups/jota-lanca-agente-financeiro-que-automatiza-financas-pessoais/">Let's Money — Jota US$8,9M Seed</a>
+    <a href="https://exame.com/bussola/apenas-20-dos-brasileiros-utilizam-aplicativos-de-gestao-financeira/">Exame — 20% dos brasileiros usam apps financeiros</a>
+    <a href="https://meuassessor.com/">Meu Assessor — Site oficial</a>
+    <a href="https://jota.ai/">Jota — Site oficial</a>
+    <a href="https://coinlaw.io/personal-finance-app-industry-statistics/">CoinLaw — Personal Finance App Statistics 2026</a>
+  </div>
+
+  <div style="text-align:center; margin-top:40px; padding-top:20px; border-top:1px solid #eee; color:#aaa; font-size:11px;">
+    GastosIA — Estudo de Mercado · Junho 2026 · Gerado com Claude AI · Documento Confidencial
+  </div>
+
+</div>
+
+</body>
+</html>
