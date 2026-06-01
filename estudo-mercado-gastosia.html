@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GastosIA — Estudo de Mercado Realista 2025</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Georgia', serif; background: #fff; color: #1a1a1a; line-height: 1.7; }
+
+  @media print {
+    .no-print { display: none; }
+    body { font-size: 11pt; }
+    .page-break { page-break-before: always; }
+    section { page-break-inside: avoid; }
+  }
+
+  .cover {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; padding: 60px 40px; color: #fff;
+  }
+  .cover-tag {
+    background: #e74c3c; color: #fff; font-size: 11px; font-family: monospace;
+    letter-spacing: 2px; padding: 6px 16px; border-radius: 2px; margin-bottom: 32px;
+    text-transform: uppercase;
+  }
+  .cover h1 { font-size: 48px; font-weight: 300; letter-spacing: -1px; margin-bottom: 16px; }
+  .cover h1 span { font-weight: 700; color: #f5a623; }
+  .cover .subtitle { font-size: 18px; color: rgba(255,255,255,0.7); max-width: 600px; margin: 0 auto 48px; }
+  .cover-stats { display: flex; gap: 48px; justify-content: center; flex-wrap: wrap; margin-top: 48px; }
+  .cover-stat { text-align: center; }
+  .cover-stat .num { font-size: 36px; font-weight: 700; color: #f5a623; }
+  .cover-stat .label { font-size: 12px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; }
+  .cover-date { margin-top: 48px; font-size: 13px; color: rgba(255,255,255,0.4); }
+
+  .disclaimer-box {
+    background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px 28px;
+    margin: 32px auto; max-width: 860px; border-radius: 4px;
+  }
+  .disclaimer-box strong { color: #856404; }
+  .disclaimer-box p { color: #533f03; font-size: 14px; margin-top: 8px; }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 60px 40px; }
+
+  h2 {
+    font-size: 28px; font-weight: 700; color: #0f3460;
+    border-bottom: 3px solid #f5a623; padding-bottom: 12px; margin: 60px 0 24px;
+  }
+  h3 { font-size: 18px; font-weight: 700; color: #1a1a2e; margin: 32px 0 12px; }
+  p { margin-bottom: 16px; font-size: 15px; }
+
+  .section-intro {
+    background: #f8f9fa; border-radius: 8px; padding: 24px 28px; margin-bottom: 28px;
+    font-size: 15px; border-left: 4px solid #0f3460;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; }
+  th { background: #0f3460; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; }
+  td { padding: 10px 14px; border-bottom: 1px solid #e9ecef; }
+  tr:nth-child(even) td { background: #f8f9fa; }
+  .td-green { color: #27ae60; font-weight: 600; }
+  .td-red { color: #e74c3c; font-weight: 600; }
+  .td-yellow { color: #f39c12; font-weight: 600; }
+
+  .warning-box {
+    background: #fdf2f2; border: 1px solid #f5c6cb; border-left: 4px solid #e74c3c;
+    border-radius: 4px; padding: 20px 24px; margin: 24px 0;
+  }
+  .warning-box .title { font-weight: 700; color: #c0392b; margin-bottom: 8px; font-size: 15px; }
+
+  .success-box {
+    background: #f0fff4; border: 1px solid #c3e6cb; border-left: 4px solid #27ae60;
+    border-radius: 4px; padding: 20px 24px; margin: 24px 0;
+  }
+  .success-box .title { font-weight: 700; color: #155724; margin-bottom: 8px; font-size: 15px; }
+
+  .info-box {
+    background: #e8f4f8; border-left: 4px solid #0f3460;
+    border-radius: 4px; padding: 20px 24px; margin: 24px 0;
+  }
+
+  .scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 24px 0; }
+  .scenario-card { border-radius: 8px; padding: 24px; text-align: center; }
+  .scenario-card.pessimist { background: #fdf2f2; border: 2px solid #e74c3c; }
+  .scenario-card.realist { background: #fff8e1; border: 2px solid #f5a623; }
+  .scenario-card.optimist { background: #f0fff4; border: 2px solid #27ae60; }
+  .scenario-card .scenario-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 12px; }
+  .scenario-card.pessimist .scenario-label { color: #e74c3c; }
+  .scenario-card.realist .scenario-label { color: #f5a623; }
+  .scenario-card.optimist .scenario-label { color: #27ae60; }
+  .scenario-card .scenario-value { font-size: 28px; font-weight: 700; color: #1a1a2e; }
+  .scenario-card .scenario-desc { font-size: 12px; color: #666; margin-top: 8px; }
+
+  .case-study {
+    background: #1a1a2e; color: #fff; border-radius: 8px; padding: 28px; margin: 28px 0;
+  }
+  .case-study h4 { font-size: 16px; color: #f5a623; margin-bottom: 12px; }
+  .case-study p { font-size: 14px; color: rgba(255,255,255,0.8); margin-bottom: 8px; }
+  .case-study .verdict {
+    margin-top: 16px; padding: 12px 16px; background: rgba(231,76,60,0.2);
+    border-left: 3px solid #e74c3c; border-radius: 2px;
+    font-size: 14px; color: #ff8a80;
+  }
+
+  .source-tag {
+    font-size: 11px; color: #999; font-style: italic; display: inline-block; margin-top: 4px;
+  }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0; }
+
+  .metric-card {
+    background: #f8f9fa; border-radius: 8px; padding: 20px; text-align: center;
+    border-top: 4px solid #0f3460;
+  }
+  .metric-card .metric-num { font-size: 28px; font-weight: 700; color: #0f3460; }
+  .metric-card .metric-label { font-size: 12px; color: #666; margin-top: 4px; }
+  .metric-card .metric-source { font-size: 10px; color: #aaa; margin-top: 8px; font-style: italic; }
+
+  .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+
+  .conclusion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0; }
+  .conclusion-col { padding: 24px; border-radius: 8px; }
+  .conclusion-col.positives { background: #f0fff4; border: 1px solid #c3e6cb; }
+  .conclusion-col.negatives { background: #fdf2f2; border: 1px solid #f5c6cb; }
+  .conclusion-col h4 { font-weight: 700; margin-bottom: 16px; }
+  .conclusion-col.positives h4 { color: #155724; }
+  .conclusion-col.negatives h4 { color: #721c24; }
+  .conclusion-col ul { padding-left: 20px; font-size: 14px; }
+  .conclusion-col ul li { margin-bottom: 8px; }
+
+  .sources-section { background: #f8f9fa; padding: 32px; border-radius: 8px; margin-top: 48px; }
+  .sources-section h3 { color: #0f3460; margin-bottom: 16px; }
+  .sources-section ul { padding-left: 20px; }
+  .sources-section li { font-size: 12px; color: #555; margin-bottom: 6px; }
+
+  @media (max-width: 640px) {
+    .scenario-grid { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .conclusion-grid { grid-template-columns: 1fr; }
+    .cover h1 { font-size: 32px; }
+    .cover-stats { gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="cover-tag">⚠ Documento Interno — Dados Verificados com Fontes Primárias</div>
+  <h1>Gastos<span>IA</span></h1>
+  <p class="subtitle">Estudo de Mercado Realista — Apps de Finanças Pessoais e Saúde Financeira Corporativa no Brasil</p>
+  <div class="cover-stats">
+    <div class="cover-stat">
+      <div class="num">&lt;1%</div>
+      <div class="label">Conversão freemium real no Brasil</div>
+    </div>
+    <div class="cover-stat">
+      <div class="num">R$120–280</div>
+      <div class="label">CAC por assinante (canais pagos)</div>
+    </div>
+    <div class="cover-stat">
+      <div class="num">22%</div>
+      <div class="label">Empresas com educação financeira</div>
+    </div>
+    <div class="cover-stat">
+      <div class="num">US$80M</div>
+      <div class="label">Investimento no GuiaBolso — encerrado 2022</div>
+    </div>
+  </div>
+  <div class="cover-date">Junho 2025 · Dados 2022–2025 · Fontes: RevenueCat, AppsFlyer, Lockton, WTW, Mercer, Sensor Tower</div>
+</div>
+
+<div class="container">
+
+  <div class="disclaimer-box">
+    <strong>⚠ Nota metodológica</strong>
+    <p>Este estudo foi produzido com pesquisa ativa em fontes primárias (RevenueCat, AppsFlyer, Lockton, WTW, Mercer, Sensor Tower, ABStartups). Onde dados públicos não existem, isso é declarado explicitamente. Projeções de receita são cenários, não promessas. O objetivo é planejamento honesto, não captação de investimento.</p>
+  </div>
+
+  <h2>1. Panorama Real do Mercado</h2>
+
+  <div class="section-intro">
+    O mercado brasileiro de apps de finanças pessoais é grande, mas profundamente hostil a novos entrantes. O principal competidor não é outro app — é o próprio banco digital do usuário, que oferece as mesmas funcionalidades de graça.
+  </div>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-num">42M+</div>
+      <div class="metric-label">Usuários de apps de finanças no Brasil</div>
+      <div class="metric-source">Business of Apps 2024</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num">95M</div>
+      <div class="metric-label">Clientes Nubank com categorização grátis</div>
+      <div class="metric-source">Nubank 2024</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num">1,5%</div>
+      <div class="metric-label">Retenção dia 30 de apps no Brasil</div>
+      <div class="metric-source">AppsFlyer 2024 — menor da América Latina</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num">US$1,7B</div>
+      <div class="metric-label">Receita total de apps no Brasil em 2024</div>
+      <div class="metric-source">Business of Apps 2024</div>
+    </div>
+  </div>
+
+  <div class="warning-box">
+    <div class="title">🚨 O maior competidor é gratuito e tem 95 milhões de usuários</div>
+    Nubank, PicPay, Banco Inter, C6 Bank e Mercado Pago oferecem controle de gastos e categorizações automáticas <strong>sem custo</strong>. O usuário brasileiro já tem o hábito de abrir o app do banco todos os dias. Convencê-lo a abrir um segundo app e pagar por isso é a maior barreira do mercado.
+  </div>
+
+  <h2>2. Concorrentes Diretos — O Que Realmente Aconteceu</h2>
+
+  <div class="case-study">
+    <h4>📕 Caso GuiaBolso (2012–2022): A maior lição do mercado</h4>
+    <p><strong>O que era:</strong> App pioneiro de finanças pessoais no Brasil, primeiro a integrar Open Banking.</p>
+    <p><strong>Escala atingida:</strong> 3,8 milhões de usuários em 2017. 6 milhões no momento da venda.</p>
+    <p><strong>Investimento recebido:</strong> US$80 milhões em 5 rodadas — QED Investors, Kaszek Ventures, Ribbit Capital, IFC (Banco Mundial).</p>
+    <p><strong>Desfecho:</strong> Vendido ao PicPay em julho de 2021. Encerrado definitivamente em novembro de 2022. O PicPay comprou a tecnologia de Open Banking — não o modelo de negócio B2C.</p>
+    <div class="verdict">
+      Lição crítica: Com 6 milhões de usuários e mais de R$400M em investimento, não conseguiram fazer o modelo pago B2C funcionar no Brasil. O PicPay encerrou o app porque não havia caminho para monetização sustentável.
+    </div>
+  </div>
+
+  <h3>Apps ativos em 2025</h3>
+  <table>
+    <tr>
+      <th>App</th>
+      <th>Status</th>
+      <th>Escala estimada</th>
+      <th>Preço base anual</th>
+      <th>Observação</th>
+    </tr>
+    <tr>
+      <td><strong>Mobills</strong></td>
+      <td class="td-green">Ativo</td>
+      <td>10–12M usuários (2023)</td>
+      <td>R$199,90/ano (~R$16,66/mês)</td>
+      <td>Adquirido pela Toro/Santander (2021). Assinantes pagantes nunca divulgados.</td>
+    </tr>
+    <tr>
+      <td><strong>Organizze</strong></td>
+      <td class="td-green">Ativo independente</td>
+      <td>~1–2M usuários</td>
+      <td>R$199,90/ano (plano manual)</td>
+      <td>Sem plano gratuito — só trial. Bootstrapped desde 2009.</td>
+    </tr>
+    <tr>
+      <td><strong>Minhas Economias</strong></td>
+      <td class="td-green">Ativo</td>
+      <td>~2,1M downloads totais</td>
+      <td>R$199,90/ano ("Meu Clube")</td>
+      <td>App principal é gratuito. Premium somente no plano anual.</td>
+    </tr>
+    <tr>
+      <td><strong>GuiaBolso</strong></td>
+      <td class="td-red">Encerrado (2022)</td>
+      <td>6M usuários na venda</td>
+      <td>—</td>
+      <td>Absorvido pelo PicPay. Descontinuado.</td>
+    </tr>
+  </table>
+  <p class="source-tag">Fontes: FintechLab, Santander Imprensa, Google Play, Mobile Time, Startups.com.br</p>
+
+  <div class="info-box">
+    <strong>📌 Convergência de preço revela o teto do mercado:</strong> Mobills, Organizze e Minhas Economias cobram exatamente R$199,90/ano no plano base. Isso não é coincidência — é o máximo que o consumidor brasileiro demonstrou disposição para pagar. O teto efetivo é ~R$16–17/mês equivalente.
+  </div>
+
+  <h2>3. Unit Economics Reais — Os Números que Determinam Viabilidade</h2>
+
+  <div class="section-intro">
+    Esta é a seção mais importante do documento. Os números abaixo são os que determinam se o negócio funciona ou não. Nenhum deles foi inventado — todos têm fonte primária.
+  </div>
+
+  <h3>Conversão freemium no Brasil</h3>
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-num" style="color:#e74c3c">&lt;0,2%</div>
+      <div class="metric-label">Conversão freemium mediana — América Latina (todos os apps)</div>
+      <div class="metric-source">RevenueCat State of Subscription Apps 2025 — 115k apps, US$16B receita</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num">2,1%</div>
+      <div class="metric-label">Conversão freemium global (média geral)</div>
+      <div class="metric-source">RevenueCat 2025</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num">10,7%</div>
+      <div class="metric-label">Conversão com trial/hard paywall (dia 35) — global</div>
+      <div class="metric-source">RevenueCat 2025 — 5x melhor que freemium</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num">1,5%</div>
+      <div class="metric-label">Retenção dia 30 no Brasil — todos os apps</div>
+      <div class="metric-source">AppsFlyer 2024 — menor da LatAm</div>
+    </div>
+  </div>
+
+  <div class="warning-box">
+    <div class="title">⚠ O que esse número significa na prática</div>
+    Com conversão de 1% (sendo otimista para apps de finanças no Brasil): para ter 300 assinantes pagantes, você precisa de 30.000 usuários ativos. Para ter 1.000 assinantes (~R$16–17k MRR), você precisa de 100.000 usuários ativos. Manter 100k usuários ativos com churn de 5–8%/mês requer aquisição contínua e significativa.
+  </div>
+
+  <h3>CAC e Payback Period</h3>
+  <table>
+    <tr>
+      <th>Canal</th>
+      <th>Custo por instalação</th>
+      <th>CAC efetivo (pós-conversão)</th>
+      <th>Payback period</th>
+    </tr>
+    <tr>
+      <td>Google Ads — "controle financeiro"</td>
+      <td>R$10–25 por clique</td>
+      <td class="td-red"><strong>R$120–280</strong></td>
+      <td>6–14 meses</td>
+    </tr>
+    <tr>
+      <td>Google Play (CPI)</td>
+      <td>~R$2,20 (Android)</td>
+      <td>R$70–200 (com 2–3% conversão)</td>
+      <td>4–12 meses</td>
+    </tr>
+    <tr>
+      <td>Orgânico (SEO/ASO/indicação)</td>
+      <td>R$0 direto</td>
+      <td>R$0 (mas leva 12–24 meses para escalar)</td>
+      <td>Longo prazo</td>
+    </tr>
+  </table>
+  <p class="source-tag">Fontes: Treinamentosaf.com.br, Mapendo CPI Report 2025, Google Ads benchmarks Brasil 2024</p>
+
+  <h3>Churn mensal estimado — apps de finanças B2C no Brasil</h3>
+  <div class="two-col">
+    <div>
+      <p>Não há dados públicos específicos de Mobills ou Organizze. O churn estimado de <strong>5–10%/mês</strong> é derivado de:</p>
+      <ul style="padding-left:20px; font-size:14px;">
+        <li style="margin-bottom:8px;">Brasil: pior retenção de apps da LatAm (AppsFlyer 2024)</li>
+        <li style="margin-bottom:8px;">30–50% dos assinantes mensais cancelam na primeira renovação (RevenueCat 2025)</li>
+        <li style="margin-bottom:8px;">SaaS B2C Brasil: 4–5%/mês (ABStartups/Deloitte)</li>
+        <li style="margin-bottom:8px;">Alta substituição por bancos digitais gratuitos</li>
+      </ul>
+    </div>
+    <div class="info-box">
+      <strong>Impacto do churn de 8%/mês no MRR:</strong><br><br>
+      Com 5 assinantes novos por dia (150/mês) e churn de 8%:<br><br>
+      • Mês 1: 150 assinantes<br>
+      • Mês 6: ~570 assinantes<br>
+      • Mês 12: ~930 assinantes (platô)<br><br>
+      <strong>Platô em ~R$15k MRR</strong> a R$16,66/mês — exige esforço constante de aquisição só para manter.
+    </div>
+  </div>
+
+  <h2>4. Tempo Real para Atingir R$10k MRR</h2>
+
+  <div class="warning-box">
+    <div class="title">Dado do ecossistema brasileiro: 60% dos SaaS bootstrapped faturam menos de US$15k/mês após 4 anos</div>
+    Análise de 697 SaaS bootstrapped (microsaas.com.br): a maioria dos fundadores solo de apps financeiros relata 8+ meses para o primeiro cliente e desistência antes de R$2k/mês de MRR quando dependem de tráfego pago.
+    <br><span class="source-tag">Fonte: microsaas.com.br, análise de 697 SaaS bootstrapped</span>
+  </div>
+
+  <p>R$10k MRR = ~600 assinantes a R$16,66/mês (plano anual) ou ~285 assinantes a R$35/mês (plano mensal).</p>
+
+  <div class="scenario-grid">
+    <div class="scenario-card pessimist">
+      <div class="scenario-label">📉 Pessimista</div>
+      <div class="scenario-value">48+ meses</div>
+      <div class="scenario-desc">Crescimento orgânico lento, sem investimento em marketing, churn alto. Acontece com a maioria dos apps.</div>
+    </div>
+    <div class="scenario-card realist">
+      <div class="scenario-label">📊 Realista</div>
+      <div class="scenario-value">24–36 meses</div>
+      <div class="scenario-desc">Algum investimento em marketing + produto bem executado + nicho definido. Exige R$50–100k investidos.</div>
+    </div>
+    <div class="scenario-card optimist">
+      <div class="scenario-label">📈 Otimista</div>
+      <div class="scenario-value">12–18 meses</div>
+      <div class="scenario-desc">Canal B2B funcionando + marketing de conteúdo forte + viral loop. Raros. Exige execução excepcional.</div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <strong>Referência: Mobills</strong> é o caso de sucesso do mercado. Fundado em 2012, levantou rodada em 2021 (9 anos depois). Nunca divulgou número de assinantes pagantes — provavelmente porque a proporção é baixa. O sucesso real foi o ativo de dados e tecnologia que valiam para a Toro/Santander, não a receita de assinaturas em si.
+  </div>
+
+  <h2>5. Mercado B2B — Saúde Financeira Corporativa</h2>
+
+  <div class="section-intro">
+    O B2B é o caminho mais promissor. O mercado está amadurecendo, a demanda é real e documentada, e a competição ainda não tem um player dominante em educação financeira digital acessível para PMEs.
+  </div>
+
+  <h3>Demanda verificada por pesquisas primárias</h3>
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-num" style="color:#27ae60">22%</div>
+      <div class="metric-label">Empresas que JÁ investem em educação financeira (2024)</div>
+      <div class="metric-source">Lockton 9ª Pesquisa de Benefícios (n=500+ empresas)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num" style="color:#f5a623">45%</div>
+      <div class="metric-label">Planejam implementar nos próximos 2 anos</div>
+      <div class="metric-source">Lockton 2024</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num" style="color:#27ae60">70%</div>
+      <div class="metric-label">Funcionários querem mais ferramentas financeiras da empresa</div>
+      <div class="metric-source">WTW 2024 — 5.000 funcionários brasileiros</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num">53%</div>
+      <div class="metric-label">Empresas oferecem previdência privada (2025)</div>
+      <div class="metric-source">Mercer 32ª Pesquisa de Benefícios</div>
+    </div>
+  </div>
+
+  <h3>Competidores B2B confirmados</h3>
+  <table>
+    <tr>
+      <th>Empresa</th>
+      <th>Produto</th>
+      <th>Escala confirmada</th>
+      <th>Funding</th>
+    </tr>
+    <tr>
+      <td><strong>Onze</strong></td>
+      <td>Previdência corporativa + hub de saúde financeira</td>
+      <td>221 empresas clientes, R$4B AUM (2024)</td>
+      <td>R$163M+ (Ribbit Capital, Red Ventures)</td>
+    </tr>
+    <tr>
+      <td><strong>Creditas @Work</strong></td>
+      <td>Benefícios + crédito consignado + educação financeira</td>
+      <td>Unicórnio (>$4,8B no pico)</td>
+      <td>Receita via spread de crédito</td>
+    </tr>
+    <tr>
+      <td><strong>Flash</strong></td>
+      <td>Multi-benefícios (VA/VR + consignado)</td>
+      <td>—</td>
+      <td>US$100M (Tencent)</td>
+    </tr>
+    <tr>
+      <td><strong>Allya</strong></td>
+      <td>Clube de descontos como benefício</td>
+      <td>—</td>
+      <td>R$7,5M</td>
+    </tr>
+    <tr>
+      <td><strong>Stay</strong></td>
+      <td>Previdência corporativa digital</td>
+      <td>Seed-stage, poucos clientes</td>
+      <td>R$15M</td>
+    </tr>
+  </table>
+
+  <div class="warning-box">
+    <div class="title">⚠ Dado crítico que não existe: preço médio por funcionário/mês</div>
+    Nenhum player B2B de saúde financeira no Brasil publica preços — todos exigem contato comercial. A única referência pública encontrada é a Allya (clube de descontos) com ~R$17,50/func/mês. O Wellhub (wellness físico) cobra R$35–70/func/mês — referência para o que empresas já pagam por wellness. <strong>Não existe benchmark confiável publicado para educação financeira SaaS B2B no Brasil.</strong>
+  </div>
+
+  <div class="success-box">
+    <div class="title">✅ O espaço não ocupado: PMEs e trabalhadores operacionais</div>
+    Onze, Creditas e Flash focam em grandes empresas (Dell, TIM, OLX). Nenhum player consolidado atende PMEs de 20–200 funcionários com solução simples, acessível e voltada para o trabalhador brasileiro de renda média-baixa. Esse é o espaço onde o GastosIA pode entrar com preço de R$8–15/func/mês.
+  </div>
+
+  <h2>6. Projeções B2C — Cenário Realista</h2>
+
+  <p><strong>Premissas:</strong> Ticket anual de R$199,90 (R$16,66/mês equiv.). Conversão freemium de 1%. Churn mensal de 7%. Crescimento via orgânico + indicação.</p>
+
+  <table>
+    <tr>
+      <th>Horizonte</th>
+      <th>Usuários ativos</th>
+      <th>Assinantes pagantes (1%)</th>
+      <th>MRR estimado</th>
+      <th>ARR estimado</th>
+    </tr>
+    <tr>
+      <td>Ano 1</td>
+      <td>5.000</td>
+      <td>50</td>
+      <td class="td-red">R$833</td>
+      <td>R$10.000</td>
+    </tr>
+    <tr>
+      <td>Ano 2</td>
+      <td>20.000</td>
+      <td>200</td>
+      <td class="td-yellow">R$3.332</td>
+      <td>R$40.000</td>
+    </tr>
+    <tr>
+      <td>Ano 3</td>
+      <td>60.000</td>
+      <td>600</td>
+      <td class="td-yellow">R$9.996</td>
+      <td>R$120.000</td>
+    </tr>
+    <tr>
+      <td>Ano 4</td>
+      <td>150.000</td>
+      <td>1.500</td>
+      <td class="td-green">R$24.990</td>
+      <td>R$300.000</td>
+    </tr>
+  </table>
+
+  <div class="warning-box">
+    <div class="title">⚠ Custo de manter 150k usuários ativos no ano 4</div>
+    Com churn de 7%/mês, você perde ~10.500 usuários por mês. Para crescer de 120k para 150k, precisa adquirir ~13.000 novos usuários por mês. A R$0,44 por instalação Android, são ~R$5.720/mês só em custo de instalação — sem contar ativação e conversão. O CAC total será substancialmente maior.
+  </div>
+
+  <h2>7. Projeções B2B — Cenário Realista</h2>
+
+  <p><strong>Premissas:</strong> Ticket de R$10/func/mês. Ciclo de venda B2B de 60–120 dias. Empresas-alvo: PMEs de 30–200 funcionários. Churn anual B2B: 15–20% (muito melhor que B2C).</p>
+
+  <table>
+    <tr>
+      <th>Horizonte</th>
+      <th>Empresas clientes</th>
+      <th>Funcionários cobertos</th>
+      <th>MRR estimado</th>
+      <th>ARR estimado</th>
+    </tr>
+    <tr>
+      <td>Ano 1 (piloto)</td>
+      <td>5–10</td>
+      <td>500–1.000</td>
+      <td class="td-yellow">R$5.000–10.000</td>
+      <td>R$60k–120k</td>
+    </tr>
+    <tr>
+      <td>Ano 2</td>
+      <td>30–50</td>
+      <td>3.000–7.500</td>
+      <td class="td-yellow">R$30k–75k</td>
+      <td>R$360k–900k</td>
+    </tr>
+    <tr>
+      <td>Ano 3</td>
+      <td>100–200</td>
+      <td>15.000–40.000</td>
+      <td class="td-green">R$150k–400k</td>
+      <td>R$1,8M–4,8M</td>
+    </tr>
+  </table>
+
+  <div class="success-box">
+    <div class="title">✅ Por que o B2B tem unit economics melhores</div>
+    Um contrato B2B de 100 funcionários a R$10/mês = R$1.000/mês de MRR. Para o mesmo MRR no B2C precisaria de ~60 assinantes individuais. O churn B2B é estruturalmente menor — empresa não cancela toda hora como pessoa física. O CAC B2B é maior, mas o LTV compensa amplamente.
+  </div>
+
+  <h2>8. O Caminho Recomendado</h2>
+
+  <div class="section-intro">
+    Baseado nos dados reais, a estratégia mais defensável não é competir de frente com Mobills no B2C. É usar o B2C como vitrine e o B2B como motor de receita.
+  </div>
+
+  <h3>Fase 1 — Validação (0–6 meses)</h3>
+  <div class="info-box">
+    <strong>Objetivo:</strong> Confirmar que alguém paga, antes de investir em crescimento.
+    <ul style="padding-left:20px; margin-top:12px; font-size:14px;">
+      <li style="margin-bottom:8px;">Resolver as 3 falhas de segurança — nenhum centavo cobrado antes disso</li>
+      <li style="margin-bottom:8px;">Lançar plano pago com trial de 7 dias (hard paywall converte 5x mais que freemium)</li>
+      <li style="margin-bottom:8px;">Meta: 50 assinantes pagantes. Se não chegar, o produto ou o posicionamento precisa mudar</li>
+      <li style="margin-bottom:8px;">Conversar com 10 empresas sobre saúde financeira corporativa — ouvir, não vender</li>
+    </ul>
+  </div>
+
+  <h3>Fase 2 — Piloto B2B (6–18 meses)</h3>
+  <div class="info-box">
+    <strong>Objetivo:</strong> Fechar os primeiros 5 contratos B2B com preço de pioneiro.
+    <ul style="padding-left:20px; margin-top:12px; font-size:14px;">
+      <li style="margin-bottom:8px;">Preço de lançamento: R$5–8/func/mês (abaixo do mercado para ganhar cases reais)</li>
+      <li style="margin-bottom:8px;">Foco em PMEs de 30–150 funcionários: indústria, comércio, serviços</li>
+      <li style="margin-bottom:8px;">Construir painel básico de RH para gestores acompanharem adesão</li>
+      <li style="margin-bottom:8px;">Lançar modo simplificado para trabalhadores operacionais (chão de fábrica)</li>
+      <li style="margin-bottom:8px;">Meta: 3–5 contratos, ~500 funcionários cobertos, R$2.500–4.000 MRR</li>
+    </ul>
+  </div>
+
+  <h3>Fase 3 — Escala seletiva (18–36 meses)</h3>
+  <div class="info-box">
+    <strong>Objetivo:</strong> Atingir R$50k MRR com foco B2B + B2C como vitrine.
+    <ul style="padding-left:20px; margin-top:12px; font-size:14px;">
+      <li style="margin-bottom:8px;">Base B2C serve como prova de produto para convencer RHs</li>
+      <li style="margin-bottom:8px;">Integração com Open Finance para diferenciação técnica real</li>
+      <li style="margin-bottom:8px;">Captação de investimento somente se já gerar R$20k+ MRR — antes disso, diluição sem retorno</li>
+    </ul>
+  </div>
+
+  <h2>9. Riscos Reais</h2>
+
+  <table>
+    <tr>
+      <th>Risco</th>
+      <th>Probabilidade</th>
+      <th>Impacto</th>
+      <th>Mitigação</th>
+    </tr>
+    <tr>
+      <td>Nubank lança feature equivalente grátis</td>
+      <td class="td-red">Alta</td>
+      <td class="td-red">Alto</td>
+      <td>Focar em B2B — Nubank não tem canal de RH</td>
+    </tr>
+    <tr>
+      <td>Não conseguir 50 assinantes pagantes em 6 meses</td>
+      <td class="td-yellow">Média</td>
+      <td class="td-red">Alto</td>
+      <td>Sinal para mudar produto ou posicionamento</td>
+    </tr>
+    <tr>
+      <td>Vazamento de dados — falha de segurança (RLS ausente)</td>
+      <td class="td-yellow">Média (sem RLS)</td>
+      <td class="td-red">Crítico</td>
+      <td>Implementar RLS, sanitização e Edge Function antes de cobrar</td>
+    </tr>
+    <tr>
+      <td>Ciclo de venda B2B mais longo que previsto</td>
+      <td class="td-red">Alta</td>
+      <td class="td-yellow">Médio</td>
+      <td>Pipeline com 20+ empresas em contato simultâneo</td>
+    </tr>
+    <tr>
+      <td>Churn B2C acima de 10%/mês</td>
+      <td class="td-yellow">Média</td>
+      <td class="td-yellow">Médio</td>
+      <td>Onboarding ativo, modo simples, notificações</td>
+    </tr>
+  </table>
+
+  <h2>10. Conclusão Honesta</h2>
+
+  <div class="conclusion-grid">
+    <div class="conclusion-col positives">
+      <h4>✅ O que joga a favor</h4>
+      <ul>
+        <li>Produto já funciona — não é ideia, é código rodando</li>
+        <li>IA no core diferencia de apps manuais antigos</li>
+        <li>B2B tem unit economics superiores ao B2C</li>
+        <li>22% das empresas já fazem educ. financeira — mercado existe</li>
+        <li>PMEs sem atendimento de Onze/Creditas — janela aberta</li>
+        <li>Fundador conhece o produto e o contexto</li>
+      </ul>
+    </div>
+    <div class="conclusion-col negatives">
+      <h4>⚠ O que exige realismo</h4>
+      <ul>
+        <li>R$10k MRR leva 24–36 meses — não semanas</li>
+        <li>Conversão freemium no Brasil é próxima de zero</li>
+        <li>Nubank e bancos digitais competem de graça</li>
+        <li>GuiaBolso prova que escala ≠ monetização no B2C</li>
+        <li>Segurança precisa ser resolvida antes de cobrar</li>
+        <li>Ciclo de venda B2B é lento — exige paciência</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-box" style="margin-top:32px;">
+    <strong>Veredicto final:</strong> O GastosIA tem uma chance real — mas não pela rota que a maioria dos apps tenta (freemium B2C em escala). A rota viável é: produto seguro → primeiros 50 pagantes B2C → pilotos B2B com PMEs → escala pelo canal corporativo. É um caminho de 3 anos, não de 3 meses. Mas é fundamentado em dados reais, não em projeções otimistas.
+  </div>
+
+  <div class="sources-section">
+    <h3>Fontes Verificadas</h3>
+    <ul>
+      <li>RevenueCat — State of Subscription Apps 2025 (115.000 apps, US$16B receita)</li>
+      <li>AppsFlyer — App Retention Benchmarks 2024 (via TI Inside, set/2024)</li>
+      <li>Lockton — 9ª Pesquisa de Benefícios 2024-2025 (n=500+ empresas brasileiras)</li>
+      <li>WTW — Global Benefits Attitudes Survey 2024 (n=5.000 funcionários brasileiros)</li>
+      <li>Mercer/Marsh — 32ª Pesquisa de Benefícios Brasil 2024-2025 (n=1.007 empresas)</li>
+      <li>Sensor Tower — Top Personal Finance Apps Brazil Q3 2024</li>
+      <li>ABStartups/Deloitte — Mapeamento do Ecossistema Brasileiro de Startups</li>
+      <li>microsaas.com.br — Análise de 697 SaaS bootstrapped</li>
+      <li>Metrikia — Benchmarks LTV/CAC SaaS Brasil 2024 (~370 empresas)</li>
+      <li>Mapendo — Cost Per Install Report 2025</li>
+      <li>Business of Apps — Brazil App Market Statistics 2024</li>
+      <li>FintechLab — Aquisição Mobills/Toro (jun/2021)</li>
+      <li>Mobile Time — Encerramento GuiaBolso (out/2022)</li>
+      <li>Brazil Journal — Onze: R$120M fundraise</li>
+      <li>Google Play / App Store — Preços Mobills, Organizze, Minhas Economias (jun/2025)</li>
+      <li>Treinamentosaf.com.br — "5 motivos para não criar SaaS financeiro no Brasil"</li>
+    </ul>
+  </div>
+
+  <div style="text-align:center; margin-top:48px; padding:32px; border-top:1px solid #e9ecef;">
+    <p style="font-size:13px; color:#999;">Documento interno — GastosIA · Junho 2025</p>
+    <p style="font-size:12px; color:#bbb; margin-top:8px;">Este documento não constitui material de captação de investimento. Projeções são cenários baseados em benchmarks de mercado verificados, não garantias de resultado.</p>
+  </div>
+
+</div>
+</body>
+</html>

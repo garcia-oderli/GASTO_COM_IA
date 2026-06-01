@@ -1730,7 +1730,7 @@ async function supaSaveExpense(exp) {
   try {
     const payload = {
       id: String(exp.id),
-      data: String(exp.data || ''),
+      data: normalizeDateString(String(exp.data || '')).slice(0, 10) || new Date().toISOString().slice(0, 10),
       categoria: String(exp.categoria || 'Outros'),
       valor: Number(exp.valor) || 0,
       fornecedor: String(exp.fornecedor || ''),
@@ -5308,7 +5308,12 @@ function renderOrcamentoVsGastos() {
   const totalSpent = Object.keys(catExpenses).reduce((s, cat) => s + (catExpenses[cat] || 0), 0);
   const totalBudgetAmount = (monthlyIncome * totalBudget) / 100;
   
+  const mesLabel = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
   el.innerHTML = `
+    <div style="text-align:center; font-size:13px; color:var(--text3); margin-bottom:12px; font-weight:600;">
+      📅 Exibindo gastos de: <span style="color:var(--accent-solid);">${mesLabel.charAt(0).toUpperCase() + mesLabel.slice(1)}</span>
+    </div>
     <div style="background:linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.03)); border:1px solid rgba(16,185,129,0.2); border-radius:var(--radius-md); padding:16px; margin-bottom:20px;">
       <div style="display:flex; justify-content:space-around; text-align:center;">
         <div>

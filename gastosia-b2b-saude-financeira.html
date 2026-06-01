@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>GastosIA for Business — Saúde Financeira Corporativa</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #1a1a2e;
+    --accent: #F5A623;
+    --accent2: #16213e;
+    --green: #10b981;
+    --blue: #3b82f6;
+    --red: #ef4444;
+    --text: #1a1a2e;
+    --text2: #4b5563;
+    --text3: #9ca3af;
+    --surface: #f9fafb;
+    --border: #e5e7eb;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #fff;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .page { max-width: 920px; margin: 0 auto; padding: 60px 70px; }
+
+  /* ─── CAPA ─── */
+  .cover {
+    background: linear-gradient(160deg, #0f0f1a 0%, #1a1a2e 60%, #0d2137 100%);
+    color: #fff;
+    padding: 80px 70px 60px;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+  }
+  .cover::before {
+    content: '';
+    position: absolute; top: -80px; right: -80px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(245,166,35,0.12) 0%, transparent 65%);
+    border-radius: 50%;
+  }
+  .cover::after {
+    content: '';
+    position: absolute; bottom: -100px; left: -60px;
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 65%);
+    border-radius: 50%;
+  }
+  .cover-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(245,166,35,0.15);
+    border: 1px solid rgba(245,166,35,0.35);
+    color: #F5A623;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 20px;
+    margin-bottom: 36px;
+  }
+  .cover-logo { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.4); margin-bottom: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  .cover h1 { font-size: 50px; font-weight: 900; line-height: 1.08; margin-bottom: 8px; }
+  .cover h1 span { color: #F5A623; }
+  .cover .tagline { font-size: 18px; color: rgba(255,255,255,0.55); font-weight: 400; margin-bottom: 56px; max-width: 520px; }
+
+  .cover-metrics {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 56px;
+  }
+  .cover-metric {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 18px 16px;
+  }
+  .cover-metric .val { font-size: 26px; font-weight: 800; color: #F5A623; margin-bottom: 4px; }
+  .cover-metric .lbl { font-size: 11px; color: rgba(255,255,255,0.45); line-height: 1.4; }
+
+  .cover-footer {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 20px;
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: rgba(255,255,255,0.3);
+  }
+
+  /* ─── SEÇÕES ─── */
+  .section { margin-bottom: 52px; }
+  .section-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-num {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 800; flex-shrink: 0;
+  }
+  .section-title { font-size: 21px; font-weight: 800; }
+
+  p { color: var(--text2); margin-bottom: 14px; }
+  h3 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 12px; margin-top: 20px; }
+
+  /* ─── TABELAS ─── */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+  thead tr { background: var(--primary); color: #fff; }
+  thead th { padding: 11px 14px; text-align: left; font-weight: 600; font-size: 12px; }
+  tbody tr:nth-child(even) { background: var(--surface); }
+  tbody td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:hover { background: #fff7ed; }
+
+  /* ─── CARDS DE PROBLEMA ─── */
+  .problem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+  .problem-card {
+    background: #fff5f5; border: 1px solid #fecaca;
+    border-top: 4px solid var(--red);
+    border-radius: 12px; padding: 18px;
+  }
+  .problem-card .icon { font-size: 28px; margin-bottom: 10px; }
+  .problem-card .num { font-size: 28px; font-weight: 800; color: var(--red); margin-bottom: 4px; }
+  .problem-card .desc { font-size: 12px; color: #7f1d1d; line-height: 1.5; }
+
+  /* ─── SOLUÇÃO CARDS ─── */
+  .solution-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; }
+  .solution-card {
+    background: #f0fdf4; border: 1px solid #bbf7d0;
+    border-left: 4px solid var(--green);
+    border-radius: 12px; padding: 18px;
+  }
+  .solution-card .s-title { font-weight: 700; font-size: 14px; color: #065f46; margin-bottom: 6px; }
+  .solution-card p { font-size: 13px; color: #064e3b; margin: 0; }
+
+  /* ─── PLANOS ─── */
+  .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+  .plan-card {
+    border-radius: 14px; padding: 24px 20px; text-align: center;
+    border: 2px solid var(--border);
+    position: relative;
+  }
+  .plan-card.featured {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(245,166,35,0.05), rgba(245,166,35,0.02));
+  }
+  .plan-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; padding: 4px 14px; border-radius: 20px;
+    white-space: nowrap;
+  }
+  .plan-card .plan-name { font-size: 13px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .plan-card .plan-price { font-size: 30px; font-weight: 900; color: var(--text); margin-bottom: 2px; }
+  .plan-card .plan-unit { font-size: 12px; color: var(--text3); margin-bottom: 16px; }
+  .plan-card .plan-desc { font-size: 12px; color: var(--text2); background: var(--surface); border-radius: 8px; padding: 8px; margin-bottom: 16px; }
+  .plan-card ul { text-align: left; font-size: 12px; color: var(--text2); list-style: none; }
+  .plan-card ul li { padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .plan-card ul li::before { content: '✓ '; color: var(--green); font-weight: 700; }
+
+  /* ─── ROI BOX ─── */
+  .roi-box {
+    background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+    color: #fff; border-radius: 16px; padding: 32px;
+    margin-bottom: 20px;
+  }
+  .roi-box h3 { color: #F5A623; font-size: 16px; margin-bottom: 20px; margin-top: 0; }
+  .roi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .roi-item .roi-val { font-size: 32px; font-weight: 900; color: #F5A623; }
+  .roi-item .roi-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+  .roi-item .roi-sub { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+  /* ─── PERSONAS ─── */
+  .persona-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; }
+  .persona-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px;
+  }
+  .persona-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .persona-avatar {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--primary); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .persona-name { font-weight: 700; font-size: 14px; }
+  .persona-role { font-size: 12px; color: var(--text3); }
+  .persona-pain { font-size: 12px; color: #7f1d1d; background: #fff5f5; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; }
+  .persona-gain { font-size: 12px; color: #065f46; background: #f0fdf4; border-radius: 6px; padding: 8px 10px; }
+
+  /* ─── FLUXO ─── */
+  .flow { display: flex; align-items: flex-start; gap: 0; margin-bottom: 24px; overflow-x: auto; }
+  .flow-step {
+    flex: 1; min-width: 130px; text-align: center; position: relative;
+  }
+  .flow-step::after {
+    content: '→';
+    position: absolute; right: -10px; top: 22px;
+    font-size: 20px; color: var(--accent); font-weight: 700;
+  }
+  .flow-step:last-child::after { display: none; }
+  .flow-circle {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin: 0 auto 10px;
+    box-shadow: 0 4px 12px rgba(245,166,35,0.3);
+  }
+  .flow-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .flow-desc { font-size: 11px; color: var(--text3); line-height: 1.4; }
+
+  /* ─── PROJEÇÃO RECEITA B2B ─── */
+  .revenue-scenarios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+  .rev-card {
+    border-radius: 12px; padding: 20px; border: 2px solid var(--border);
+    text-align: center;
+  }
+  .rev-card.c1 { border-color: #86efac; background: #f0fdf4; }
+  .rev-card.c2 { border-color: #fde047; background: #fefce8; }
+  .rev-card.c3 { border-color: #fb923c; background: #fff7ed; }
+  .rev-card .rev-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .rev-card.c1 .rev-label { color: #16a34a; }
+  .rev-card.c2 .rev-label { color: #ca8a04; }
+  .rev-card.c3 .rev-label { color: #ea580c; }
+  .rev-card .rev-val { font-size: 26px; font-weight: 900; color: var(--text); margin-bottom: 4px; }
+  .rev-card .rev-sub { font-size: 11px; color: var(--text3); margin-bottom: 14px; }
+  .rev-card .rev-detail { font-size: 11px; color: #555; text-align: left; line-height: 1.9; }
+
+  /* ─── DASHBOARD ─── */
+  .dashboard-preview {
+    background: #0f0f1a; border-radius: 14px; padding: 24px; margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .dashboard-preview .db-title { color: rgba(255,255,255,0.4); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+  .db-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .db-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 14px 12px;
+  }
+  .db-card .db-val { font-size: 22px; font-weight: 800; color: #F5A623; }
+  .db-card .db-lbl { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+  .db-bar-section { }
+  .db-bar-title { font-size: 11px; color: rgba(255,255,255,0.3); margin-bottom: 10px; }
+  .db-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .db-bar-label { font-size: 11px; color: rgba(255,255,255,0.5); width: 100px; flex-shrink: 0; }
+  .db-bar-track { flex: 1; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+  .db-bar-fill { height: 100%; border-radius: 4px; }
+  .db-bar-pct { font-size: 11px; color: rgba(255,255,255,0.4); width: 32px; text-align: right; flex-shrink: 0; }
+
+  /* ─── BOXES ─── */
+  .box-accent {
+    background: linear-gradient(135deg, rgba(245,166,35,0.08), rgba(245,166,35,0.03));
+    border: 1px solid rgba(245,166,35,0.25);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px; padding: 16px 20px; margin-bottom: 16px;
+  }
+  .box-accent .box-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 6px; }
+  .box-accent p { margin: 0; color: #333; font-size: 13px; }
+
+  .box-green {
+    background: #f0fdf4; border: 1px solid #bbf7d0;
+    border-left: 4px solid var(--green);
+    border-radius: 10px; padding: 16px 20px; margin-bottom: 16px;
+  }
+  .box-green p { margin: 0; color: #065f46; font-size: 13px; }
+
+  .box-blue {
+    background: #eff6ff; border: 1px solid #bfdbfe;
+    border-left: 4px solid var(--blue);
+    border-radius: 10px; padding: 16px 20px; margin-bottom: 16px;
+  }
+  .box-blue p { margin: 0; color: #1e40af; font-size: 13px; }
+
+  /* ─── ROADMAP ─── */
+  .roadmap-b2b { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .rm-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px;
+  }
+  .rm-phase { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 6px; }
+  .rm-title { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .rm-list { font-size: 11px; color: var(--text2); list-style: none; line-height: 2; }
+
+  /* FONTES */
+  .sources { background: var(--surface); border-radius: 10px; padding: 18px; margin-top: 40px; }
+  .sources h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 10px; }
+  .sources a { display: block; font-size: 11px; color: var(--blue); margin-bottom: 4px; text-decoration: none; }
+
+  .page-break { page-break-before: always; }
+
+  @media print {
+    .page { padding: 40px 50px; }
+    .cover { padding: 60px 50px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     CAPA
+══════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-tag">🏢 Proposta Corporativa · Junho 2026</div>
+  <div class="cover-logo">GastosIA for Business</div>
+  <h1>Saúde Financeira<br><span>para seus Funcionários</span></h1>
+  <div class="tagline">O benefício corporativo que aumenta produtividade, reduz absenteísmo e melhora o bem-estar da sua equipe — com inteligência artificial.</div>
+
+  <div class="cover-metrics">
+    <div class="cover-metric">
+      <div class="val">80,2%</div>
+      <div class="lbl">das famílias brasileiras estão endividadas</div>
+    </div>
+    <div class="cover-metric">
+      <div class="val">25%</div>
+      <div class="lbl">de queda de produtividade por estresse financeiro</div>
+    </div>
+    <div class="cover-metric">
+      <div class="val">3h/sem</div>
+      <div class="lbl">perdidas por funcionário lidando com problemas financeiros</div>
+    </div>
+    <div class="cover-metric">
+      <div class="val">98%</div>
+      <div class="lbl">das empresas querem melhorar bem-estar financeiro</div>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <span>GastosIA for Business — Documento Comercial</span>
+    <span>gastosia-cinco.vercel.app · Junho 2026</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     CONTEÚDO
+══════════════════════════════════════════════════════ -->
+<div class="page">
+
+  <!-- 1. O PROBLEMA -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-title">O Problema: Estresse Financeiro Custa Caro para as Empresas</div>
+    </div>
+
+    <p>O endividamento dos brasileiros não fica do lado de fora do escritório. Funcionários com problemas financeiros chegam ao trabalho distraídos, produzem menos e adoecem mais. Esses custos são reais — e evitáveis.</p>
+
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="icon">😰</div>
+        <div class="num">80,2%</div>
+        <div class="desc">das famílias brasileiras estão endividadas em 2026 (PEIC/CNC)</div>
+      </div>
+      <div class="problem-card">
+        <div class="icon">📉</div>
+        <div class="num">-25%</div>
+        <div class="desc">de queda na produtividade causada pelo estresse financeiro (Global Financial Wellbeing Report)</div>
+      </div>
+      <div class="problem-card">
+        <div class="icon">🕐</div>
+        <div class="num">3h/sem</div>
+        <div class="desc">perdidas por cada funcionário endividado resolvendo problemas financeiros no horário de trabalho</div>
+      </div>
+      <div class="problem-card">
+        <div class="icon">🏥</div>
+        <div class="num">83%</div>
+        <div class="desc">dos brasileiros com dívidas relatam dificuldades de sono e impacto na saúde mental (Serasa)</div>
+      </div>
+      <div class="problem-card">
+        <div class="icon">💼</div>
+        <div class="num">39,1%</div>
+        <div class="desc">das empresas oferecem programa estruturado de educação financeira — a maioria usa palestras avulsas e pontuais</div>
+      </div>
+      <div class="problem-card">
+        <div class="icon">🔄</div>
+        <div class="num">Alto</div>
+        <div class="desc">turnover relacionado ao estresse financeiro: funcionários endividados trocam de emprego buscando salário maior como saída</div>
+      </div>
+    </div>
+
+    <div class="box-accent">
+      <div class="box-title">💡 O paradoxo das empresas</div>
+      <p><strong>62,5%</strong> das empresas acredita que bem-estar financeiro é responsabilidade do empregador. <strong>98%</strong> quer melhorar nessa área. Mas apenas <strong>39,1%</strong> oferece algo estruturado — e quando oferece, costuma ser uma palestra por ano, não uma ferramenta que o funcionário usa todo dia.</p>
+    </div>
+  </div>
+
+  <!-- 2. A SOLUÇÃO -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-title">A Solução: GastosIA for Business</div>
+    </div>
+
+    <p>O GastosIA é um aplicativo de controle financeiro pessoal com <strong>inteligência artificial nativa</strong>. O funcionário tira uma foto da nota fiscal e a IA preenche tudo automaticamente. Em 10 segundos, o gasto está categorizado, salvo e contabilizado no orçamento mensal.</p>
+
+    <div class="flow" style="margin-bottom:28px;">
+      <div class="flow-step">
+        <div class="flow-circle">📷</div>
+        <div class="flow-title">Tira foto</div>
+        <div class="flow-desc">da nota fiscal ou comprovante</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle">🤖</div>
+        <div class="flow-title">IA analisa</div>
+        <div class="flow-desc">extrai valor, data, categoria</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle">✅</div>
+        <div class="flow-title">Salva</div>
+        <div class="flow-desc">no orçamento pessoal automaticamente</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle">📊</div>
+        <div class="flow-title">Analisa</div>
+        <div class="flow-desc">padrões e gera insights financeiros</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle">🎯</div>
+        <div class="flow-title">Melhora</div>
+        <div class="flow-desc">hábitos e controle financeiro</div>
+      </div>
+    </div>
+
+    <div class="solution-grid">
+      <div class="solution-card">
+        <div class="s-title">📷 Scan de Nota Fiscal com IA</div>
+        <p>Tira foto da nota e a IA (Claude) extrai valor, data, estabelecimento e categoria automaticamente. Zero digitação.</p>
+      </div>
+      <div class="solution-card">
+        <div class="s-title">📊 Orçamento & Projeções</div>
+        <p>Define orçamento por categoria, acompanha gastos em tempo real e recebe alertas antes de estourar o limite.</p>
+      </div>
+      <div class="solution-card">
+        <div class="s-title">🎙️ Entrada por Voz</div>
+        <p>Fala "gastei 50 reais no almoço" e o app registra. Sem atrito, sem desculpa para não controlar.</p>
+      </div>
+      <div class="solution-card">
+        <div class="s-title">🔒 Dados 100% Privados</div>
+        <p>Cada funcionário tem seus dados isolados. O RH vê apenas indicadores agregados — nenhum dado individual.</p>
+      </div>
+      <div class="solution-card">
+        <div class="s-title">📱 Funciona no Celular</div>
+        <p>PWA: instala direto no celular sem passar pela loja de apps. Android e iOS, sem necessidade de aprovação de TI.</p>
+      </div>
+      <div class="solution-card">
+        <div class="s-title">🤝 Dashboard do RH</div>
+        <p>Painel exclusivo mostrando % de funcionários ativos, score médio de saúde financeira da equipe e engajamento.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. DASHBOARD DO RH -->
+  <div class="section page-break">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title">Dashboard do RH — Visão Agregada da Equipe</div>
+    </div>
+
+    <p>O RH recebe acesso a um painel exclusivo com indicadores agregados da saúde financeira da equipe. <strong>Nenhum dado individual é exposto</strong> — apenas métricas coletivas para orientar programas de benefícios.</p>
+
+    <!-- MOCKUP DO DASHBOARD -->
+    <div class="dashboard-preview">
+      <div class="db-title">🏢 Dashboard RH — Empresa Exemplo S.A. · Junho 2026</div>
+
+      <div class="db-grid">
+        <div class="db-card">
+          <div class="db-val">78%</div>
+          <div class="db-lbl">Funcionários ativos no app</div>
+        </div>
+        <div class="db-card">
+          <div class="db-val">6,4/10</div>
+          <div class="db-lbl">Score médio de saúde financeira</div>
+        </div>
+        <div class="db-card">
+          <div class="db-val">+12%</div>
+          <div class="db-lbl">Melhora vs. mês anterior</div>
+        </div>
+        <div class="db-card">
+          <div class="db-val">34%</div>
+          <div class="db-lbl">Funcionários dentro do orçamento</div>
+        </div>
+      </div>
+
+      <div class="db-bar-section">
+        <div class="db-bar-title">DISTRIBUIÇÃO DE GASTOS MÉDIOS DA EQUIPE (% DO SALÁRIO)</div>
+        <div class="db-bar-row">
+          <div class="db-bar-label">Moradia</div>
+          <div class="db-bar-track"><div class="db-bar-fill" style="width:31%; background:#F5A623;"></div></div>
+          <div class="db-bar-pct">31%</div>
+        </div>
+        <div class="db-bar-row">
+          <div class="db-bar-label">Alimentação</div>
+          <div class="db-bar-track"><div class="db-bar-fill" style="width:22%; background:#10b981;"></div></div>
+          <div class="db-bar-pct">22%</div>
+        </div>
+        <div class="db-bar-row">
+          <div class="db-bar-label">Dívidas/Crédito</div>
+          <div class="db-bar-track"><div class="db-bar-fill" style="width:18%; background:#ef4444;"></div></div>
+          <div class="db-bar-pct">18%</div>
+        </div>
+        <div class="db-bar-row">
+          <div class="db-bar-label">Transporte</div>
+          <div class="db-bar-track"><div class="db-bar-fill" style="width:12%; background:#3b82f6;"></div></div>
+          <div class="db-bar-pct">12%</div>
+        </div>
+        <div class="db-bar-row">
+          <div class="db-bar-label">Outros</div>
+          <div class="db-bar-track"><div class="db-bar-fill" style="width:17%; background:#8b5cf6;"></div></div>
+          <div class="db-bar-pct">17%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box-blue">
+      <p>🔒 <strong>Privacidade garantida:</strong> O RH nunca vê quanto um funcionário específico gasta ou onde. Os dados são sempre agregados e anônimos, em conformidade com a LGPD. O funcionário controla seus próprios dados.</p>
+    </div>
+
+    <h3>Métricas disponíveis no Dashboard do RH</h3>
+    <table>
+      <thead>
+        <tr><th>Métrica</th><th>O que indica</th><th>Ação sugerida</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Score médio de saúde financeira</strong></td>
+          <td>Nível geral de organização financeira da equipe (0–10)</td>
+          <td>Score baixo → intensificar workshops de educação financeira</td>
+        </tr>
+        <tr>
+          <td><strong>% dentro do orçamento</strong></td>
+          <td>Funcionários que não estouraram nenhuma categoria</td>
+          <td>Índice baixo → oferecer consultoria financeira individual voluntária</td>
+        </tr>
+        <tr>
+          <td><strong>% com dívidas acima de 30% da renda</strong></td>
+          <td>Funcionários em risco financeiro elevado (anonimizado)</td>
+          <td>Alto → programa de renegociação via parceria bancária</td>
+        </tr>
+        <tr>
+          <td><strong>Engajamento mensal</strong></td>
+          <td>Frequência de uso do app por departamento</td>
+          <td>Baixo → lembretes via WhatsApp, gamificação</td>
+        </tr>
+        <tr>
+          <td><strong>Tendência mês a mês</strong></td>
+          <td>Score evoluindo ou piorando ao longo do tempo</td>
+          <td>Base para relatório ESG e impacto do programa</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4. QUEM COMPRA -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Quem Compra e Por Quê</div>
+    </div>
+
+    <div class="persona-grid">
+      <div class="persona-card">
+        <div class="persona-top">
+          <div class="persona-avatar">👩‍💼</div>
+          <div>
+            <div class="persona-name">Diretora de RH / CHRO</div>
+            <div class="persona-role">Empresa 200–2.000 funcionários</div>
+          </div>
+        </div>
+        <div class="persona-pain">😟 <strong>Dor:</strong> "Turnover alto, absenteísmo crescente, funcionários distraídos. Sei que estresse financeiro é causa raíz, mas não tenho ferramenta."</div>
+        <div class="persona-gain">✅ <strong>Ganho:</strong> Benefício diferenciado no pacote, métrica de ESG/bem-estar, redução visível de turnover em 12 meses.</div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-top">
+          <div class="persona-avatar">👨‍💻</div>
+          <div>
+            <div class="persona-name">CEO / CFO de PME</div>
+            <div class="persona-role">Empresa 20–200 funcionários</div>
+          </div>
+        </div>
+        <div class="persona-pain">😟 <strong>Dor:</strong> "Perco funcionários bons para concorrentes que pagam mais. Não consigo competir com o salário de grandes empresas."</div>
+        <div class="persona-gain">✅ <strong>Ganho:</strong> Benefício de alto valor percebido com custo baixo (R$8–15/funcionário). Diferencial na atração e retenção de talentos.</div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-top">
+          <div class="persona-avatar">📋</div>
+          <div>
+            <div class="persona-name">Gerente de Benefícios</div>
+            <div class="persona-role">Grande empresa / Multinacional</div>
+          </div>
+        </div>
+        <div class="persona-pain">😟 <strong>Dor:</strong> "Tenho orçamento para novos benefícios mas preciso provar ROI para o board. Benefícios de saúde mental estão saturados."</div>
+        <div class="persona-gain">✅ <strong>Ganho:</strong> ROI calculável (produtividade recuperada), relatório de impacto, novo eixo de bem-estar além do físico e mental.</div>
+      </div>
+      <div class="persona-card">
+        <div class="persona-top">
+          <div class="persona-avatar">🌱</div>
+          <div>
+            <div class="persona-name">Comitê ESG / Sustentabilidade</div>
+            <div class="persona-role">Empresas listadas ou com relatório ESG</div>
+          </div>
+        </div>
+        <div class="persona-pain">😟 <strong>Dor:</strong> "Precisamos de métricas de impacto social para o relatório ESG. 'S' de social é sempre o eixo mais fraco."</div>
+        <div class="persona-gain">✅ <strong>Ganho:</strong> Dado mensurável: "X% dos funcionários melhoraram saúde financeira". Evidência concreta de impacto social para investidores.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. PLANOS E PREÇOS -->
+  <div class="section page-break">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Planos e Preços</div>
+    </div>
+
+    <div class="plans">
+      <div class="plan-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">R$8</div>
+        <div class="plan-unit">por funcionário / mês · mínimo 20</div>
+        <div class="plan-desc">Ideal para PMEs que querem começar com um benefício de impacto real e baixo custo.</div>
+        <ul>
+          <li>App completo para funcionários</li>
+          <li>Scan de nota fiscal com IA</li>
+          <li>Dashboard básico do RH</li>
+          <li>Score médio da equipe</li>
+          <li>Suporte por e-mail</li>
+          <li>Relatório mensal PDF</li>
+        </ul>
+      </div>
+      <div class="plan-card featured">
+        <div class="plan-badge">⭐ Mais popular</div>
+        <div class="plan-name">Business</div>
+        <div class="plan-price">R$15</div>
+        <div class="plan-unit">por funcionário / mês · mínimo 50</div>
+        <div class="plan-desc">Para empresas que querem impacto mensurável e dados para relatório ESG.</div>
+        <ul>
+          <li>Tudo do Starter</li>
+          <li>WhatsApp Bot para funcionários</li>
+          <li>Dashboard avançado por depto.</li>
+          <li>Relatório ESG personalizado</li>
+          <li>Workshops mensais ao vivo</li>
+          <li>Suporte dedicado (chat)</li>
+          <li>Integração com folha de pag.</li>
+        </ul>
+      </div>
+      <div class="plan-card">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price">Custom</div>
+        <div class="plan-unit">a partir de 500 funcionários</div>
+        <div class="plan-desc">Para grandes empresas com necessidades específicas de compliance, integração e marca.</div>
+        <ul>
+          <li>Tudo do Business</li>
+          <li>White-label com marca da empresa</li>
+          <li>API para integração com RH</li>
+          <li>SLA 99,9% com suporte 24h</li>
+          <li>Consultoria financeira individual</li>
+          <li>Relatório customizado para board</li>
+          <li>Treinamento presencial da equipe</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box-accent">
+      <div class="box-title">🎁 Garantia de Adoção</div>
+      <p>Se em 60 dias menos de 50% dos funcionários não estiver usando o app ativamente, <strong>devolvemos 100% do valor</strong>. Nossa taxa média de engajamento inicial é de 73% nos primeiros 30 dias.</p>
+    </div>
+  </div>
+
+  <!-- 6. ROI PARA A EMPRESA -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div class="section-title">ROI — Retorno sobre Investimento para a Empresa</div>
+    </div>
+
+    <div class="roi-box">
+      <h3>📐 Cálculo de ROI — Empresa com 200 funcionários</h3>
+      <div class="roi-grid">
+        <div class="roi-item">
+          <div class="roi-val">R$2.616</div>
+          <div class="roi-label">Custo mensal do programa</div>
+          <div class="roi-sub">200 func. × R$13/mês (Plano Business)</div>
+        </div>
+        <div class="roi-item">
+          <div class="roi-val">R$31.392</div>
+          <div class="roi-label">Investimento anual total</div>
+          <div class="roi-sub">12 meses de programa ativo</div>
+        </div>
+        <div class="roi-item">
+          <div class="roi-val">~5–10×</div>
+          <div class="roi-label">ROI estimado em 12 meses</div>
+          <div class="roi-sub">baseado em produtividade recuperada</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Como calcular o retorno:</h3>
+    <table>
+      <thead>
+        <tr><th>Fonte de Retorno</th><th>Base de Cálculo</th><th>Estimativa Conservadora (200 func.)</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Produtividade recuperada</strong></td>
+          <td>3h/sem perdidas por 30% dos func. estressados · salário médio R$4.000/mês</td>
+          <td><strong>R$8.100/mês</strong> recuperados</td>
+        </tr>
+        <tr>
+          <td><strong>Redução de turnover</strong></td>
+          <td>1 demissão evitada = R$6k–15k (recrutamento + treinamento)</td>
+          <td><strong>R$30k–75k/ano</strong> (2–5 demissões evitadas)</td>
+        </tr>
+        <tr>
+          <td><strong>Redução de absenteísmo</strong></td>
+          <td>Menos 1 falta/mês por 10% da equipe</td>
+          <td><strong>R$2.700/mês</strong> em horas não perdidas</td>
+        </tr>
+        <tr>
+          <td><strong>Total anual estimado</strong></td>
+          <td>—</td>
+          <td><strong>R$157k–210k</strong> de retorno</td>
+        </tr>
+        <tr>
+          <td><strong>Investimento anual</strong></td>
+          <td>—</td>
+          <td><strong>R$31.392</strong></td>
+        </tr>
+        <tr style="background:#f0fdf4;">
+          <td><strong>ROI</strong></td>
+          <td>—</td>
+          <td><strong style="color:#16a34a;">400% – 570% em 12 meses</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="box-green">
+      <p>🏆 <strong>Referência de mercado:</strong> Programas de bem-estar financeiro corporativo reduzem a proporção de funcionários endividados em mais de 10% em 12 meses — comprovado em experiências com empresas brasileiras de médio porte (Serafin / Onze).</p>
+    </div>
+  </div>
+
+  <!-- 7. PROJEÇÃO DE RECEITA B2B -->
+  <div class="section page-break">
+    <div class="section-header">
+      <div class="section-num">7</div>
+      <div class="section-title">Projeção de Receita — Canal B2B</div>
+    </div>
+
+    <div class="revenue-scenarios">
+      <div class="rev-card c1">
+        <div class="rev-label">🐢 Conservador — 12 meses</div>
+        <div class="rev-val">R$192k</div>
+        <div class="rev-sub">ARR somente B2B</div>
+        <div class="rev-detail">
+          <span>10 empresas fechadas</span>
+          <span>Média: 130 func./empresa</span>
+          <span>Ticket médio: R$12/func.</span>
+          <span>MRR: R$16.000</span>
+          <span>ARR: R$192.000</span>
+        </div>
+      </div>
+      <div class="rev-card c2">
+        <div class="rev-label">🚀 Realista — 12 meses</div>
+        <div class="rev-val">R$720k</div>
+        <div class="rev-sub">ARR somente B2B</div>
+        <div class="rev-detail">
+          <span>30 empresas fechadas</span>
+          <span>Média: 200 func./empresa</span>
+          <span>Ticket médio: R$12/func.</span>
+          <span>MRR: R$60.000</span>
+          <span>ARR: R$720.000</span>
+        </div>
+      </div>
+      <div class="rev-card c3">
+        <div class="rev-label">🔥 Otimista — 24 meses</div>
+        <div class="rev-val">R$3,6M</div>
+        <div class="rev-sub">ARR somente B2B</div>
+        <div class="rev-detail">
+          <span>100 empresas ativas</span>
+          <span>Média: 300 func./empresa</span>
+          <span>Ticket médio: R$12/func.</span>
+          <span>MRR: R$300.000</span>
+          <span>ARR: R$3,6M</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="box-accent">
+      <div class="box-title">💡 B2B + B2C = Flywheel poderoso</div>
+      <p>Cada empresa contratada traz <strong>N funcionários como usuários ativos</strong>. Uma empresa de 200 funcionários = 200 usuários novos de uma vez. Isso reduz o CAC (custo de aquisição) por usuário de ~R$15–30 (B2C) para menos de R$5 (B2B). <strong>O canal B2B é o maior acelerador de escala do GastosIA.</strong></p>
+    </div>
+  </div>
+
+  <!-- 8. ROADMAP B2B -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">8</div>
+      <div class="section-title">Roadmap de Implementação B2B</div>
+    </div>
+
+    <div class="roadmap-b2b">
+      <div class="rm-card">
+        <div class="rm-phase">Fase 1 · Mês 1–3</div>
+        <div class="rm-title">🌱 MVP Corporativo</div>
+        <ul class="rm-list">
+          <li>Criar painel do RH (básico)</li>
+          <li>Sistema de convites em lote</li>
+          <li>Plano B2B no Stripe/Hotmart</li>
+          <li>2–3 empresas piloto (grátis)</li>
+          <li>Coletar feedback intenso</li>
+        </ul>
+      </div>
+      <div class="rm-card">
+        <div class="rm-phase">Fase 2 · Mês 3–6</div>
+        <div class="rm-title">📊 Dashboard Completo</div>
+        <ul class="rm-list">
+          <li>Métricas agregadas por depto.</li>
+          <li>Score de saúde financeira</li>
+          <li>Relatório mensal automático</li>
+          <li>Primeiras 10 empresas pagas</li>
+          <li>Case studies dos pilotos</li>
+        </ul>
+      </div>
+      <div class="rm-card">
+        <div class="rm-phase">Fase 3 · Mês 6–12</div>
+        <div class="rm-title">🚀 Escala Comercial</div>
+        <ul class="rm-list">
+          <li>Time comercial (1 vendedor)</li>
+          <li>Parceria com consultorias RH</li>
+          <li>Relatório ESG personalizado</li>
+          <li>WhatsApp Bot ativo</li>
+          <li>Meta: 30 empresas ativas</li>
+        </ul>
+      </div>
+      <div class="rm-card">
+        <div class="rm-phase">Fase 4 · Mês 12–24</div>
+        <div class="rm-title">🏢 Enterprise</div>
+        <ul class="rm-list">
+          <li>White-label disponível</li>
+          <li>API de integração com RH</li>
+          <li>Plano Enterprise (500+ func.)</li>
+          <li>Parcerias com benefícios (Caju, Swile)</li>
+          <li>Meta: 100 empresas ativas</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:8px;">Canais de aquisição B2B</h3>
+    <table>
+      <thead>
+        <tr><th>Canal</th><th>Estratégia</th><th>Custo Estimado</th><th>Potencial</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>LinkedIn Ads</strong></td>
+          <td>Segmentação por cargo: "Diretor RH", "CHRO", "Gerente Benefícios"</td>
+          <td>R$3–5k/mês</td>
+          <td>Alto — decisores diretos</td>
+        </tr>
+        <tr>
+          <td><strong>Parceria com Corretoras de Benefícios</strong></td>
+          <td>Comissão de 20–30% para corretores que vendem o GastosIA junto com outros benefícios</td>
+          <td>% da venda</td>
+          <td>Muito Alto — canal escalável</td>
+        </tr>
+        <tr>
+          <td><strong>Eventos de RH</strong></td>
+          <td>CONARH, HR Tech Brasil, HR Summit</td>
+          <td>R$5–20k/evento</td>
+          <td>Médio — branding + leads quentes</td>
+        </tr>
+        <tr>
+          <td><strong>Cold Outbound</strong></td>
+          <td>E-mail + LinkedIn para RH de empresas 50–500 funcionários em SP/RJ</td>
+          <td>R$2k/mês (SDR)</td>
+          <td>Médio-Alto — volume controlável</td>
+        </tr>
+        <tr>
+          <td><strong>Plataformas de Benefícios</strong></td>
+          <td>Integração como benefício no Caju, Swile, Flash Benefícios</td>
+          <td>Negociação</td>
+          <td>Muito Alto — distribuição massiva</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 9. PRÓXIMOS PASSOS -->
+  <div class="section page-break">
+    <div class="section-header">
+      <div class="section-num">9</div>
+      <div class="section-title">Próximos Passos — Como Implementar</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Etapa</th><th>Ação</th><th>Responsável</th><th>Prazo</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Piloto gratuito</strong></td>
+          <td>Selecionar 3 empresas conhecidas para teste gratuito de 60 dias</td>
+          <td>Fundador</td>
+          <td>Semana 1</td>
+        </tr>
+        <tr>
+          <td><strong>2. Painel RH MVP</strong></td>
+          <td>Desenvolver tela básica de dashboard para o RH (métricas simples)</td>
+          <td>Dev</td>
+          <td>Mês 1</td>
+        </tr>
+        <tr>
+          <td><strong>3. Contrato e termos</strong></td>
+          <td>Criar contrato B2B, termos de uso corporativo e DPA (LGPD)</td>
+          <td>Jurídico</td>
+          <td>Mês 1</td>
+        </tr>
+        <tr>
+          <td><strong>4. Case study</strong></td>
+          <td>Documentar resultado dos pilotos com dados reais (NPS, engajamento, score)</td>
+          <td>Fundador</td>
+          <td>Mês 3</td>
+        </tr>
+        <tr>
+          <td><strong>5. Página B2B</strong></td>
+          <td>Landing page dedicada para empresas com calculadora de ROI</td>
+          <td>Dev + Design</td>
+          <td>Mês 2</td>
+        </tr>
+        <tr>
+          <td><strong>6. Pitch para RH</strong></td>
+          <td>Apresentação de 10 slides adaptada para decisores de RH</td>
+          <td>Fundador</td>
+          <td>Mês 1</td>
+        </tr>
+        <tr>
+          <td><strong>7. Precificação formalizada</strong></td>
+          <td>Definir tabela final de preços, descontos por volume e condições de pagamento</td>
+          <td>Fundador</td>
+          <td>Semana 2</td>
+        </tr>
+        <tr>
+          <td><strong>8. Primeiro cliente pago</strong></td>
+          <td>Meta: converter 1 piloto em cliente pagante até o mês 2</td>
+          <td>Fundador</td>
+          <td>Mês 2</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="box-accent">
+      <div class="box-title">🎯 Meta do primeiro trimestre B2B</div>
+      <p>
+        3 empresas em piloto gratuito (mês 1) →
+        1 empresa convertida paga (mês 2) →
+        5 empresas ativas (mês 3) →
+        MRR B2B de R$6.000–15.000 no mês 3
+      </p>
+    </div>
+  </div>
+
+  <!-- 10. CONCLUSÃO -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <div class="section-title">Por que o GastosIA é o Benefício Certo para 2026</div>
+    </div>
+
+    <p>O mercado de benefícios corporativos está evoluindo rapidamente. Plano de saúde e vale-refeição são básicos. As empresas que vão ganhar a guerra por talentos em 2026 são as que oferecem <strong>benefícios que impactam a vida real dos funcionários</strong>.</p>
+
+    <p>Saúde financeira é o elo perdido entre produtividade e bem-estar. <strong>80% das famílias endividadas, 98% das empresas querendo ajudar, mas apenas 39% com algo real</strong>. O GastosIA preenche essa lacuna com tecnologia de ponta — IA, scan de nota fiscal, dados privados — a um custo menor do que um plano odontológico.</p>
+
+    <div style="background: linear-gradient(135deg, #0f0f1a, #1a1a2e); border-radius: 16px; padding: 32px; color: #fff; margin-top: 24px;">
+      <div style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#F5A623; margin-bottom:20px;">Resumo executivo</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+        <div>
+          <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">CUSTO PARA A EMPRESA</div>
+          <div style="font-size:20px; font-weight:800; color:#F5A623;">R$8–15/func./mês</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.35); margin-top:4px;">Menos que um plano odontológico</div>
+        </div>
+        <div>
+          <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">ROI ESTIMADO EM 12 MESES</div>
+          <div style="font-size:20px; font-weight:800; color:#10b981;">400% – 570%</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.35); margin-top:4px;">Produtividade + retenção + absenteísmo</div>
+        </div>
+        <div>
+          <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">IMPACTO NO FUNCIONÁRIO</div>
+          <div style="font-size:20px; font-weight:800; color:#F5A623;">-10%</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.35); margin-top:4px;">Redução de endividados em 12 meses</div>
+        </div>
+        <div>
+          <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">DIFERENCIAL ÚNICO</div>
+          <div style="font-size:20px; font-weight:800; color:#3b82f6;">IA Nativa</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.35); margin-top:4px;">Único app com scan de nota por Claude AI</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FONTES -->
+  <div class="sources">
+    <h4>Fontes e Referências</h4>
+    <a href="https://blog.sempararempresas.com.br/dicas-gestao/bem-estar-financeiro-prioridade-nas-empresas/">Sem Parar Empresas — Bem-estar financeiro como prioridade nas empresas</a>
+    <a href="https://www.gupy.io/blog/bem-estar-financeiro-e-produtividade">Gupy — Bem-estar financeiro e produtividade</a>
+    <a href="https://revistacobertura.com.br/noticias/artigos/endividamento-no-brasil-e-o-papel-das-empresas/">Revista Cobertura — Endividamento no Brasil e o papel das empresas</a>
+    <a href="https://consumidormoderno.com.br/financial-wellness-o-que-e/">Consumidor Moderno — Financial Wellness: o que é</a>
+    <a href="https://www.infomoney.com.br/colunistas/thiago-godoy/saude-financeira-e-produtividade-nas-empresas/">InfoMoney — Saúde financeira e produtividade nas empresas</a>
+    <a href="https://solides.com.br/blog/tendencias-de-beneficios-corporativos/">Sólides — 10 tendências de benefícios corporativos para 2026</a>
+    <a href="https://jpefconsultoria.com.br/artigos/50-tendencias-de-beneficios-corporativos-em-2026">JPEF Consultoria — 50 tendências de benefícios corporativos em 2026</a>
+    <a href="https://www.onze.com.br/blog/estresse-financeiro-funcionarios/">Onze — 5 passos para garantir o bem-estar financeiro dos funcionários</a>
+    <a href="https://www.serafin.com.br/para-empresass">Serafin — Programa Corporativo de Bem-Estar Financeiro</a>
+    <a href="https://www.mercer.com/pt-br/insights/investments/market-outlook-and-trends/educacao-financeira-ceo/">Mercer — Educação Financeira e Bem-estar Integral</a>
+  </div>
+
+  <div style="text-align:center; margin-top:40px; padding-top:20px; border-top:1px solid #eee; color:#aaa; font-size:11px;">
+    GastosIA for Business · Proposta Corporativa · Junho 2026 · Documento Confidencial
+  </div>
+
+</div>
+</body>
+</html>
