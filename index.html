@@ -1881,24 +1881,27 @@ const DataLayerManager = (() => {
   
   // Log de auditoria
   const logAudit = (operation, description, payload = {}) => {
-    const auditLog = JSON.parse(localStorage.getItem(LAYER_AUDIT) || '[]');
-    auditLog.push({
-      id: generateId(),
-      timestamp: new Date().toISOString(),
-      operation,
-      description,
-      payload,
-      user: 'system'
-    });
-    
-    // Manter últimos 1000 registros de auditoria
-    if (auditLog.length > 1000) auditLog.shift();
-    localStorage.setItem(LAYER_AUDIT, JSON.stringify(auditLog));
+    try {
+      const auditLog = JSON.parse(localStorage.getItem(LAYER_AUDIT) || '[]');
+      auditLog.push({
+        id: generateId(),
+        timestamp: new Date().toISOString(),
+        operation,
+        description,
+        payload,
+        user: 'system'
+      });
+      // Manter últimos 50 registros de auditoria
+      if (auditLog.length > 50) auditLog.splice(0, auditLog.length - 50);
+      localStorage.setItem(LAYER_AUDIT, JSON.stringify(auditLog));
+    } catch(e) {
+      // Quota excedida — limpa log de auditoria (não é crítico)
+      try { localStorage.removeItem(LAYER_AUDIT); } catch(_) {}
+    }
   };
   
   // Backup automático
   const createBackup = (reason = 'MANUAL') => {
-    const backup = JSON.parse(localStorage.getItem(LAYER_BACKUP) || '[]');
     const newBackup = {
       id: generateId(),
       timestamp: new Date().toISOString(),
@@ -1907,59 +1910,74 @@ const DataLayerManager = (() => {
       rendas: JSON.parse(JSON.stringify(incomes)),
       size: JSON.stringify(expenses).length + JSON.stringify(incomes).length
     };
-    
-    backup.push(newBackup);
-    
-    // Manter últimos 20 backups
-    if (backup.length > 20) backup.shift();
-    localStorage.setItem(LAYER_BACKUP, JSON.stringify(backup));
-    logAudit('BACKUP', 'Backup automático criado', { reason, size: newBackup.size, countExpenses: expenses.length, countIncomes: incomes.length });
-    
+    try {
+      const backup = JSON.parse(localStorage.getItem(LAYER_BACKUP) || '[]');
+      backup.push(newBackup);
+      // Manter últimos 3 backups
+      if (backup.length > 3) backup.splice(0, backup.length - 3);
+      localStorage.setItem(LAYER_BACKUP, JSON.stringify(backup));
+    } catch(e) {
+      // Quota excedida — descarta backups antigos (dados estão no Supabase)
+      try { localStorage.removeItem(LAYER_BACKUP); } catch(_) {}
+    }
+    logAudit('BACKUP', 'Backup criado', { reason, countExpenses: expenses.length });
     return newBackup;
   };
   
   // Sincronização incremental
   const syncIncremental = () => {
-    const processed = JSON.parse(localStorage.getItem(LAYER_PROCESSED) || 'null');
-    
-    if (!processed) {
-      localStorage.setItem(LAYER_PROCESSED, JSON.stringify({
-        expenses: JSON.parse(JSON.stringify(expenses)),
-        incomes: JSON.parse(JSON.stringify(incomes)),
-        lastSync: new Date().toISOString(),
-        syncCount: 0
-      }));
-      logAudit('SYNC', 'Primeira sincronização realizada', { countExpenses: expenses.length, countIncomes: incomes.length });
-      return { new: expenses.length + incomes.length, updated: 0, unchanged: 0 };
-    }
-    
-    let newCount = 0, updatedCount = 0, unchangedCount = 0;
-    
-    // Comparar e marcar duelos
-    const processedExpenses = processed.expenses;
-    expenses.forEach(e => {
-      const existing = processedExpenses.find(pe => pe.id === e.id);
-      if (!existing) {
-        newCount++;
-        e._syncStatus = 'NEW';
-      } else if (JSON.stringify(e) !== JSON.stringify(existing)) {
-        updatedCount++;
-        e._syncStatus = 'UPDATED';
-      } else {
-        unchangedCount++;
-        e._syncStatus = 'UNCHANGED';
+    try {
+      const processed = JSON.parse(localStorage.getItem(LAYER_PROCESSED) || 'null');
+
+      if (!processed) {
+        try {
+          localStorage.setItem(LAYER_PROCESSED, JSON.stringify({
+            expenses: JSON.parse(JSON.stringify(expenses)),
+            incomes: JSON.parse(JSON.stringify(incomes)),
+            lastSync: new Date().toISOString(),
+            syncCount: 0
+          }));
+        } catch(e) {
+          try { localStorage.removeItem(LAYER_PROCESSED); } catch(_) {}
+        }
+        logAudit('SYNC', 'Primeira sincronização realizada', { countExpenses: expenses.length, countIncomes: incomes.length });
+        return { new: expenses.length + incomes.length, updated: 0, unchanged: 0 };
       }
-    });
-    
-    processed.expenses = JSON.parse(JSON.stringify(expenses));
-    processed.incomes = JSON.parse(JSON.stringify(incomes));
-    processed.lastSync = new Date().toISOString();
-    processed.syncCount = (processed.syncCount || 0) + 1;
-    
-    localStorage.setItem(LAYER_PROCESSED, JSON.stringify(processed));
-    logAudit('SYNC', 'Sincronização incremental completada', { new: newCount, updated: updatedCount, unchanged: unchangedCount });
-    
-    return { new: newCount, updated: updatedCount, unchanged: unchangedCount };
+
+      let newCount = 0, updatedCount = 0, unchangedCount = 0;
+
+      // Comparar e marcar status
+      const processedExpenses = processed.expenses;
+      expenses.forEach(e => {
+        const existing = processedExpenses.find(pe => pe.id === e.id);
+        if (!existing) {
+          newCount++;
+          e._syncStatus = 'NEW';
+        } else if (JSON.stringify(e) !== JSON.stringify(existing)) {
+          updatedCount++;
+          e._syncStatus = 'UPDATED';
+        } else {
+          unchangedCount++;
+          e._syncStatus = 'UNCHANGED';
+        }
+      });
+
+      processed.expenses = JSON.parse(JSON.stringify(expenses));
+      processed.incomes = JSON.parse(JSON.stringify(incomes));
+      processed.lastSync = new Date().toISOString();
+      processed.syncCount = (processed.syncCount || 0) + 1;
+
+      try {
+        localStorage.setItem(LAYER_PROCESSED, JSON.stringify(processed));
+      } catch(e) {
+        try { localStorage.removeItem(LAYER_PROCESSED); } catch(_) {}
+      }
+      logAudit('SYNC', 'Sincronização incremental completada', { new: newCount, updated: updatedCount, unchanged: unchangedCount });
+
+      return { new: newCount, updated: updatedCount, unchanged: unchangedCount };
+    } catch(e) {
+      return { new: 0, updated: 0, unchanged: 0 };
+    }
   };
   
   // Validação de integridade
@@ -2089,6 +2107,15 @@ const DataLayerManager = (() => {
   // API pública
   return {
     initialize: () => {
+      // Libera localStorage de dados volumosos antes de iniciar
+      try {
+        const audit = JSON.parse(localStorage.getItem(LAYER_AUDIT) || '[]');
+        if (audit.length > 50) { localStorage.setItem(LAYER_AUDIT, JSON.stringify(audit.slice(-50))); }
+        const bkp = JSON.parse(localStorage.getItem(LAYER_BACKUP) || '[]');
+        if (bkp.length > 3) { localStorage.setItem(LAYER_BACKUP, JSON.stringify(bkp.slice(-3))); }
+      } catch(e) {
+        try { localStorage.removeItem(LAYER_AUDIT); localStorage.removeItem(LAYER_BACKUP); localStorage.removeItem(LAYER_PROCESSED); } catch(_) {}
+      }
       migrateExistingData();
       createBackup('INIT');
       syncIncremental();
