@@ -1006,6 +1006,9 @@ function startRecognition() {
   S.recognition.onerror = e => {
     if (['no-speech','aborted'].includes(e.error)) return;
     if (e.error === 'not-allowed') toast('Microfone bloqueado pelo browser', 'err');
+    else if (e.error === 'network') toast('Erro de rede no Speech API — verifique conexão', 'err');
+    else if (e.error === 'service-not-allowed') toast('Speech API bloqueado — tente chrome://settings/content/microphone', 'err');
+    else toast('Erro transcrição: ' + e.error, 'warn');
   };
 
   try { S.recognition.start(); } catch(e){}
