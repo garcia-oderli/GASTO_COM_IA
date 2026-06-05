@@ -468,6 +468,18 @@
     </div>
 
     <div class="field-group">
+      <label>Groq API Key <span style="color:var(--ok)">— grátis</span></label>
+      <input type="password" id="cfgGroq" placeholder="gsk_..." autocomplete="off" spellcheck="false">
+      <div class="modal-note">Crie em <a href="https://console.groq.com" target="_blank">console.groq.com</a> — plano gratuito inclui ~2h de áudio/dia</div>
+    </div>
+
+    <div class="field-group">
+      <label>OpenAI API Key <span style="color:var(--txt3)">— Whisper pago</span></label>
+      <input type="password" id="cfgOai" placeholder="sk-..." autocomplete="off" spellcheck="false">
+      <div class="modal-note">Obtenha em <a href="https://platform.openai.com" target="_blank">platform.openai.com</a> — ~$0,006/min</div>
+    </div>
+
+    <div class="field-group">
       <label>Idioma da Transcrição</label>
       <select id="cfgLang">
         <option value="pt-BR">Português (Brasil)</option>
@@ -637,6 +649,10 @@
       <button class="btn-ghost btn-drive" id="btnDrive" onclick="saveToDrive()" disabled>☁ DRIVE</button>
       <button class="btn-ghost" onclick="copyTranscript()">⎘ TEXTO</button>
     </div>
+    <div class="btn-row" id="transcribeRow" style="display:none">
+      <button class="btn-ghost" id="btnGroq" onclick="transcribeAudio('groq')" style="color:var(--ok);border-color:rgba(76,175,80,.3)">🎙 GROQ</button>
+      <button class="btn-ghost" id="btnWhisper" onclick="transcribeAudio('whisper')" style="color:var(--txt2)">🎙 WHISPER</button>
+    </div>
   </div>
 
   <!-- ── Ata ── -->
@@ -699,10 +715,12 @@ const S = {
   tokenClient: null,
 
   config: {
-    claudeKey:      localStorage.getItem('mr_ck')   || '',
-    googleClientId: localStorage.getItem('mr_gid')  || '',
-    lang:           localStorage.getItem('mr_lang') || 'pt-BR',
-    pwdHash:        localStorage.getItem('mr_pwd')  || ''
+    claudeKey:      localStorage.getItem('mr_ck')    || '',
+    googleClientId: localStorage.getItem('mr_gid')   || '',
+    lang:           localStorage.getItem('mr_lang')  || 'pt-BR',
+    pwdHash:        localStorage.getItem('mr_pwd')   || '',
+    groqKey:        localStorage.getItem('mr_groq')  || '',
+    openaiKey:      localStorage.getItem('mr_oai')   || ''
   }
 };
 
@@ -814,6 +832,8 @@ async function saveConfig() {
   S.config.claudeKey      = document.getElementById('cfgCk').value.trim();
   S.config.googleClientId = document.getElementById('cfgGid').value.trim();
   S.config.lang           = document.getElementById('cfgLang').value;
+  S.config.groqKey        = document.getElementById('cfgGroq').value.trim();
+  S.config.openaiKey      = document.getElementById('cfgOai').value.trim();
   const newPwd = document.getElementById('cfgPwd').value;
   if (newPwd) {
     if (newPwd.length < 4) { toast('Senha mínima: 4 caracteres', 'err'); return; }
@@ -824,11 +844,14 @@ async function saveConfig() {
   localStorage.setItem('mr_ck',   S.config.claudeKey);
   localStorage.setItem('mr_gid',  S.config.googleClientId);
   localStorage.setItem('mr_lang', S.config.lang);
+  localStorage.setItem('mr_groq', S.config.groqKey);
+  localStorage.setItem('mr_oai',  S.config.openaiKey);
   document.getElementById('cfgPwd').value = '';
   document.getElementById('btnLogout').style.display = S.config.pwdHash ? '' : 'none';
   closeModal('modalCfg');
   toast('Configuração salva', 'ok');
   if (S.config.googleClientId) scheduleInitGIS();
+  updateTranscribeRow();
 }
 
 // Pre-fill modal on open
@@ -844,6 +867,8 @@ window.openModal = function(id) {
     document.getElementById('cfgCk').value   = S.config.claudeKey;
     document.getElementById('cfgGid').value  = S.config.googleClientId;
     document.getElementById('cfgLang').value = S.config.lang;
+    document.getElementById('cfgGroq').value = S.config.groqKey;
+    document.getElementById('cfgOai').value  = S.config.openaiKey;
     document.getElementById('cfgPwd').value  = '';
   }
   document.getElementById(id).classList.remove('hidden');
@@ -998,6 +1023,7 @@ function onRecordStop() {
   if (S.transcript.trim().length > 10) {
     document.getElementById('btnAta').disabled = false;
   }
+  updateTranscribeRow();
   drawIdle();
   toast('Gravação salva', 'ok');
 }
@@ -1616,7 +1642,78 @@ function handleAudioUpload(input) {
 
   S.done = true;
   updateUI();
+  updateTranscribeRow();
   toast('Áudio carregado — adicione a transcrição e gere a ata', 'ok');
+}
+
+/* ═══════════════════════════════════════════════════
+   TRANSCRIBE — GROQ / WHISPER
+═══════════════════════════════════════════════════ */
+function updateTranscribeRow() {
+  const row     = document.getElementById('transcribeRow');
+  const btnGroq = document.getElementById('btnGroq');
+  const btnWh   = document.getElementById('btnWhisper');
+  const hasGroq = !!S.config.groqKey && !!S.audioBlob;
+  const hasOai  = !!S.config.openaiKey && !!S.audioBlob;
+  row.style.display       = (hasGroq || hasOai) ? '' : 'none';
+  btnGroq.style.display   = hasGroq ? '' : 'none';
+  btnWh.style.display     = hasOai  ? '' : 'none';
+}
+
+async function transcribeAudio(provider) {
+  if (!S.audioBlob) { toast('Nenhum áudio disponível', 'warn'); return; }
+
+  const key = provider === 'groq' ? S.config.groqKey : S.config.openaiKey;
+  if (!key) {
+    toast(`Configure a chave ${provider === 'groq' ? 'Groq' : 'OpenAI'} em ⚙`, 'err');
+    openModal('modalCfg');
+    return;
+  }
+
+  const btnId = provider === 'groq' ? 'btnGroq' : 'btnWhisper';
+  const btn   = document.getElementById(btnId);
+  const label = provider === 'groq' ? '🎙 GROQ' : '🎙 WHISPER';
+  btn.disabled    = true;
+  btn.textContent = '⏳ …';
+  toast('Transcrevendo áudio...', '');
+
+  try {
+    const ext  = (S.mediaRec?.mimeType || '').includes('mp4') ? 'm4a' : 'webm';
+    const form = new FormData();
+    form.append('file',            S.audioBlob, `audio.${ext}`);
+    form.append('model',           provider === 'groq' ? 'whisper-large-v3' : 'whisper-1');
+    form.append('language',        S.config.lang.split('-')[0]);
+    form.append('response_format', 'text');
+
+    const url = provider === 'groq'
+      ? 'https://api.groq.com/openai/v1/audio/transcriptions'
+      : 'https://api.openai.com/v1/audio/transcriptions';
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${key}` },
+      body: form
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const text   = await res.text();
+    S.transcript = text.trim();
+    renderTranscript();
+    const ta = document.getElementById('transcriptEditArea');
+    if (ta.style.display !== 'none') ta.value = S.transcript;
+    document.getElementById('btnAta').disabled = !S.transcript;
+    toast('Transcrição concluída!', 'ok');
+
+  } catch(e) {
+    toast('Erro: ' + e.message, 'err');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = label;
+  }
 }
 
 /* ═══════════════════════════════════════════════════
