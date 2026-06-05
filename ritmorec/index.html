@@ -969,14 +969,21 @@ function startRecognition() {
   }
 
   try { S.recognition?.abort(); } catch(e){}
+  if (S._recRestartTimer) { clearTimeout(S._recRestartTimer); S._recRestartTimer = null; }
+
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
   S.recognition                = new SR();
-  S.recognition.continuous     = true;
+  S.recognition.continuous     = !isMobile; // mobile não suporta bem continuous
   S.recognition.interimResults = true;
   S.recognition.lang           = S.config.lang;
   S.recognition.maxAlternatives = 1;
 
   let interim = '';
+
+  S.recognition.onstart = () => {
+    setMicIndicator(true);
+  };
 
   S.recognition.onresult = e => {
     interim = '';
@@ -984,7 +991,6 @@ function startRecognition() {
       const t = e.results[i][0].transcript;
       if (e.results[i].isFinal) {
         S.transcript += t + ' ';
-        // Sync editable textarea if open
         const ta = document.getElementById('transcriptEditArea');
         if (ta.style.display !== 'none') ta.value = S.transcript;
       } else {
@@ -998,20 +1004,37 @@ function startRecognition() {
   };
 
   S.recognition.onend = () => {
+    setMicIndicator(false);
     if (S.recording && !S.paused) {
-      try { S.recognition.start(); } catch(e){}
+      // mobile precisa de pequena pausa antes de reiniciar
+      S._recRestartTimer = setTimeout(() => {
+        if (S.recording && !S.paused) {
+          try { startRecognition(); } catch(e){}
+        }
+      }, isMobile ? 300 : 50);
     }
   };
 
   S.recognition.onerror = e => {
-    if (['no-speech','aborted'].includes(e.error)) return;
+    setMicIndicator(false);
+    if (['no-speech', 'aborted'].includes(e.error)) return;
     if (e.error === 'not-allowed') toast('Microfone bloqueado pelo browser', 'err');
-    else if (e.error === 'network') toast('Erro de rede no Speech API — verifique conexão', 'err');
-    else if (e.error === 'service-not-allowed') toast('Speech API bloqueado — tente chrome://settings/content/microphone', 'err');
+    else if (e.error === 'network') toast('Erro de rede — verifique conexão', 'err');
+    else if (e.error === 'service-not-allowed') toast('Speech API bloqueado pelo browser', 'err');
     else toast('Erro transcrição: ' + e.error, 'warn');
   };
 
   try { S.recognition.start(); } catch(e){}
+}
+
+function setMicIndicator(active) {
+  const box = document.getElementById('transcriptBox');
+  if (!box) return;
+  if (active && S.recording && !S.paused) {
+    box.style.borderLeft = '2px solid var(--red)';
+  } else {
+    box.style.borderLeft = '';
+  }
 }
 
 function renderTranscript(interim = '') {
