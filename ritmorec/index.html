@@ -755,12 +755,21 @@ function resetSession() {
 }
 
 async function startRecording() {
-  // Check secure context first
   if (!window.isSecureContext) {
     showInsecureWarning();
     openModal('modalHttps');
     return;
   }
+
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    // No mobile: SpeechRecognition primeiro, MediaRecorder depois com stream separado
+    startRecognition();
+    // Aguarda SR iniciar antes de abrir o MediaRecorder
+    await new Promise(r => setTimeout(r, 600));
+  }
+
   if (!navigator.mediaDevices?.getUserMedia) {
     showInsecureWarning();
     toast('Microfone não disponível neste browser', 'err');
@@ -798,7 +807,7 @@ async function startRecording() {
   S.mediaRec.start(500);
 
   startVisualizer(S.stream);
-  startRecognition();
+  if (!isMobile) startRecognition();
 
   S.seconds  = 0;
   S.timerIv  = setInterval(() => { S.seconds++; updateTimerDisplay(); }, 1000);
