@@ -324,6 +324,18 @@
     }
     .btn-config:active { background: var(--elevated); color: var(--txt); }
 
+    /* ── MIC FIELD BUTTON ── */
+    .btn-mic-field {
+      background: var(--elevated);
+      border: 0.5px solid var(--border);
+      border-radius: 7px;
+      padding: 7px 10px;
+      cursor: pointer; font-size: 16px;
+      transition: all .2s; flex-shrink: 0;
+    }
+    .btn-mic-field:active { background: rgba(244,67,54,.15); border-color: var(--red); }
+    .btn-mic-field.listening { background: rgba(244,67,54,.15); border-color: var(--red); animation: pls 1s infinite; }
+
     /* ── LOGIN ── */
     #loginScreen {
       position: fixed; inset: 0;
@@ -555,11 +567,15 @@
   <!-- ── Reunião ── -->
   <div class="card">
     <div class="card-label">Reunião</div>
-    <input class="meet-title" id="meetTitle" type="text"
-           placeholder="Título da reunião..." autocomplete="off">
+    <div style="display:flex;align-items:center;gap:8px">
+      <input class="meet-title" id="meetTitle" type="text"
+             placeholder="Título da reunião..." autocomplete="off" style="flex:1">
+      <button class="btn-mic-field" id="micTitle" onclick="dictateField('meetTitle','micTitle')" title="Falar título">🎙</button>
+    </div>
     <div class="meet-meta">
-      <input id="meetDate" type="text" placeholder="Data / Hora" style="width:42%" readonly>
+      <input id="meetDate" type="text" placeholder="Data / Hora" style="width:38%" readonly>
       <input id="meetPart" type="text" placeholder="Participantes" style="flex:1" autocomplete="off">
+      <button class="btn-mic-field" id="micPart" onclick="dictateField('meetPart','micPart')" title="Falar participantes">🎙</button>
     </div>
   </div>
 
@@ -1157,6 +1173,47 @@ function startRecognition() {
   };
 
   try { S.recognition.start(); } catch(e){}
+}
+
+function dictateField(fieldId, btnId) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('Microfone não disponível neste browser', 'warn'); return; }
+
+  const field = document.getElementById(fieldId);
+  const btn   = document.getElementById(btnId);
+
+  if (btn.classList.contains('listening')) {
+    btn._sr?.abort();
+    return;
+  }
+
+  const sr = new SR();
+  btn._sr = sr;
+  sr.lang           = S.config.lang;
+  sr.interimResults = false;
+  sr.maxAlternatives = 1;
+
+  btn.classList.add('listening');
+  toast('Fale agora...', '');
+
+  sr.onresult = e => {
+    const text = e.results[0][0].transcript;
+    field.value = text;
+    field.dispatchEvent(new Event('input'));
+    toast('✓ ' + text, 'ok');
+  };
+
+  sr.onend = () => {
+    btn.classList.remove('listening');
+  };
+
+  sr.onerror = e => {
+    btn.classList.remove('listening');
+    if (e.error !== 'no-speech' && e.error !== 'aborted')
+      toast('Erro: ' + e.error, 'err');
+  };
+
+  try { sr.start(); } catch(e) {}
 }
 
 function setMicIndicator(active) {
