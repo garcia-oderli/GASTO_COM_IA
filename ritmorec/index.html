@@ -1132,7 +1132,8 @@ Regras: seja formal, objetivo, profissional. Se alguma info não estiver na tran
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': S.config.claudeKey,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
