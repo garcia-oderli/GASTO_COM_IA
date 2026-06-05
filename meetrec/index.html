@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#111111">
+  <title>MeetRec — Gravador de Reunião</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --bg:       #111111;
+      --surface:  #1C1C1C;
+      --elevated: #2A2A2A;
+      --border:   #333333;
+      --acc:      #F5A623;
+      --ok:       #4CAF50;
+      --warn:     #FF9800;
+      --red:      #F44336;
+      --txt:      #F5F5F5;
+      --txt2:     #888888;
+      --txt3:     #444444;
+      --font-h:   'Barlow Condensed', sans-serif;
+      --font-b:   'Barlow', sans-serif;
+      --font-d:   'IBM Plex Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--txt);
+      font-family: var(--font-b);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200; padding: 20px;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      width: 100%; max-width: 440px;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-title {
+      font-family: var(--font-h);
+      font-size: 20px; font-weight: 700;
+      color: var(--acc);
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+    .field-group { margin-bottom: 16px; }
+    .field-group label {
+      display: block;
+      font-family: var(--font-d);
+      font-size: 10px; color: var(--txt2);
+      letter-spacing: 2px; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .field-group input,
+    .field-group select {
+      width: 100%; padding: 11px 14px;
+      background: var(--elevated);
+      border: 0.5px solid var(--border);
+      border-radius: 7px;
+      color: var(--txt);
+      font-family: var(--font-b); font-size: 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .field-group input:focus,
+    .field-group select:focus { border-color: var(--acc); }
+    .field-group select option { background: var(--surface); }
+    .modal-note {
+      font-size: 11px; color: var(--txt2);
+      margin-top: 6px; line-height: 1.55;
+    }
+    .modal-note a { color: var(--acc); text-decoration: none; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 22px; }
+
+    /* ── HEADER ── */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 16px;
+      border-bottom: 0.5px solid var(--border);
+      position: sticky; top: 0; background: var(--bg); z-index: 50;
+    }
+    .logo {
+      font-family: var(--font-h);
+      font-size: 22px; font-weight: 700;
+      color: var(--txt); letter-spacing: 3px;
+    }
+    .logo span { color: var(--acc); }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+
+    .status-badge {
+      font-family: var(--font-d);
+      font-size: 10px; font-weight: 600;
+      padding: 4px 11px; border-radius: 4px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      transition: all .3s;
+      white-space: nowrap;
+    }
+    .s-idle   { background: var(--elevated); color: var(--txt2); }
+    .s-rec    { background: rgba(244,67,54,.12); color: var(--red); border: 0.5px solid rgba(244,67,54,.3); animation: pls 1.4s infinite; }
+    .s-paused { background: rgba(255,152,0,.12); color: var(--warn); border: 0.5px solid rgba(255,152,0,.3); }
+    .s-done   { background: rgba(76,175,80,.12); color: var(--ok);  border: 0.5px solid rgba(76,175,80,.3); }
+    @keyframes pls { 0%,100%{opacity:1} 50%{opacity:.45} }
+
+    /* ── MAIN ── */
+    main {
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 14px;
+      padding-bottom: 72px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 10px; padding: 16px;
+    }
+    .card-label {
+      font-family: var(--font-d);
+      font-size: 10px; color: var(--txt2);
+      letter-spacing: 2.5px; text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* ── MEETING INFO ── */
+    .meet-title {
+      width: 100%; padding: 9px 0;
+      background: transparent; border: none;
+      border-bottom: 0.5px solid var(--border);
+      color: var(--txt);
+      font-family: var(--font-h); font-size: 20px; font-weight: 700;
+      outline: none; letter-spacing: .5px;
+      transition: border-color .2s;
+    }
+    .meet-title::placeholder { color: var(--txt3); }
+    .meet-title:focus { border-bottom-color: var(--acc); }
+    .meet-meta { display: flex; gap: 8px; margin-top: 10px; }
+    .meet-meta input {
+      padding: 8px 10px;
+      background: var(--elevated);
+      border: 0.5px solid var(--border);
+      border-radius: 6px;
+      color: var(--txt);
+      font-family: var(--font-d); font-size: 11px;
+      outline: none; transition: border-color .2s;
+    }
+    .meet-meta input:focus { border-color: var(--acc); }
+    .meet-meta input::placeholder { color: var(--txt3); }
+
+    /* ── TIMER ── */
+    .timer {
+      font-family: var(--font-d);
+      font-size: 50px; font-weight: 600;
+      text-align: center; letter-spacing: 5px;
+      padding: 8px 0; transition: color .3s;
+      color: var(--txt);
+    }
+    .timer.t-rec    { color: var(--red); }
+    .timer.t-paused { color: var(--warn); }
+
+    /* ── WAVEFORM ── */
+    #wave {
+      display: block; width: 100%; height: 56px;
+      border-radius: 6px; margin-top: 8px;
+      background: var(--elevated);
+    }
+
+    /* ── CONTROLS ── */
+    .controls {
+      display: flex; gap: 10px; justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-big {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px;
+      padding: 15px 28px; border-radius: 50px;
+      border: none; cursor: pointer;
+      font-family: var(--font-h); font-size: 17px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      min-width: 150px; min-height: 52px;
+      transition: transform .1s, opacity .2s;
+      -webkit-user-select: none; user-select: none;
+    }
+    .btn-big:active { transform: scale(.96); opacity: .85; }
+    .btn-big:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+    .b-rec   { background: var(--red);     color: #fff; }
+    .b-pause { background: var(--warn);    color: #111; }
+    .b-stop  { background: var(--elevated); color: var(--txt); border: 0.5px solid var(--border); }
+
+    /* ── TRANSCRIPT ── */
+    #transcriptBox {
+      min-height: 110px; max-height: 260px;
+      overflow-y: auto; padding: 12px;
+      background: var(--elevated);
+      border-radius: 7px;
+      font-size: 14px; line-height: 1.65;
+      word-break: break-word;
+      color: var(--txt);
+    }
+    .row-between { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    #transcriptEditArea {
+      display: none; width: 100%;
+      min-height: 110px; max-height: 260px;
+      resize: vertical; padding: 12px;
+      background: var(--elevated);
+      border: 0.5px solid var(--acc);
+      border-radius: 7px;
+      color: var(--txt);
+      font-family: var(--font-b); font-size: 14px; line-height: 1.65;
+      outline: none; margin-top: 10px;
+    }
+
+    /* ── ACTION BUTTONS ── */
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; width: 100%; padding: 14px 20px;
+      background: var(--acc); color: #111;
+      font-family: var(--font-b); font-weight: 600; font-size: 15px;
+      border-radius: 8px; border: none; cursor: pointer;
+      transition: opacity .2s;
+    }
+    .btn-primary:disabled { opacity: .35; cursor: not-allowed; }
+    .btn-primary:active:not(:disabled) { opacity: .8; }
+
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+    .btn-ghost {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      gap: 6px;
+      padding: 11px 10px;
+      background: transparent; color: var(--txt2);
+      font-family: var(--font-b); font-size: 13px;
+      border-radius: 8px; border: 0.5px solid var(--border);
+      cursor: pointer; transition: all .2s;
+    }
+    .btn-ghost:disabled { opacity: .3; cursor: not-allowed; }
+    .btn-ghost:active:not(:disabled) { background: var(--elevated); color: var(--txt); }
+    .btn-sm {
+      padding: 5px 13px; font-size: 11px; letter-spacing: .5px;
+      border-radius: 5px; flex: none;
+    }
+    .btn-drive { color: #4A90E2; border-color: rgba(74,144,226,.3); }
+    .btn-drive:active { background: rgba(74,144,226,.08) !important; }
+
+    /* ── ATA ── */
+    #ataPanel { display: none; }
+    #ataContent {
+      font-size: 14px; line-height: 1.7;
+      color: var(--txt);
+      word-break: break-word;
+    }
+    .spin {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border); border-top-color: var(--acc);
+      border-radius: 50%; animation: spin .7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 76px; left: 50%;
+      transform: translateX(-50%) translateY(0);
+      background: var(--elevated);
+      border: 0.5px solid var(--border);
+      color: var(--txt);
+      font-family: var(--font-d); font-size: 11px;
+      letter-spacing: 1px;
+      padding: 9px 20px; border-radius: 20px;
+      white-space: nowrap; max-width: 90vw;
+      z-index: 300; pointer-events: none;
+      transition: opacity .25s, transform .25s;
+    }
+    #toast.hidden { opacity: 0; transform: translateX(-50%) translateY(6px); }
+    #toast.t-ok    { color: var(--ok);  border-color: rgba(76,175,80,.35); }
+    #toast.t-err   { color: var(--red); border-color: rgba(244,67,54,.35); }
+    #toast.t-warn  { color: var(--warn); border-color: rgba(255,152,0,.35); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 18px;
+      border-top: 0.5px solid var(--border);
+      background: var(--bg); z-index: 40;
+    }
+    .footer-brand {
+      font-family: var(--font-h);
+      font-size: 13px; font-weight: 700;
+      color: var(--acc); letter-spacing: 1.5px;
+    }
+    .footer-sep { color: var(--txt3); }
+    .footer-author { font-family: var(--font-b); font-size: 11px; color: var(--txt2); }
+    .footer-ver { font-family: var(--font-d); font-size: 10px; color: var(--txt3); margin-left: auto; }
+
+    .btn-config {
+      background: transparent;
+      border: 0.5px solid var(--border);
+      color: var(--txt2);
+      padding: 7px 13px; border-radius: 6px;
+      cursor: pointer; font-family: var(--font-d); font-size: 11px;
+      letter-spacing: .5px; transition: all .2s;
+    }
+    .btn-config:active { background: var(--elevated); color: var(--txt); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 0.5px; background: var(--border);
+      margin: 12px 0;
+    }
+
+    /* ── WORD COUNT ── */
+    .wc {
+      font-family: var(--font-d); font-size: 10px;
+      color: var(--txt3); text-align: right; margin-top: 6px;
+    }
+
+    /* ── WARNING BANNER ── */
+    #warnBanner {
+      display: none;
+      background: rgba(244,67,54,.1);
+      border-bottom: 0.5px solid rgba(244,67,54,.3);
+      padding: 10px 16px;
+      font-family: var(--font-b); font-size: 13px; color: var(--red);
+      line-height: 1.5;
+    }
+    #warnBanner b { color: #fff; }
+    #warnBanner a { color: var(--acc); text-decoration:none; font-weight:600; }
+
+    /* ── FILE FALLBACK ── */
+    .fallback-box {
+      display: none;
+      border: 1.5px dashed var(--border);
+      border-radius: 8px; padding: 20px;
+      text-align: center; cursor: pointer;
+      transition: border-color .2s;
+      margin-top: 10px;
+    }
+    .fallback-box:hover { border-color: var(--acc); }
+    .fallback-box input[type=file] { display:none; }
+    .fallback-icon { font-size: 28px; margin-bottom: 8px; }
+    .fallback-label {
+      font-family: var(--font-d); font-size: 11px;
+      color: var(--txt2); letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .fallback-sub { font-size: 11px; color: var(--txt3); margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast" class="hidden"></div>
+
+<!-- ═══════════════════════════════════════ -->
+<!--  MODAL CONFIG                           -->
+<!-- ═══════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modalCfg">
+  <div class="modal">
+    <div class="modal-title">⚙ CONFIGURAÇÃO</div>
+
+    <div class="field-group">
+      <label>Claude API Key</label>
+      <input type="password" id="cfgCk" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false">
+      <div class="modal-note">
+        Obtenha em <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Google OAuth Client ID <span style="color:var(--txt3)">(opcional)</span></label>
+      <input type="text" id="cfgGid" placeholder="xxxxxxxx.apps.googleusercontent.com" autocomplete="off" spellcheck="false">
+      <div class="modal-note">
+        Crie em <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a>
+        → APIs &amp; Services → Credentials → OAuth 2.0.<br>
+        Em "Origens autorizadas" adicione <strong>file://</strong> (uso local) ou a URL onde hospedar.
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Idioma da Transcrição</label>
+      <select id="cfgLang">
+        <option value="pt-BR">Português (Brasil)</option>
+        <option value="en-US">English (US)</option>
+        <option value="es-ES">Español</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveConfig()" style="flex:1;padding:12px">SALVAR</button>
+      <button class="btn-ghost" onclick="closeModal('modalCfg')" style="flex:1;padding:12px">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!--  MODAL NOVA GRAVAÇÃO                    -->
+<!-- ═══════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modalNew">
+  <div class="modal" style="max-width:340px;text-align:center">
+    <div class="modal-title" style="justify-content:center;text-align:center">NOVA GRAVAÇÃO</div>
+    <p style="font-size:14px;color:var(--txt2);line-height:1.6;margin-bottom:20px">
+      Deseja limpar a sessão atual (transcrição, ata e áudio) e começar do zero?
+    </p>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="confirmNewSession()" style="flex:1;padding:12px">LIMPAR E GRAVAR</button>
+      <button class="btn-ghost" onclick="closeModal('modalNew')" style="flex:1;padding:12px">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!--  MODAL HTTPS HELP                       -->
+<!-- ═══════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modalHttps">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">🔒 COMO RESOLVER</div>
+    <p style="font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:16px">
+      O Chrome no celular exige <b style="color:var(--txt)">HTTPS</b> para liberar o microfone.
+      Arquivos abertos via <code style="color:var(--warn);font-family:var(--font-d)">file://</code> são bloqueados.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+      <div class="card" style="padding:14px">
+        <div style="font-family:var(--font-h);font-size:15px;color:var(--acc);margin-bottom:6px">① Netlify Drop — 30 segundos, grátis</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.55">
+          Acesse <a href="https://app.netlify.com/drop" target="_blank" style="color:var(--acc)">app.netlify.com/drop</a>,
+          arraste o arquivo <b style="color:var(--txt)">meetrec_v1.html</b> e abra o link gerado no celular.
+          Sem cadastro, funciona imediatamente.
+        </div>
+      </div>
+      <div class="card" style="padding:14px">
+        <div style="font-family:var(--font-h);font-size:15px;color:var(--txt);margin-bottom:6px">② GitHub Pages — permanente</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.55">
+          Crie repositório público → suba como <code style="color:var(--warn);font-family:var(--font-d)">index.html</code> → ative GitHub Pages. URL HTTPS fixa.
+        </div>
+      </div>
+      <div class="card" style="padding:14px">
+        <div style="font-family:var(--font-h);font-size:15px;color:var(--txt);margin-bottom:6px">③ Modo fallback — sem microfone</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.55">
+          Grave com o <b style="color:var(--txt)">gravador nativo</b> do celular, depois <b style="color:var(--txt)">carregue o arquivo de áudio</b> no MeetRec para gerar a ata com IA.
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="closeModal('modalHttps')" style="padding:12px">ENTENDI</button>
+  </div>
+</div>
+
+<!-- HTTPS WARNING BANNER -->
+<div id="warnBanner">
+  ⚠ <b>Microfone bloqueado — página precisa de HTTPS.</b><br>
+  <span style="font-size:12px">
+    Arraste o arquivo em
+    <a href="https://app.netlify.com/drop" target="_blank">app.netlify.com/drop</a>
+    → abra o link no celular.
+    &nbsp;·&nbsp;
+    <span style="color:var(--txt2);cursor:pointer;text-decoration:underline"
+          onclick="openModal('modalHttps')">Outras opções</span>
+  </span>
+</div>
+<header>
+  <div class="logo">MEET<span>REC</span></div>
+  <div class="header-right">
+    <span class="status-badge s-idle" id="statusBadge">PRONTO</span>
+    <button class="btn-config" onclick="openModal('modalCfg')">⚙</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── Reunião ── -->
+  <div class="card">
+    <div class="card-label">Reunião</div>
+    <input class="meet-title" id="meetTitle" type="text"
+           placeholder="Título da reunião..." autocomplete="off">
+    <div class="meet-meta">
+      <input id="meetDate" type="text" placeholder="Data / Hora" style="width:42%" readonly>
+      <input id="meetPart" type="text" placeholder="Participantes" style="flex:1" autocomplete="off">
+    </div>
+  </div>
+
+  <!-- ── Timer + Waveform ── -->
+  <div class="card">
+    <div class="timer" id="timerDisplay">00:00:00</div>
+    <canvas id="wave"></canvas>
+  </div>
+
+  <!-- ── Controles ── -->
+  <div class="card">
+    <div class="controls">
+      <button class="btn-big b-rec" id="btnRec" onclick="handleRecBtn()">
+        <span id="recIcon">●</span><span id="recLabel">GRAVAR</span>
+      </button>
+      <button class="btn-big b-stop" id="btnStop" onclick="stopRecording()" disabled>
+        ■ PARAR
+      </button>
+    </div>
+    <!-- Fallback: upload de áudio gravado externamente -->
+    <div class="fallback-box" id="fallbackBox" onclick="document.getElementById('audioFileInput').click()">
+      <input type="file" id="audioFileInput" accept="audio/*" onchange="handleAudioUpload(this)">
+      <div class="fallback-icon">🎵</div>
+      <div class="fallback-label">CARREGAR ÁUDIO GRAVADO</div>
+      <div class="fallback-sub">mp3, m4a, wav, ogg, webm</div>
+    </div>
+    <div id="fallbackInfo" style="display:none;margin-top:10px;padding:10px 12px;background:var(--elevated);border-radius:7px;font-size:13px;color:var(--ok)"></div>
+  </div>
+
+  <!-- ── Transcrição ── -->
+  <div class="card">
+    <div class="row-between">
+      <div class="card-label" style="margin-bottom:0">Transcrição ao vivo</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn-ghost btn-sm" id="btnEditTr" onclick="toggleEditTranscript()">✎ EDITAR</button>
+        <button class="btn-ghost btn-sm" onclick="clearTranscript()">✕ LIMPAR</button>
+      </div>
+    </div>
+
+    <div id="transcriptBox">
+      <span style="color:var(--txt3);font-style:italic">
+        A transcrição aparecerá aqui durante a gravação...
+      </span>
+    </div>
+
+    <textarea id="transcriptEditArea"
+      placeholder="Edite a transcrição antes de gerar a ata..."></textarea>
+
+    <div class="wc" id="wordCount">0 palavras</div>
+  </div>
+
+  <!-- ── Ações ── -->
+  <div class="card">
+    <button class="btn-primary" id="btnAta" onclick="generateAta()" disabled>
+      ✦ GERAR ATA COM IA
+    </button>
+    <div class="btn-row">
+      <button class="btn-ghost" id="btnDlAudio" onclick="downloadAudio()" disabled>⬇ ÁUDIO</button>
+      <button class="btn-ghost btn-drive" id="btnDrive" onclick="saveToDrive()" disabled>☁ DRIVE</button>
+      <button class="btn-ghost" onclick="copyTranscript()">⎘ TEXTO</button>
+    </div>
+  </div>
+
+  <!-- ── Ata ── -->
+  <div class="card" id="ataPanel">
+    <div class="row-between" style="margin-bottom:12px">
+      <div class="card-label" style="margin-bottom:0;color:var(--acc)">ATA GERADA</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn-ghost btn-sm" onclick="copyAta()">⎘ COPIAR</button>
+        <button class="btn-ghost btn-sm" onclick="downloadAta()">⬇ TXT</button>
+      </div>
+    </div>
+    <div id="ataLoading" style="display:none;align-items:center;gap:10px;padding:14px 0">
+      <div class="spin"></div>
+      <span style="font-family:var(--font-d);font-size:11px;color:var(--txt2);letter-spacing:1px">GERANDO ATA...</span>
+    </div>
+    <div id="ataContent"></div>
+  </div>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer>
+  <span class="footer-author">Oderli Garcia © 2026</span>
+  <span class="footer-sep">·</span>
+  <span class="footer-brand">RitmoProd</span>
+  <span class="footer-ver">MEETREC v1.0</span>
+</footer>
+
+
+<script>
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+const S = {
+  recording: false,
+  paused:    false,
+  done:      false,
+  micBlocked: false,
+
+  mediaRec:   null,
+  chunks:     [],
+  audioBlob:  null,
+  audioURL:   null,
+  stream:     null,
+
+  audioCtx:   null,
+  analyser:   null,
+  animFrame:  null,
+
+  recognition: null,
+  transcript:  '',
+
+  seconds: 0,
+  timerIv: null,
+  wakeLock: null,
+
+  ataRaw: '',
+  googleToken: null,
+  tokenClient: null,
+
+  config: {
+    claudeKey:      localStorage.getItem('mr_ck')   || '',
+    googleClientId: localStorage.getItem('mr_gid')  || '',
+    lang:           localStorage.getItem('mr_lang') || 'pt-BR'
+  }
+};
+
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+function init() {
+  const now = new Date();
+  document.getElementById('meetDate').value =
+    now.toLocaleDateString('pt-BR') + ' ' +
+    now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+
+  // Canvas sizing
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  // GIS
+  if (S.config.googleClientId) scheduleInitGIS();
+
+  // Hint
+  if (!S.config.claudeKey) {
+    setTimeout(() => toast('Configure a chave Claude API em ⚙', 'warn'), 1200);
+  }
+
+  // Detect insecure context proactively
+  checkSecureContext();
+}
+
+function checkSecureContext() {
+  // isSecureContext é false em file:// no mobile Chrome
+  const insecure = !window.isSecureContext;
+  // Também verificar se getUserMedia sequer existe
+  const noMic = !navigator.mediaDevices?.getUserMedia;
+  if (insecure || noMic) {
+    showInsecureWarning();
+  }
+}
+
+function showInsecureWarning() {
+  S.micBlocked = true;
+  document.getElementById('warnBanner').style.display = 'block';
+  document.getElementById('fallbackBox').style.display = 'block';
+  // Disable record button visually but keep it clickable to show message
+  document.getElementById('btnRec').style.opacity = '0.5';
+}
+
+function resizeCanvas() {
+  const c = document.getElementById('wave');
+  c.width  = c.offsetWidth || window.innerWidth - 64;
+  c.height = 56;
+  drawIdle();
+}
+
+/* ═══════════════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════════════ */
+function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+/* ═══════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════ */
+function openConfig() { openModal('modalCfg'); }
+
+function saveConfig() {
+  S.config.claudeKey      = document.getElementById('cfgCk').value.trim();
+  S.config.googleClientId = document.getElementById('cfgGid').value.trim();
+  S.config.lang           = document.getElementById('cfgLang').value;
+  localStorage.setItem('mr_ck',   S.config.claudeKey);
+  localStorage.setItem('mr_gid',  S.config.googleClientId);
+  localStorage.setItem('mr_lang', S.config.lang);
+  closeModal('modalCfg');
+  toast('Configuração salva', 'ok');
+  if (S.config.googleClientId) scheduleInitGIS();
+}
+
+// Pre-fill modal on open
+document.getElementById('modalCfg').addEventListener('transitionend', () => {
+  document.getElementById('cfgCk').value   = S.config.claudeKey;
+  document.getElementById('cfgGid').value  = S.config.googleClientId;
+  document.getElementById('cfgLang').value = S.config.lang;
+});
+// Actually populate on open:
+const _origOpenModal = openModal;
+window.openModal = function(id) {
+  if (id === 'modalCfg') {
+    document.getElementById('cfgCk').value   = S.config.claudeKey;
+    document.getElementById('cfgGid').value  = S.config.googleClientId;
+    document.getElementById('cfgLang').value = S.config.lang;
+  }
+  document.getElementById(id).classList.remove('hidden');
+};
+
+/* ═══════════════════════════════════════════════════
+   RECORDING
+═══════════════════════════════════════════════════ */
+function handleRecBtn() {
+  if (S.done) {
+    openModal('modalNew');
+    return;
+  }
+  if (!S.recording) {
+    startRecording();
+  } else if (!S.paused) {
+    pauseRecording();
+  } else {
+    resumeRecording();
+  }
+}
+
+function confirmNewSession() {
+  closeModal('modalNew');
+  resetSession();
+  setTimeout(() => startRecording(), 80);
+}
+
+function resetSession() {
+  S.done      = false;
+  S.recording = false;
+  S.paused    = false;
+  S.transcript = '';
+  S.ataRaw    = '';
+  S.chunks    = [];
+  if (S.audioURL) URL.revokeObjectURL(S.audioURL);
+  S.audioBlob = null;
+  S.audioURL  = null;
+  S.seconds   = 0;
+  updateTimerDisplay();
+  renderTranscript();
+  document.getElementById('ataPanel').style.display   = 'none';
+  document.getElementById('ataContent').innerHTML     = '';
+  document.getElementById('btnDlAudio').disabled      = true;
+  document.getElementById('btnDrive').disabled        = true;
+  document.getElementById('btnAta').disabled          = true;
+  updateUI();
+  drawIdle();
+}
+
+async function startRecording() {
+  // Check secure context first
+  if (!window.isSecureContext) {
+    showInsecureWarning();
+    openModal('modalHttps');
+    return;
+  }
+  if (!navigator.mediaDevices?.getUserMedia) {
+    showInsecureWarning();
+    toast('Microfone não disponível neste browser', 'err');
+    return;
+  }
+
+  try {
+    S.stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  } catch(e) {
+    let msg = 'Erro ao acessar microfone';
+    if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+      msg = 'Permissão negada — libere o microfone nas configurações do browser';
+    } else if (e.name === 'NotFoundError') {
+      msg = 'Nenhum microfone encontrado neste dispositivo';
+    } else if (e.name === 'NotReadableError') {
+      msg = 'Microfone em uso por outro app';
+    } else if (!window.isSecureContext) {
+      msg = 'HTTPS necessário — veja as opções abaixo';
+      showInsecureWarning();
+    }
+    toast(msg, 'err');
+    document.getElementById('fallbackBox').style.display = 'block';
+    return;
+  }
+
+  S.chunks = [];
+  const mime = bestMime();
+  try {
+    S.mediaRec = new MediaRecorder(S.stream, mime ? { mimeType: mime } : {});
+  } catch(e) {
+    S.mediaRec = new MediaRecorder(S.stream);
+  }
+  S.mediaRec.ondataavailable = e => { if (e.data && e.data.size > 0) S.chunks.push(e.data); };
+  S.mediaRec.onstop = onRecordStop;
+  S.mediaRec.start(500);
+
+  startVisualizer(S.stream);
+  startRecognition();
+
+  S.seconds  = 0;
+  S.timerIv  = setInterval(() => { S.seconds++; updateTimerDisplay(); }, 1000);
+
+  try { S.wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+
+  S.recording = true;
+  S.paused    = false;
+  S.done      = false;
+  updateUI();
+}
+
+function pauseRecording() {
+  try { if (S.mediaRec?.state === 'recording') S.mediaRec.pause(); } catch(e){}
+  try { S.recognition?.stop(); } catch(e){}
+  clearInterval(S.timerIv);
+  S.paused = true;
+  updateUI();
+}
+
+function resumeRecording() {
+  try { if (S.mediaRec?.state === 'paused') S.mediaRec.resume(); } catch(e){}
+  startRecognition();
+  S.timerIv = setInterval(() => { S.seconds++; updateTimerDisplay(); }, 1000);
+  S.paused  = false;
+  updateUI();
+}
+
+function stopRecording() {
+  try { if (S.mediaRec && S.mediaRec.state !== 'inactive') S.mediaRec.stop(); } catch(e){}
+  try { S.recognition?.stop(); } catch(e){}
+  clearInterval(S.timerIv);
+  try { S.wakeLock?.release(); S.wakeLock = null; } catch(e){}
+  stopVisualizer();
+  S.stream?.getTracks().forEach(t => t.stop());
+  S.recording = false;
+  S.paused    = false;
+  S.done      = true;
+  updateUI();
+}
+
+function onRecordStop() {
+  const type = S.mediaRec?.mimeType || 'audio/webm';
+  S.audioBlob = new Blob(S.chunks, { type });
+  if (S.audioURL) URL.revokeObjectURL(S.audioURL);
+  S.audioURL  = URL.createObjectURL(S.audioBlob);
+  document.getElementById('btnDlAudio').disabled = false;
+  document.getElementById('btnDrive').disabled   = false;
+  if (S.transcript.trim().length > 10) {
+    document.getElementById('btnAta').disabled = false;
+  }
+  drawIdle();
+  toast('Gravação salva', 'ok');
+}
+
+function bestMime() {
+  const list = [
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/mp4',
+    'audio/ogg;codecs=opus'
+  ];
+  return list.find(m => {
+    try { return MediaRecorder.isTypeSupported(m); } catch(e){ return false; }
+  }) || null;
+}
+
+function downloadAudio() {
+  if (!S.audioURL) return;
+  const ext  = (S.mediaRec?.mimeType || '').includes('mp4') ? 'm4a' : 'webm';
+  const name = sanitize(document.getElementById('meetTitle').value || 'reuniao');
+  const a = document.createElement('a');
+  a.href = S.audioURL;
+  a.download = `AUDIO_${name}_${dateFmt()}.${ext}`;
+  a.click();
+}
+
+/* ═══════════════════════════════════════════════════
+   VISUALIZER
+═══════════════════════════════════════════════════ */
+function startVisualizer(stream) {
+  try {
+    S.audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
+    S.analyser  = S.audioCtx.createAnalyser();
+    S.analyser.fftSize = 128;
+    const src   = S.audioCtx.createMediaStreamSource(stream);
+    src.connect(S.analyser);
+    drawLoop();
+  } catch(e) { /* not critical */ }
+}
+
+function drawLoop() {
+  const canvas = document.getElementById('wave');
+  const ctx    = canvas.getContext('2d');
+  const buf    = new Uint8Array(S.analyser.frequencyBinCount);
+  const W      = canvas.width, H = canvas.height;
+
+  function frame() {
+    if (!S.recording && !S.paused) return;
+    S.animFrame = requestAnimationFrame(frame);
+    S.analyser.getByteFrequencyData(buf);
+
+    ctx.clearRect(0, 0, W, H);
+    const total  = Math.min(buf.length, 32);
+    const barW   = Math.max(3, W / total - 2);
+    const step   = W / total;
+
+    for (let i = 0; i < total; i++) {
+      const v    = buf[i] / 255;
+      const bh   = Math.max(3, v * H * 0.85);
+      const x    = i * step;
+      const y    = (H - bh) / 2;
+      const alpha = S.paused ? 0.35 : (0.4 + v * 0.6);
+      ctx.fillStyle = S.paused
+        ? `rgba(255,152,0,${alpha})`
+        : `rgba(244,67,54,${alpha})`;
+      roundRect(ctx, x, y, barW, bh, 2);
+      ctx.fill();
+    }
+  }
+  frame();
+}
+
+function stopVisualizer() {
+  cancelAnimationFrame(S.animFrame);
+  try { S.audioCtx?.close(); } catch(e){}
+}
+
+function drawIdle() {
+  const canvas = document.getElementById('wave');
+  if (!canvas.width) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const total = Math.floor(canvas.width / 6);
+  for (let i = 0; i < total; i++) {
+    const bh = Math.random() * 8 + 2;
+    const x  = i * 6;
+    const y  = (canvas.height - bh) / 2;
+    ctx.fillStyle = 'rgba(80,80,80,0.4)';
+    roundRect(ctx, x, y, 4, bh, 1);
+    ctx.fill();
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  const R = Math.min(r, h/2, w/2);
+  ctx.beginPath();
+  ctx.moveTo(x + R, y);
+  ctx.lineTo(x + w - R, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + R);
+  ctx.lineTo(x + w, y + h - R);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - R, y + h);
+  ctx.lineTo(x + R, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - R);
+  ctx.lineTo(x, y + R);
+  ctx.quadraticCurveTo(x, y, x + R, y);
+  ctx.closePath();
+}
+
+/* ═══════════════════════════════════════════════════
+   SPEECH RECOGNITION
+═══════════════════════════════════════════════════ */
+function startRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    toast('Transcrição não disponível neste browser', 'warn');
+    return;
+  }
+
+  try { S.recognition?.abort(); } catch(e){}
+
+  S.recognition                = new SR();
+  S.recognition.continuous     = true;
+  S.recognition.interimResults = true;
+  S.recognition.lang           = S.config.lang;
+  S.recognition.maxAlternatives = 1;
+
+  let interim = '';
+
+  S.recognition.onresult = e => {
+    interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) {
+        S.transcript += t + ' ';
+        // Sync editable textarea if open
+        const ta = document.getElementById('transcriptEditArea');
+        if (ta.style.display !== 'none') ta.value = S.transcript;
+      } else {
+        interim += t;
+      }
+    }
+    renderTranscript(interim);
+    if (S.transcript.trim().length > 10) {
+      document.getElementById('btnAta').disabled = S.recording;
+    }
+  };
+
+  S.recognition.onend = () => {
+    if (S.recording && !S.paused) {
+      try { S.recognition.start(); } catch(e){}
+    }
+  };
+
+  S.recognition.onerror = e => {
+    if (['no-speech','aborted'].includes(e.error)) return;
+    if (e.error === 'not-allowed') toast('Microfone bloqueado pelo browser', 'err');
+  };
+
+  try { S.recognition.start(); } catch(e){}
+}
+
+function renderTranscript(interim = '') {
+  const box   = document.getElementById('transcriptBox');
+  const words = S.transcript.trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById('wordCount').textContent = `${words} palavra${words !== 1 ? 's' : ''}`;
+
+  if (!S.transcript && !interim) {
+    box.innerHTML = '<span style="color:var(--txt3);font-style:italic">A transcrição aparecerá aqui durante a gravação...</span>';
+    return;
+  }
+  box.innerHTML =
+    (S.transcript ? `<span>${escapeHTML(S.transcript)}</span>` : '') +
+    (interim ? `<span style="color:var(--txt2);font-style:italic">${escapeHTML(interim)}</span>` : '');
+  box.scrollTop = box.scrollHeight;
+}
+
+function clearTranscript() {
+  S.transcript = '';
+  document.getElementById('transcriptEditArea').value = '';
+  renderTranscript();
+  document.getElementById('btnAta').disabled = true;
+}
+
+function toggleEditTranscript() {
+  const ta  = document.getElementById('transcriptEditArea');
+  const btn = document.getElementById('btnEditTr');
+  if (ta.style.display === 'none' || !ta.style.display) {
+    ta.style.display = 'block';
+    ta.value = S.transcript;
+    btn.textContent = '✓ CONFIRMAR';
+    ta.focus();
+  } else {
+    S.transcript     = ta.value;
+    ta.style.display = 'none';
+    btn.textContent  = '✎ EDITAR';
+    renderTranscript();
+  }
+}
+
+function copyTranscript() {
+  const t = document.getElementById('transcriptEditArea').style.display !== 'none'
+    ? document.getElementById('transcriptEditArea').value
+    : S.transcript;
+  if (!t.trim()) { toast('Transcrição vazia', 'warn'); return; }
+  navigator.clipboard.writeText(t)
+    .then(() => toast('Transcrição copiada!', 'ok'))
+    .catch(() => toast('Erro ao copiar', 'err'));
+}
+
+/* ═══════════════════════════════════════════════════
+   AI — GERAR ATA
+═══════════════════════════════════════════════════ */
+async function generateAta() {
+  if (!S.config.claudeKey) {
+    toast('Configure a chave Claude API em ⚙', 'err');
+    openModal('modalCfg');
+    return;
+  }
+
+  const transcript = document.getElementById('transcriptEditArea').style.display !== 'none'
+    ? document.getElementById('transcriptEditArea').value
+    : S.transcript;
+
+  if (!transcript.trim()) {
+    toast('Transcrição vazia — grave antes de gerar a ata', 'warn');
+    return;
+  }
+
+  const title = document.getElementById('meetTitle').value.trim() || 'Reunião';
+  const date  = document.getElementById('meetDate').value.trim();
+  const parts = document.getElementById('meetPart').value.trim();
+
+  // Show panel
+  const panel = document.getElementById('ataPanel');
+  panel.style.display = 'block';
+  document.getElementById('ataLoading').style.display = 'flex';
+  document.getElementById('ataContent').innerHTML     = '';
+  document.getElementById('btnAta').disabled          = true;
+
+  const prompt = `Você é um assistente especializado em atas de reunião corporativas.
+Com base nas informações abaixo, gere uma ata profissional e estruturada em português brasileiro.
+
+TÍTULO: ${title}
+DATA/HORA: ${date}
+PARTICIPANTES: ${parts || 'Não informado'}
+
+TRANSCRIÇÃO:
+${transcript}
+
+Estruture exatamente assim (use os títulos em Markdown):
+
+# ATA DE REUNIÃO — ${title}
+
+## Informações Gerais
+(título, data, hora, local se mencionado, lista de participantes)
+
+## Resumo Executivo
+(3-5 linhas objetivas sobre objetivo e resultado da reunião)
+
+## Pauta e Discussões
+(tópicos discutidos em bullets -)
+
+## Decisões Tomadas
+(decisões em bullets -, seja específico)
+
+## Ações e Responsáveis
+(formato por bullet: - [AÇÃO] | Responsável: [NOME ou "A definir"] | Prazo: [DATA ou "A definir"])
+
+## Próximos Passos
+(resumo objetivo)
+
+Regras: seja formal, objetivo, profissional. Se alguma info não estiver na transcrição, escreva "Não mencionado". Não invente informações.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': S.config.claudeKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    S.ataRaw    = data.content?.[0]?.text || '';
+
+    document.getElementById('ataLoading').style.display = 'none';
+    document.getElementById('ataContent').innerHTML     = md2html(S.ataRaw);
+    toast('Ata gerada!', 'ok');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch(e) {
+    document.getElementById('ataLoading').style.display = 'none';
+    document.getElementById('ataContent').innerHTML =
+      `<span style="color:var(--red)">❌ Erro: ${escapeHTML(e.message)}</span>`;
+    toast('Erro ao gerar ata', 'err');
+  }
+
+  document.getElementById('btnAta').disabled = false;
+}
+
+function md2html(md) {
+  return md
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^# (.+)$/gm,
+      '<h1 style="font-family:var(--font-h);font-size:21px;font-weight:700;color:var(--acc);margin:14px 0 8px;letter-spacing:1px">$1</h1>')
+    .replace(/^## (.+)$/gm,
+      '<h2 style="font-family:var(--font-h);font-size:16px;font-weight:700;color:var(--txt);margin:16px 0 6px;border-bottom:0.5px solid var(--border);padding-bottom:4px">$1</h2>')
+    .replace(/^### (.+)$/gm,
+      '<h3 style="font-family:var(--font-h);font-size:14px;color:var(--warn);margin:10px 0 4px">$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g,
+      '<strong style="color:var(--txt)">$1</strong>')
+    .replace(/^- (.+)$/gm,
+      '<div style="display:flex;gap:8px;margin:4px 0;padding-left:6px"><span style="color:var(--acc);flex-shrink:0;margin-top:1px">▸</span><span>$1</span></div>')
+    .replace(/\n\n+/g, '<div style="height:8px"></div>')
+    .replace(/\n/g, '<br>');
+}
+
+function copyAta() {
+  if (!S.ataRaw) return;
+  navigator.clipboard.writeText(S.ataRaw)
+    .then(() => toast('Ata copiada!', 'ok'))
+    .catch(() => toast('Erro ao copiar', 'err'));
+}
+
+function downloadAta() {
+  if (!S.ataRaw) return;
+  const name = sanitize(document.getElementById('meetTitle').value || 'reuniao');
+  const blob = new Blob([S.ataRaw], { type: 'text/plain;charset=utf-8' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `ATA_${name}_${dateFmt()}.txt`;
+  a.click();
+}
+
+/* ═══════════════════════════════════════════════════
+   GOOGLE DRIVE
+═══════════════════════════════════════════════════ */
+function scheduleInitGIS() {
+  if (window.google?.accounts?.oauth2) {
+    initGIS();
+  } else {
+    const iv = setInterval(() => {
+      if (window.google?.accounts?.oauth2) { clearInterval(iv); initGIS(); }
+    }, 500);
+    setTimeout(() => clearInterval(iv), 10000);
+  }
+}
+
+function initGIS() {
+  if (!S.config.googleClientId || !window.google?.accounts?.oauth2) return;
+  S.tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: S.config.googleClientId,
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    callback: async resp => {
+      if (resp.error) { toast('Erro OAuth: ' + resp.error, 'err'); return; }
+      S.googleToken = resp.access_token;
+      await performDriveUpload(resp.access_token);
+    }
+  });
+}
+
+async function saveToDrive() {
+  if (!S.config.googleClientId) {
+    toast('Configure o Google Client ID em ⚙', 'err');
+    openModal('modalCfg');
+    return;
+  }
+  if (!window.google?.accounts?.oauth2) {
+    toast('Biblioteca Google não carregada ainda', 'warn');
+    return;
+  }
+  if (!S.tokenClient) initGIS();
+  if (!S.tokenClient) { toast('Não foi possível iniciar OAuth', 'err'); return; }
+  S.tokenClient.requestAccessToken({ prompt: S.googleToken ? '' : 'consent' });
+}
+
+async function performDriveUpload(token) {
+  const name = sanitize(document.getElementById('meetTitle').value || 'reuniao');
+  const d    = dateFmt();
+  toast('Enviando para Drive...', 'ok');
+  try {
+    if (S.ataRaw) {
+      await driveUpText(token, S.ataRaw, `ATA_${name}_${d}.txt`);
+    } else if (S.transcript) {
+      await driveUpText(token, S.transcript, `TRANSCRICAO_${name}_${d}.txt`);
+    }
+    if (S.audioBlob) {
+      const ext = (S.mediaRec?.mimeType || '').includes('mp4') ? 'm4a' : 'webm';
+      await driveUpBlob(token, S.audioBlob, `AUDIO_${name}_${d}.${ext}`, S.audioBlob.type);
+    }
+    toast('Salvo no Google Drive!', 'ok');
+  } catch(e) {
+    toast('Erro Drive: ' + e.message, 'err');
+  }
+}
+
+async function driveUpText(token, content, filename) {
+  const meta = { name: filename, mimeType: 'text/plain' };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+  form.append('file',     new Blob([content],             { type: 'text/plain;charset=utf-8' }));
+  const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form
+  });
+  if (!r.ok) throw new Error(`Drive ${r.status}`);
+  return r.json();
+}
+
+async function driveUpBlob(token, blob, filename, mimeType) {
+  const meta = { name: filename, mimeType };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+  form.append('file', blob);
+  const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form
+  });
+  if (!r.ok) throw new Error(`Drive ${r.status}`);
+  return r.json();
+}
+
+/* ═══════════════════════════════════════════════════
+   UI STATE
+═══════════════════════════════════════════════════ */
+function updateUI() {
+  const badge  = document.getElementById('statusBadge');
+  const timer  = document.getElementById('timerDisplay');
+  const btnRec = document.getElementById('btnRec');
+  const btnStp = document.getElementById('btnStop');
+  const icon   = document.getElementById('recIcon');
+  const lbl    = document.getElementById('recLabel');
+
+  badge.className = 'status-badge';
+  timer.className = 'timer';
+
+  if (S.recording && !S.paused) {
+    badge.classList.add('s-rec');   badge.textContent = '● REC';
+    timer.classList.add('t-rec');
+    icon.textContent = '⏸'; lbl.textContent = 'PAUSAR';
+    btnRec.className = 'btn-big b-pause';
+    btnStp.disabled  = false;
+    document.getElementById('btnAta').disabled = true;
+
+  } else if (S.paused) {
+    badge.classList.add('s-paused'); badge.textContent = '⏸ PAUSADO';
+    timer.classList.add('t-paused');
+    icon.textContent = '●'; lbl.textContent = 'RETOMAR';
+    btnRec.className = 'btn-big b-rec';
+    btnStp.disabled  = false;
+
+  } else if (S.done) {
+    badge.classList.add('s-done'); badge.textContent = '✓ CONCLUÍDO';
+    icon.textContent = '+'; lbl.textContent = 'NOVA';
+    btnRec.className = 'btn-big b-rec';
+    btnStp.disabled  = true;
+
+  } else {
+    badge.classList.add('s-idle'); badge.textContent = 'PRONTO';
+    icon.textContent = '●'; lbl.textContent = 'GRAVAR';
+    btnRec.className = 'btn-big b-rec';
+    btnStp.disabled  = true;
+  }
+}
+
+function updateTimerDisplay() {
+  const h = Math.floor(S.seconds / 3600);
+  const m = Math.floor((S.seconds % 3600) / 60);
+  const s = S.seconds % 60;
+  document.getElementById('timerDisplay').textContent =
+    `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+
+/* ═══════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════ */
+function pad(n)      { return String(n).padStart(2, '0'); }
+function escapeHTML(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function sanitize(s) {
+  return s.replace(/[^\w\s\-áéíóúÁÉÍÓÚãõçÃÕÇ]/g,'').trim().replace(/\s+/g,'_') || 'reuniao';
+}
+function dateFmt() {
+  const d = new Date();
+  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
+}
+
+let _toastT;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = type ? `t-${type}` : '';
+  clearTimeout(_toastT);
+  _toastT = setTimeout(() => el.classList.add('hidden'), 3200);
+}
+
+/* ═══════════════════════════════════════════════════
+   FALLBACK — UPLOAD DE ÁUDIO EXTERNO
+═══════════════════════════════════════════════════ */
+function handleAudioUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  if (S.audioURL) URL.revokeObjectURL(S.audioURL);
+  S.audioBlob = file;
+  S.audioURL  = URL.createObjectURL(file);
+
+  // Show info
+  const info = document.getElementById('fallbackInfo');
+  const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+  info.style.display = 'block';
+  info.innerHTML = `✓ ${escapeHTML(file.name)} — ${sizeMB} MB carregado`;
+
+  // Enable actions
+  document.getElementById('btnDlAudio').disabled = false;
+  document.getElementById('btnDrive').disabled   = false;
+  document.getElementById('btnAta').disabled     = !S.transcript.trim();
+
+  S.done = true;
+  updateUI();
+  toast('Áudio carregado — adicione a transcrição e gere a ata', 'ok');
+}
+
+/* ═══════════════════════════════════════════════════
+   START
+═══════════════════════════════════════════════════ */
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
