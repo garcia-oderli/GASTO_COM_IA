@@ -319,6 +319,48 @@
     }
     .btn-config:active { background: var(--elevated); color: var(--txt); }
 
+    /* ── LOGIN ── */
+    #loginScreen {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 500; padding: 20px;
+    }
+    #loginScreen.hidden { display: none; }
+    .login-box {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      padding: 32px 28px;
+      width: 100%; max-width: 360px;
+      text-align: center;
+    }
+    .login-logo {
+      font-family: var(--font-h);
+      font-size: 32px; font-weight: 700;
+      letter-spacing: 4px; margin-bottom: 6px;
+    }
+    .login-logo span { color: var(--acc); }
+    .login-sub {
+      font-family: var(--font-d); font-size: 10px;
+      color: var(--txt3); letter-spacing: 2px;
+      margin-bottom: 28px;
+    }
+    .login-input {
+      width: 100%; padding: 13px 16px;
+      background: var(--elevated);
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--txt); font-family: var(--font-b); font-size: 15px;
+      outline: none; text-align: center; letter-spacing: 3px;
+      transition: border-color .2s; margin-bottom: 14px;
+    }
+    .login-input:focus { border-color: var(--acc); }
+    .login-err {
+      font-family: var(--font-d); font-size: 11px;
+      color: var(--red); margin-top: 10px; min-height: 16px;
+    }
+
     /* ── DIVIDER ── */
     .divider {
       height: 0.5px; background: var(--border);
@@ -365,6 +407,21 @@
 </head>
 <body>
 
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">RITMO<span>REC</span></div>
+    <div class="login-sub">GRAVADOR DE REUNIÃO</div>
+    <input class="login-input" id="loginPwd" type="password"
+           placeholder="••••••••" autocomplete="current-password"
+           onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-primary" onclick="doLogin()" style="width:100%;padding:13px">
+      ENTRAR
+    </button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast" class="hidden"></div>
 
@@ -400,6 +457,12 @@
         <option value="en-US">English (US)</option>
         <option value="es-ES">Español</option>
       </select>
+    </div>
+
+    <div class="field-group">
+      <label>Senha de Acesso <span style="color:var(--txt3)">(deixe vazio para sem senha)</span></label>
+      <input type="password" id="cfgPwd" placeholder="Nova senha..." autocomplete="new-password">
+      <div class="modal-note">Mínimo 4 caracteres. Será pedida ao abrir o app.</div>
     </div>
 
     <div class="modal-actions">
@@ -478,6 +541,7 @@
   <div class="header-right">
     <span class="status-badge s-idle" id="statusBadge">PRONTO</span>
     <button class="btn-config" onclick="openModal('modalCfg')">⚙</button>
+    <button class="btn-config" id="btnLogout" onclick="doLogout()" style="display:none" title="Sair">⏻</button>
   </div>
 </header>
 
@@ -616,9 +680,53 @@ const S = {
   config: {
     claudeKey:      localStorage.getItem('mr_ck')   || '',
     googleClientId: localStorage.getItem('mr_gid')  || '',
-    lang:           localStorage.getItem('mr_lang') || 'pt-BR'
+    lang:           localStorage.getItem('mr_lang') || 'pt-BR',
+    pwdHash:        localStorage.getItem('mr_pwd')  || ''
   }
 };
+
+/* ═══════════════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════════════ */
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function doLogin() {
+  const pwd = document.getElementById('loginPwd').value;
+  const err = document.getElementById('loginErr');
+  const stored = S.config.pwdHash;
+
+  if (!stored) { unlockApp(); return; }
+
+  const hash = await sha256(pwd);
+  if (hash === stored) {
+    sessionStorage.setItem('mr_auth', '1');
+    unlockApp();
+  } else {
+    err.textContent = 'Senha incorreta';
+    document.getElementById('loginPwd').value = '';
+    document.getElementById('loginPwd').focus();
+  }
+}
+
+function unlockApp() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('btnLogout').style.display = S.config.pwdHash ? '' : 'none';
+  init();
+}
+
+function doLogout() {
+  sessionStorage.removeItem('mr_auth');
+  location.reload();
+}
+
+async function checkAuth() {
+  if (!S.config.pwdHash) { unlockApp(); return; }
+  if (sessionStorage.getItem('mr_auth') === '1') { unlockApp(); return; }
+  document.getElementById('loginPwd').focus();
+}
 
 /* ═══════════════════════════════════════════════════
    INIT
@@ -681,13 +789,22 @@ function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 ═══════════════════════════════════════════════════ */
 function openConfig() { openModal('modalCfg'); }
 
-function saveConfig() {
+async function saveConfig() {
   S.config.claudeKey      = document.getElementById('cfgCk').value.trim();
   S.config.googleClientId = document.getElementById('cfgGid').value.trim();
   S.config.lang           = document.getElementById('cfgLang').value;
+  const newPwd = document.getElementById('cfgPwd').value;
+  if (newPwd) {
+    if (newPwd.length < 4) { toast('Senha mínima: 4 caracteres', 'err'); return; }
+    S.config.pwdHash = await sha256(newPwd);
+    localStorage.setItem('mr_pwd', S.config.pwdHash);
+    sessionStorage.setItem('mr_auth', '1');
+  }
   localStorage.setItem('mr_ck',   S.config.claudeKey);
   localStorage.setItem('mr_gid',  S.config.googleClientId);
   localStorage.setItem('mr_lang', S.config.lang);
+  document.getElementById('cfgPwd').value = '';
+  document.getElementById('btnLogout').style.display = S.config.pwdHash ? '' : 'none';
   closeModal('modalCfg');
   toast('Configuração salva', 'ok');
   if (S.config.googleClientId) scheduleInitGIS();
@@ -706,6 +823,7 @@ window.openModal = function(id) {
     document.getElementById('cfgCk').value   = S.config.claudeKey;
     document.getElementById('cfgGid').value  = S.config.googleClientId;
     document.getElementById('cfgLang').value = S.config.lang;
+    document.getElementById('cfgPwd').value  = '';
   }
   document.getElementById(id).classList.remove('hidden');
 };
@@ -1442,7 +1560,7 @@ function handleAudioUpload(input) {
 /* ═══════════════════════════════════════════════════
    START
 ═══════════════════════════════════════════════════ */
-window.addEventListener('load', init);
+window.addEventListener('load', checkAuth);
 </script>
 </body>
 </html>
