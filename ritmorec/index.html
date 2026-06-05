@@ -561,6 +561,7 @@
       <div style="display:flex;gap:6px">
         <button class="btn-ghost btn-sm" onclick="copyAta()">⎘ COPIAR</button>
         <button class="btn-ghost btn-sm" onclick="downloadAta()">⬇ TXT</button>
+        <button class="btn-ghost btn-sm" onclick="printAta()">⎙ PDF</button>
       </div>
     </div>
     <div id="ataLoading" style="display:none;align-items:center;gap:10px;padding:14px 0">
@@ -1180,6 +1181,26 @@ function md2html(md) {
       '<div style="display:flex;gap:8px;margin:4px 0;padding-left:6px"><span style="color:var(--acc);flex-shrink:0;margin-top:1px">▸</span><span>$1</span></div>')
     .replace(/\n\n+/g, '<div style="height:8px"></div>')
     .replace(/\n/g, '<br>');
+}
+
+function printAta() {
+  if (!S.ataRaw) return;
+  const title = document.getElementById('meetTitle').value.trim() || 'Reunião';
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>ATA — ${title}</title>
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 13px; line-height: 1.7; color: #111; padding: 32px 48px; max-width: 780px; margin: 0 auto; }
+      h1 { font-size: 20px; color: #333; border-bottom: 2px solid #F5A623; padding-bottom: 6px; }
+      h2 { font-size: 15px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin-top: 20px; }
+      h3 { font-size: 13px; color: #666; }
+      @media print { body { padding: 20px; } }
+    </style></head><body>
+    ${md2html(S.ataRaw).replace(/var\(--[^)]+\)/g, 'inherit')}
+    </body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 400);
 }
 
 function copyAta() {
