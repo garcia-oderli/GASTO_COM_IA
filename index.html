@@ -4129,18 +4129,14 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if(e.target===o) closeModal(o.id); });
 });
 
-// Garante que botões principais funcionem mesmo com popup Android aberto
-function bindTouchBtn(id, fn) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    if (window.getSelection) window.getSelection().removeAllRanges();
-    fn();
-  }, { passive: false });
-}
-bindTouchBtn('detail-edit-btn', editExpenseOpen);
-bindTouchBtn('new-cat-save-btn', saveNewCategory);
+// Fix global: impede popup Android de bloquear qualquer botão dentro de modais
+document.addEventListener('touchstart', function(e) {
+  const btn = e.target.closest('.modal-overlay button');
+  if (!btn || btn.disabled) return;
+  e.preventDefault();
+  if (window.getSelection) window.getSelection().removeAllRanges();
+  setTimeout(() => btn.click(), 0);
+}, { passive: false });
 
 // Classificação automática ao digitar fornecedor
 document.getElementById('f-fornecedor').addEventListener('input', function() {
