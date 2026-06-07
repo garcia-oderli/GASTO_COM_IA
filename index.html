@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" id="manifest-placeholder">
-<title>GastosIA - Smart Finance v3.0</title>
+<title>GastosIA - Smart Finance v3.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -693,7 +693,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v3.0</span>
+    <span class="logo-version">v3.1</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1303,7 +1303,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v3.0.0</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v3.1.0</div>
       </div>
     </div>
   </div>
@@ -1600,41 +1600,41 @@
           <!-- Grade de emojis rápidos -->
           <div id="emoji-grid" style="display:flex;flex-wrap:wrap;gap:6px;">
             <!-- Alimentação / Compras -->
-            <button type="button" onclick="pickEmoji('🍽')" class="emoji-pick-btn">🍽</button>
-            <button type="button" onclick="pickEmoji('🍔')" class="emoji-pick-btn">🍔</button>
-            <button type="button" onclick="pickEmoji('🍕')" class="emoji-pick-btn">🍕</button>
-            <button type="button" onclick="pickEmoji('🍣')" class="emoji-pick-btn">🍣</button>
-            <button type="button" onclick="pickEmoji('🧃')" class="emoji-pick-btn">🧃</button>
-            <button type="button" onclick="pickEmoji('☕')" class="emoji-pick-btn">☕</button>
-            <button type="button" onclick="pickEmoji('🛒')" class="emoji-pick-btn">🛒</button>
-            <button type="button" onclick="pickEmoji('🛍')" class="emoji-pick-btn">🛍</button>
+            <button type="button" onclick="pickEmoji(this,'🍽')" class="emoji-pick-btn">🍽</button>
+            <button type="button" onclick="pickEmoji(this,'🍔')" class="emoji-pick-btn">🍔</button>
+            <button type="button" onclick="pickEmoji(this,'🍕')" class="emoji-pick-btn">🍕</button>
+            <button type="button" onclick="pickEmoji(this,'🍣')" class="emoji-pick-btn">🍣</button>
+            <button type="button" onclick="pickEmoji(this,'🧃')" class="emoji-pick-btn">🧃</button>
+            <button type="button" onclick="pickEmoji(this,'☕')" class="emoji-pick-btn">☕</button>
+            <button type="button" onclick="pickEmoji(this,'🛒')" class="emoji-pick-btn">🛒</button>
+            <button type="button" onclick="pickEmoji(this,'🛍')" class="emoji-pick-btn">🛍</button>
             <!-- Transporte / Casa -->
-            <button type="button" onclick="pickEmoji('🚗')" class="emoji-pick-btn">🚗</button>
-            <button type="button" onclick="pickEmoji('⛽')" class="emoji-pick-btn">⛽</button>
-            <button type="button" onclick="pickEmoji('🏠')" class="emoji-pick-btn">🏠</button>
-            <button type="button" onclick="pickEmoji('💡')" class="emoji-pick-btn">💡</button>
+            <button type="button" onclick="pickEmoji(this,'🚗')" class="emoji-pick-btn">🚗</button>
+            <button type="button" onclick="pickEmoji(this,'⛽')" class="emoji-pick-btn">⛽</button>
+            <button type="button" onclick="pickEmoji(this,'🏠')" class="emoji-pick-btn">🏠</button>
+            <button type="button" onclick="pickEmoji(this,'💡')" class="emoji-pick-btn">💡</button>
             <!-- Saúde / Beleza -->
-            <button type="button" onclick="pickEmoji('🏥')" class="emoji-pick-btn">🏥</button>
-            <button type="button" onclick="pickEmoji('💊')" class="emoji-pick-btn">💊</button>
-            <button type="button" onclick="pickEmoji('💅')" class="emoji-pick-btn">💅</button>
-            <button type="button" onclick="pickEmoji('🏋️')" class="emoji-pick-btn">🏋️</button>
+            <button type="button" onclick="pickEmoji(this,'🏥')" class="emoji-pick-btn">🏥</button>
+            <button type="button" onclick="pickEmoji(this,'💊')" class="emoji-pick-btn">💊</button>
+            <button type="button" onclick="pickEmoji(this,'💅')" class="emoji-pick-btn">💅</button>
+            <button type="button" onclick="pickEmoji(this,'🏋️')" class="emoji-pick-btn">🏋️</button>
             <!-- Lazer / Educação -->
-            <button type="button" onclick="pickEmoji('🎮')" class="emoji-pick-btn">🎮</button>
-            <button type="button" onclick="pickEmoji('🎬')" class="emoji-pick-btn">🎬</button>
-            <button type="button" onclick="pickEmoji('📚')" class="emoji-pick-btn">📚</button>
-            <button type="button" onclick="pickEmoji('✈️')" class="emoji-pick-btn">✈️</button>
+            <button type="button" onclick="pickEmoji(this,'🎮')" class="emoji-pick-btn">🎮</button>
+            <button type="button" onclick="pickEmoji(this,'🎬')" class="emoji-pick-btn">🎬</button>
+            <button type="button" onclick="pickEmoji(this,'📚')" class="emoji-pick-btn">📚</button>
+            <button type="button" onclick="pickEmoji(this,'✈️')" class="emoji-pick-btn">✈️</button>
             <!-- Finanças / Outros -->
-            <button type="button" onclick="pickEmoji('💳')" class="emoji-pick-btn">💳</button>
-            <button type="button" onclick="pickEmoji('💰')" class="emoji-pick-btn">💰</button>
-            <button type="button" onclick="pickEmoji('📱')" class="emoji-pick-btn">📱</button>
-            <button type="button" onclick="pickEmoji('🐾')" class="emoji-pick-btn">🐾</button>
-            <button type="button" onclick="pickEmoji('🎁')" class="emoji-pick-btn">🎁</button>
-            <button type="button" onclick="pickEmoji('🔧')" class="emoji-pick-btn">🔧</button>
-            <button type="button" onclick="pickEmoji('🏫')" class="emoji-pick-btn">🏫</button>
-            <button type="button" onclick="pickEmoji('👶')" class="emoji-pick-btn">👶</button>
+            <button type="button" onclick="pickEmoji(this,'💳')" class="emoji-pick-btn">💳</button>
+            <button type="button" onclick="pickEmoji(this,'💰')" class="emoji-pick-btn">💰</button>
+            <button type="button" onclick="pickEmoji(this,'📱')" class="emoji-pick-btn">📱</button>
+            <button type="button" onclick="pickEmoji(this,'🐾')" class="emoji-pick-btn">🐾</button>
+            <button type="button" onclick="pickEmoji(this,'🎁')" class="emoji-pick-btn">🎁</button>
+            <button type="button" onclick="pickEmoji(this,'🔧')" class="emoji-pick-btn">🔧</button>
+            <button type="button" onclick="pickEmoji(this,'🏫')" class="emoji-pick-btn">🏫</button>
+            <button type="button" onclick="pickEmoji(this,'👶')" class="emoji-pick-btn">👶</button>
           </div>
         </div>
-        <input type="text" id="new-cat-emoji" placeholder="ou digite aqui" maxlength="4" style="font-size:22px;text-align:center;letter-spacing:4px;">
+        <input type="text" id="new-cat-emoji" readonly inputmode="none" placeholder="selecione acima" maxlength="4" style="font-size:22px;text-align:center;letter-spacing:4px;pointer-events:none;cursor:default;user-select:none;-webkit-user-select:none;">
       </div>
       <div class="field">
         <label>Nome da Categoria *</label>
@@ -1957,11 +1957,16 @@ function refreshCategoryChips() {
 
 let _newCatFromSelect = null;
 
-function pickEmoji(emoji) {
+function pickEmoji(btn, emoji) {
   document.getElementById('new-cat-emoji').value = emoji;
-  // Destaca o botão selecionado
   document.querySelectorAll('.emoji-pick-btn').forEach(b => b.style.background = '');
-  event.currentTarget && (event.currentTarget.style.background = 'rgba(245,166,35,0.25)');
+  if (btn) btn.style.background = 'rgba(245,166,35,0.25)';
+}
+
+function _highlightEmojiBtn(emoji) {
+  document.querySelectorAll('.emoji-pick-btn').forEach(b => {
+    b.style.background = b.textContent.trim() === emoji ? 'rgba(245,166,35,0.25)' : '';
+  });
 }
 
 function openNewCategoryModal(fromSelectId) {
@@ -1972,7 +1977,7 @@ function openNewCategoryModal(fromSelectId) {
   document.getElementById('new-cat-modal-title').textContent = 'Nova Categoria';
   document.getElementById('new-cat-save-btn').textContent = 'Criar Categoria';
   document.getElementById('new-cat-modal').classList.add('open');
-  setTimeout(() => document.getElementById('new-cat-emoji').focus(), 200);
+  setTimeout(() => document.getElementById('new-cat-name').focus(), 300);
 }
 
 function openEditCategoryModal(oldName) {
@@ -1985,7 +1990,8 @@ function openEditCategoryModal(oldName) {
   document.getElementById('new-cat-modal-title').textContent = 'Editar Categoria';
   document.getElementById('new-cat-save-btn').textContent = 'Salvar Alterações';
   document.getElementById('new-cat-modal').classList.add('open');
-  setTimeout(() => document.getElementById('new-cat-name').focus(), 200);
+  _highlightEmojiBtn(cat.emoji);
+  setTimeout(() => document.getElementById('new-cat-name').focus(), 300);
 }
 
 function cancelNewCategory() {
@@ -2027,8 +2033,9 @@ function saveNewCategory() {
 
     // Migra gastos
     if (currentName !== name) {
-      expenses.forEach(e => { if (e.categoria === currentName) e.categoria = name; });
-      saveExpenses();
+      const affected = expenses.filter(e => e.categoria === currentName);
+      affected.forEach(e => { e.categoria = name; });
+      if (affected.length > 0) affected.forEach(e => supaSaveExpense(e));
     }
 
     refreshCategorySelects();
@@ -2063,8 +2070,9 @@ function saveNewCategory() {
     }
 
     // Atualiza gastos que usavam o nome antigo
-    expenses.forEach(e => { if (e.categoria === editing) e.categoria = name; });
-    saveExpenses();
+    const affected = expenses.filter(e => e.categoria === editing);
+    affected.forEach(e => { e.categoria = name; });
+    if (affected.length > 0) affected.forEach(e => supaSaveExpense(e));
 
     refreshCategorySelects();
     refreshCategoryChips();
@@ -2109,8 +2117,9 @@ function deleteCustomCategory(name) {
   }
 
   // Move gastos para "Outros"
-  expenses.forEach(e => { if (e.categoria === name) e.categoria = 'Outros'; });
-  saveExpenses();
+  const moved = expenses.filter(e => e.categoria === name);
+  moved.forEach(e => { e.categoria = 'Outros'; });
+  if (moved.length > 0) moved.forEach(e => supaSaveExpense(e));
 
   customCategories = customCategories.filter(c => c.name !== name);
   localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
@@ -2169,7 +2178,8 @@ function openEditNativeCategoryModal(name) {
   document.getElementById('new-cat-modal-title').textContent = 'Editar Categoria';
   document.getElementById('new-cat-save-btn').textContent = 'Salvar Alterações';
   document.getElementById('new-cat-modal').classList.add('open');
-  setTimeout(() => document.getElementById('new-cat-name').focus(), 200);
+  _highlightEmojiBtn(emoji);
+  setTimeout(() => document.getElementById('new-cat-name').focus(), 300);
 }
 
 // ─── Classificação Automática ───────────────────────────────────────
@@ -4832,18 +4842,21 @@ function updateExpense() {
     };
     
     // Usar API segura de atualização
-    const result = DataLayerManager.updateExpense(currentEditId, updates);
-    saveExpenses();
+    const savedId = currentEditId;
+    DataLayerManager.updateExpense(savedId, updates);
     closeModal('edit-modal');
     renderHome();
     renderAll();
-    showToast('✓ Gasto atualizado!');
-    
+    showToast('✓ Salvando...');
+
     // Invalida cache
     cachedInsights = null;
     localStorage.removeItem(INSIGHTS_KEY);
-    
     currentEditId = null;
+
+    // Persiste no Supabase e recarrega
+    const updated = expenses.find(e => e.id === savedId);
+    if (updated) supaSaveExpense(updated).then(() => supaLoadAll());
   } catch (err) {
     showToast('❌ Erro ao atualizar: ' + err.message);
     console.error('Erro ao atualizar gasto:', err);
@@ -4893,7 +4906,7 @@ function exportJSON() {
   const orcamento = getOrcamento();
   
   const backup = {
-    version: '3.0',
+    version: '3.1',
     exportadoEm: new Date().toISOString(),
     resumo: {
       totalGastos: monthTotal.toFixed(2),
@@ -5569,7 +5582,7 @@ const manifest = {
   theme_color: '#F5A623',
   orientation: 'portrait',
   icons: [{
-    src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjgwIiBmaWxsPSIjMTExMTExIi8+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjUxMiIgaGVpZ2h0PSIyMCIgZmlsbD0iI0Y1QTYyMyIgcng9IjQiLz48dGV4dCB4PSIyNTYiIHk9IjI5MCIgZm9udC1mYW1pbHk9IkFyaWFsIEJsYWNrLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAwIiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjRjVBNjIzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5SJDwvdGV4dD48cmVjdCB4PSI2MCIgeT0iNDAwIiB3aWR0aD0iNTUiIGhlaWdodD0iMjUiIGZpbGw9IiMyQTJBMkEiIHJ4PSI0Ii8+PHJlY3QgeD0iMTMwIiB5PSIzNjgiIHdpZHRoPSI1NSIgaGVpZ2h0PSI1NyIgZmlsbD0iI0Y1QTYyMyIgcng9IjQiLz48cmVjdCB4PSIyMDAiIHk9IjM4NSIgd2lkdGg9IjU1IiBoZWlnaHQ9IjQwIiBmaWxsPSIjMkEyQTJBIiByeD0iNCIvPjxyZWN0IHg9IjI3MCIgeT0iMzUwIiB3aWR0aD0iNTUiIGhlaWdodD0iNzUiIGZpbGw9IiNGNUE2MjMiIHJ4PSI0Ii8+PHBvbHlnb24gcG9pbnRzPSIyOTcsMzIwIDMyNSwzNTAgMjY5LDM1MCIgZmlsbD0iI0Y1QTYyMyIvPjwvc3ZnPg==",
+    src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzExMTExMSIvPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSI1MTIiIGhlaWdodD0iMjAiIGZpbGw9IiNGNUE2MjMiIHJ4PSI0Ii8+PHRleHQgeD0iMjU2IiB5PSIyOTAiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjayxzYW5zLXNlcmlmIiBmb250LXNpemU9IjIwMCIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI0Y1QTYyMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+UiQ8L3RleHQ+PHJlY3QgeD0iNjAiIHk9IjQwMCIgd2lkdGg9IjU1IiBoZWlnaHQ9IjI1IiBmaWxsPSIjMkEyQTJBIiByeD0iNCIvPjxyZWN0IHg9IjEzMCIgeT0iMzY4IiB3aWR0aD0iNTUiIGhlaWdodD0iNTciIGZpbGw9IiNGNUE2MjMiIHJ4PSI0Ii8+PHJlY3QgeD0iMjAwIiB5PSIzODUiIHdpZHRoPSI1NSIgaGVpZ2h0PSI0MCIgZmlsbD0iIzJBMkEyQSIgcng9IjQiLz48cmVjdCB4PSIyNzAiIHk9IjM1MCIgd2lkdGg9IjU1IiBoZWlnaHQ9Ijc1IiBmaWxsPSIjRjVBNjIzIiByeD0iNCIvPjxwb2x5Z29uIHBvaW50cz0iMjk3LDMyMCAzMjUsMzUwIDI2OSwzNTAiIGZpbGw9IiNGNUE2MjMiLz48L3N2Zz4=",
     sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable'
   }]
 };
@@ -5773,7 +5786,7 @@ const manifestBlob = new Blob([JSON.stringify(manifest)],{type:'application/json
 document.getElementById('manifest-placeholder').href = URL.createObjectURL(manifestBlob);
 
 if ('serviceWorker' in navigator) {
-  const swCode = `const CACHE='gastosIA-v3';self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['.']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+  const swCode = `const CACHE='gastosIA-v3.1';self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['.']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
   const swBlob = new Blob([swCode],{type:'application/javascript'});
   navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 }
