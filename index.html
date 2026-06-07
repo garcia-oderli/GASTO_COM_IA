@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
-<link rel="manifest" id="manifest-placeholder">
+<link rel="manifest" href="/manifest.json">
 <title>GastosIA - Smart Finance v3.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -5569,23 +5569,7 @@ function init() {
 init();
 initAuth();
 
-// ═══════════════════════════════════════════════════════════════════
-// PWA: SERVICE WORKER + MANIFEST
-// ═══════════════════════════════════════════════════════════════════
-const manifest = {
-  name: 'GastosIA · R$',
-  short_name: 'GastosIA',
-  description: 'Controle financeiro inteligente com IA',
-  start_url: '.',
-  display: 'standalone',
-  background_color: '#F5A623',
-  theme_color: '#F5A623',
-  orientation: 'portrait',
-  icons: [{
-    src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iI0Y1QTYyMyIvPjx0ZXh0IHg9IjI1NiIgeT0iMjcwIiBmb250LWZhbWlseT0iQXJpYWwgQmxhY2ssc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMjAiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMxMTExMTEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPlIkPC90ZXh0PjxyZWN0IHg9IjcwIiB5PSIzOTAiIHdpZHRoPSI2MCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzExMTExMSIgcng9IjUiLz48cmVjdCB4PSIxNTAiIHk9IjM1NSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjY1IiBmaWxsPSIjMWExYTFhIiByeD0iNSIvPjxyZWN0IHg9IjIzMCIgeT0iMzc1IiB3aWR0aD0iNjAiIGhlaWdodD0iNDUiIGZpbGw9IiMxMTExMTEiIHJ4PSI1Ii8+PHJlY3QgeD0iMzEwIiB5PSIzMzAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI5MCIgZmlsbD0iIzFhMWExYSIgcng9IjUiLz48cG9seWdvbiBwb2ludHM9IjM0MCwzMDAgMzcwLDMzMCAzMTAsMzMwIiBmaWxsPSIjMWExYTFhIi8+PC9zdmc+",
-    sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable'
-  }]
-};
+// PWA: service worker registrado via /sw.js (arquivo estático)
 
 // ═══════════════════════════════════════════════════════════════════
 // BUDGET MANAGEMENT
@@ -5782,13 +5766,8 @@ function renderOrcamentoVsGastos() {
   `;
 }
 
-const manifestBlob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
-document.getElementById('manifest-placeholder').href = URL.createObjectURL(manifestBlob);
-
 if ('serviceWorker' in navigator) {
-  const swCode = `const CACHE='gastosIA-v3.2';self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['.']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
-  const swBlob = new Blob([swCode],{type:'application/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+  navigator.serviceWorker.register('/sw.js').catch(()=>{});
 }
 
 // ═══════════════════════════════════════════════════════════════════
