@@ -2615,12 +2615,21 @@ function getTotalIncomeAll() {
 function autoClassify(fornecedor) {
   if (!fornecedor) return null;
   const lower = fornecedor.toLowerCase();
+
+  // 1. Histórico tem prioridade: se o usuário já categorizou este fornecedor, repete
+  const prev = expenses.find(e => e.fornecedor && e.fornecedor.toLowerCase() === lower);
+  if (prev) return prev.categoria;
+
+  // 2. Se existe categoria "Delivery", mapeia palavras-chave de delivery para ela
+  if (CAT_ICONS['Delivery']) {
+    const deliveryKw = ['ifood','rappi','uber eats','delivery','pedido','motoboy','zé delivery','loggi'];
+    if (deliveryKw.some(k => lower.includes(k))) return 'Delivery';
+  }
+
+  // 3. Mapa fixo como fallback
   for (const [keyword, cat] of Object.entries(AUTO_CLASSIFY_MAP)) {
     if (lower.includes(keyword)) return cat;
   }
-  // Aprendizado com histórico: se o fornecedor já foi cadastrado antes, usa a categoria anterior
-  const prev = expenses.find(e => e.fornecedor && e.fornecedor.toLowerCase() === lower);
-  if (prev) return prev.categoria;
   return null;
 }
 
