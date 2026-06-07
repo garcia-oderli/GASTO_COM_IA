@@ -968,97 +968,97 @@
       <div style="font-size:13px; color:var(--text4); margin-bottom:20px;">Ajuste os sliders para garantir que o total seja 100%. Valores acima de 100% serão destacados em vermelho.</div>
       
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🏠 Moradia</span>
+        <span id="budget-label-moradia" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🏠 Moradia</span>
         <input type="range" id="budget-moradia" min="0" max="50" value="30" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-moradia-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">30%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🍽 Alimentação</span>
+        <span id="budget-label-alimentacao" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🍽 Alimentação</span>
         <input type="range" id="budget-alimentacao" min="0" max="30" value="15" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-alimentacao-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">15%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🚗 Transporte</span>
+        <span id="budget-label-transporte" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🚗 Transporte</span>
         <input type="range" id="budget-transporte" min="0" max="25" value="10" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-transporte-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">10%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🏥 Saúde</span>
+        <span id="budget-label-saude" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🏥 Saúde</span>
         <input type="range" id="budget-saude" min="0" max="20" value="8" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-saude-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">8%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🎮 Lazer</span>
+        <span id="budget-label-lazer" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🎮 Lazer</span>
         <input type="range" id="budget-lazer" min="0" max="20" value="8" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-lazer-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">8%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📚 Educação</span>
+        <span id="budget-label-educacao" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📚 Educação</span>
         <input type="range" id="budget-educacao" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-educacao-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🛡️ Seguros</span>
+        <span id="budget-label-seguros" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🛡️ Seguros</span>
         <input type="range" id="budget-seguros" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-seguros-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📱 Assinaturas</span>
+        <span id="budget-label-assinaturas" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📱 Assinaturas</span>
         <input type="range" id="budget-assinaturas" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-assinaturas-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">✈️ Viagem</span>
+        <span id="budget-label-viagem" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">✈️ Viagem</span>
         <input type="range" id="budget-viagem" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-viagem-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🛍️ Compras</span>
+        <span id="budget-label-compras" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🛍️ Compras</span>
         <input type="range" id="budget-compras" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-compras-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">💅 Beleza</span>
+        <span id="budget-label-beleza" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">💅 Beleza</span>
         <input type="range" id="budget-beleza" min="0" max="10" value="3" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-beleza-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">3%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🐾 Pets</span>
+        <span id="budget-label-pets" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🐾 Pets</span>
         <input type="range" id="budget-pets" min="0" max="10" value="2" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-pets-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">2%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🎁 Presentes</span>
+        <span id="budget-label-presentes" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🎁 Presentes</span>
         <input type="range" id="budget-presentes" min="0" max="10" value="3" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-presentes-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">3%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">💳 Dívidas</span>
+        <span id="budget-label-dividas" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">💳 Dívidas</span>
         <input type="range" id="budget-dividas" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-dividas-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📈 Investimentos</span>
+        <span id="budget-label-investimentos" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📈 Investimentos</span>
         <input type="range" id="budget-investimentos" min="0" max="25" value="10" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-investimentos-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">10%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📦 Outros</span>
+        <span id="budget-label-outros" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📦 Outros</span>
         <input type="range" id="budget-outros" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-outros-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
@@ -1838,6 +1838,9 @@ const CAT_COLORS = {
 const CUSTOM_CAT_KEY = 'gastosIA_customCategories';
 let customCategories = [];
 
+const NATIVE_CAT_OVERRIDES_KEY = 'gastosIA_nativeCatOverrides';
+// [{ catKey: 'alimentacao', name: 'Comida', emoji: '🍔' }]
+
 function loadCustomCategories() {
   try { customCategories = JSON.parse(localStorage.getItem(CUSTOM_CAT_KEY) || '[]'); } catch(e) { customCategories = []; }
   customCategories.forEach(cat => {
@@ -1846,6 +1849,32 @@ function loadCustomCategories() {
     CAT_KEYS[cat.name] = key;
     CAT_COLORS[cat.name] = cat.color || '#9ca3af';
   });
+  // Aplica overrides de categorias nativas
+  loadNativeCatOverrides();
+}
+
+function loadNativeCatOverrides() {
+  try {
+    const overrides = JSON.parse(localStorage.getItem(NATIVE_CAT_OVERRIDES_KEY) || '[]');
+    overrides.forEach(ov => {
+      // Acha o nome atual que aponta para esse catKey
+      const currentName = Object.keys(CAT_KEYS).find(k => CAT_KEYS[k] === ov.catKey);
+      if (currentName && currentName !== ov.name) {
+        const color = CAT_COLORS[currentName];
+        delete CAT_ICONS[currentName];
+        delete CAT_KEYS[currentName];
+        delete CAT_COLORS[currentName];
+        CAT_ICONS[ov.name] = ov.emoji;
+        CAT_KEYS[ov.name] = ov.catKey;
+        CAT_COLORS[ov.name] = color;
+      } else if (currentName) {
+        CAT_ICONS[currentName] = ov.emoji; // só emoji mudou
+      }
+      // Atualiza label do orçamento
+      const labelEl = document.getElementById(`budget-label-${ov.catKey}`);
+      if (labelEl) labelEl.textContent = `${ov.emoji} ${ov.name}`;
+    });
+  } catch(e) {}
 }
 
 function refreshCategorySelects() {
@@ -1919,6 +1948,42 @@ function saveNewCategory() {
   const editing = document.getElementById('new-cat-editing').value;
 
   if (!name) { showToast('⚠️ Informe o nome da categoria'); return; }
+
+  // Edição de categoria NATIVA
+  if (editing && editing.startsWith('native:')) {
+    const catKey = editing.replace('native:', '');
+    const currentName = Object.keys(CAT_KEYS).find(k => CAT_KEYS[k] === catKey);
+    if (!currentName) return;
+    const color = CAT_COLORS[currentName];
+
+    // Atualiza constantes em memória
+    delete CAT_ICONS[currentName]; delete CAT_KEYS[currentName]; delete CAT_COLORS[currentName];
+    CAT_ICONS[name] = emoji; CAT_KEYS[name] = catKey; CAT_COLORS[name] = color;
+
+    // Salva override persistente
+    const overrides = JSON.parse(localStorage.getItem(NATIVE_CAT_OVERRIDES_KEY) || '[]');
+    const idx = overrides.findIndex(o => o.catKey === catKey);
+    if (idx >= 0) overrides[idx] = { catKey, name, emoji };
+    else overrides.push({ catKey, name, emoji });
+    localStorage.setItem(NATIVE_CAT_OVERRIDES_KEY, JSON.stringify(overrides));
+
+    // Atualiza label do orçamento
+    const labelEl = document.getElementById(`budget-label-${catKey}`);
+    if (labelEl) labelEl.textContent = `${emoji} ${name}`;
+
+    // Migra gastos
+    if (currentName !== name) {
+      expenses.forEach(e => { if (e.categoria === currentName) e.categoria = name; });
+      saveExpenses();
+    }
+
+    refreshCategorySelects();
+    refreshCategoryChips();
+    renderCategoriesSettings();
+    closeModal('new-cat-modal');
+    showToast(`✓ Categoria atualizada para "${name}"!`);
+    return;
+  }
 
   if (editing) {
     // Modo edição: atualiza categoria existente
@@ -2008,23 +2073,49 @@ function deleteCustomCategory(name) {
 function renderCategoriesSettings() {
   const container = document.getElementById('custom-cat-settings');
   if (!container) return;
-  const empty = document.getElementById('custom-cat-empty');
-  if (!customCategories.length) {
-    container.innerHTML = '<div style="color:var(--text4);font-size:13px;padding:8px 0;" id="custom-cat-empty">Nenhuma categoria criada ainda.</div>';
-    return;
-  }
-  container.innerHTML = customCategories.map(cat => `
-    <div class="settings-row" style="justify-content:space-between;">
+
+  // Categorias nativas (têm catKey fixo)
+  const nativeNames = Object.keys(CAT_KEYS).filter(n => !customCategories.find(c => c.name === n));
+  const nativeRows = nativeNames.map(name => {
+    const emoji = CAT_ICONS[name] || '📦';
+    const n = name.replace(/'/g,"\\'");
+    return `<div class="settings-row" style="justify-content:space-between;">
       <div class="settings-row-left">
-        <div class="settings-row-icon" style="background:rgba(245,166,35,0.12);font-size:18px;">${cat.emoji}</div>
-        <div class="settings-row-label">${cat.name}</div>
+        <div class="settings-row-icon" style="background:rgba(245,166,35,0.12);font-size:18px;">${emoji}</div>
+        <div><div class="settings-row-label">${name}</div><div class="settings-row-desc" style="font-size:11px;">Nativa</div></div>
+      </div>
+      <button type="button" onclick="openEditNativeCategoryModal('${n}')" style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--accent2);">✏️</button>
+    </div>`;
+  }).join('');
+
+  // Categorias customizadas
+  const customRows = customCategories.map(cat => {
+    const n = cat.name.replace(/'/g,"\\'");
+    return `<div class="settings-row" style="justify-content:space-between;">
+      <div class="settings-row-left">
+        <div class="settings-row-icon" style="background:rgba(99,102,241,0.12);font-size:18px;">${cat.emoji}</div>
+        <div><div class="settings-row-label">${cat.name}</div><div class="settings-row-desc" style="font-size:11px;">Personalizada</div></div>
       </div>
       <div style="display:flex;gap:8px;">
-        <button type="button" onclick="openEditCategoryModal('${cat.name.replace(/'/g,"\\'")}')" style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--accent2);">✏️</button>
-        <button type="button" onclick="deleteCustomCategory('${cat.name.replace(/'/g,"\\'")}')" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--red-solid);">🗑️</button>
+        <button type="button" onclick="openEditCategoryModal('${n}')" style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--accent2);">✏️</button>
+        <button type="button" onclick="deleteCustomCategory('${n}')" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--red-solid);">🗑️</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
+
+  container.innerHTML = nativeRows + customRows;
+}
+
+function openEditNativeCategoryModal(name) {
+  const catKey = CAT_KEYS[name];
+  const emoji = CAT_ICONS[name] || '📦';
+  document.getElementById('new-cat-editing').value = `native:${catKey}`;
+  document.getElementById('new-cat-emoji').value = emoji;
+  document.getElementById('new-cat-name').value = name;
+  document.getElementById('new-cat-modal-title').textContent = 'Editar Categoria';
+  document.getElementById('new-cat-save-btn').textContent = 'Salvar Alterações';
+  document.getElementById('new-cat-modal').classList.add('open');
+  setTimeout(() => document.getElementById('new-cat-name').focus(), 200);
 }
 
 // ─── Classificação Automática ───────────────────────────────────────
