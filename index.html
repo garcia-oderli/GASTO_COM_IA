@@ -1924,14 +1924,24 @@ function saveNewCategory() {
     // Modo edição: atualiza categoria existente
     const idx = customCategories.findIndex(c => c.name === editing);
     if (idx === -1) return;
-    const oldEmoji = customCategories[idx].emoji;
+    const oldKey = CAT_KEYS[editing]; // captura antes de deletar
     customCategories[idx] = { name, emoji, color: '#9ca3af' };
     localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
 
     // Atualiza constantes
     delete CAT_ICONS[editing]; delete CAT_KEYS[editing]; delete CAT_COLORS[editing];
-    const key = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'custom';
-    CAT_ICONS[name] = emoji; CAT_KEYS[name] = key; CAT_COLORS[name] = '#9ca3af';
+    const newKey = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'custom';
+    CAT_ICONS[name] = emoji; CAT_KEYS[name] = newKey; CAT_COLORS[name] = '#9ca3af';
+
+    // Migra orçamento: renomeia a chave de oldKey para newKey
+    if (oldKey !== newKey) {
+      const budgets = JSON.parse(localStorage.getItem('userBudgets') || '{}');
+      if (budgets[oldKey] !== undefined) {
+        budgets[newKey] = budgets[oldKey];
+        delete budgets[oldKey];
+        localStorage.setItem('userBudgets', JSON.stringify(budgets));
+      }
+    }
 
     // Atualiza gastos que usavam o nome antigo
     expenses.forEach(e => { if (e.categoria === editing) e.categoria = name; });
@@ -1969,6 +1979,15 @@ function saveNewCategory() {
 
 function deleteCustomCategory(name) {
   if (!confirm(`Excluir a categoria "${name}"? Gastos nessa categoria serão movidos para "Outros".`)) return;
+
+  const oldKey = CAT_KEYS[name]; // captura antes de deletar
+
+  // Remove orçamento planejado desta categoria
+  const budgets = JSON.parse(localStorage.getItem('userBudgets') || '{}');
+  if (budgets[oldKey] !== undefined) {
+    delete budgets[oldKey];
+    localStorage.setItem('userBudgets', JSON.stringify(budgets));
+  }
 
   // Move gastos para "Outros"
   expenses.forEach(e => { if (e.categoria === name) e.categoria = 'Outros'; });
