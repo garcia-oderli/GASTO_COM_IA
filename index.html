@@ -217,8 +217,14 @@
   .modal-handle { width: 48px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 24px; }
   .modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; margin-bottom: 24px; letter-spacing: -0.02em; user-select: none; -webkit-user-select: none; }
   .modal-handle { user-select: none; -webkit-user-select: none; }
-  #detail-modal .modal { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-  #detail-modal .modal * { user-select: none; -webkit-user-select: none; }
+  .modal-overlay .modal { -webkit-touch-callout: none; }
+  .modal-overlay .modal label,
+  .modal-overlay .modal-title,
+  .modal-overlay .modal-handle,
+  .modal-overlay .detail-row,
+  .modal-overlay .detail-key,
+  .modal-overlay .detail-val,
+  .modal-overlay .detail-amount { user-select: none; -webkit-user-select: none; }
 
   /* ═══ IMAGE DROP ZONE ═══ */
   .drop-zone { border: 2px dashed var(--border2); border-radius: var(--radius-md); padding: 40px 24px; text-align: center; cursor: pointer; transition: all var(--animation-smooth); position: relative; overflow: hidden; background: var(--glass); }
@@ -246,7 +252,7 @@
   .ai-text { font-size: 14px; color: var(--accent3); font-weight: 500; }
 
   /* ═══ BUTTONS ═══ */
-  .btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 16px 24px; border-radius: var(--radius-sm); font-family: var(--font-display); font-size: 16px; font-weight: 700; cursor: pointer; border: none; transition: all var(--animation-smooth); text-align: center; min-height: 52px; letter-spacing: -0.01em; }
+  .btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 16px 24px; border-radius: var(--radius-sm); font-family: var(--font-display); font-size: 16px; font-weight: 700; cursor: pointer; border: none; transition: all var(--animation-smooth); text-align: center; min-height: 52px; letter-spacing: -0.01em; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
   .btn-primary { background: var(--accent); color: #ffffff; box-shadow: var(--shadow-md); }
   .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
   .btn-primary:active { transform: translateY(0); }
@@ -4123,12 +4129,18 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if(e.target===o) closeModal(o.id); });
 });
 
-// Garante que o botão Editar funcione mesmo com menu de seleção de texto aberto no Android
-document.getElementById('detail-edit-btn').addEventListener('touchstart', function(e) {
-  e.preventDefault();
-  if (window.getSelection) window.getSelection().removeAllRanges();
-  editExpenseOpen();
-}, { passive: false });
+// Garante que botões principais funcionem mesmo com popup Android aberto
+function bindTouchBtn(id, fn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    if (window.getSelection) window.getSelection().removeAllRanges();
+    fn();
+  }, { passive: false });
+}
+bindTouchBtn('detail-edit-btn', editExpenseOpen);
+bindTouchBtn('new-cat-save-btn', saveNewCategory);
 
 // Classificação automática ao digitar fornecedor
 document.getElementById('f-fornecedor').addEventListener('input', function() {
