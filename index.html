@@ -1240,6 +1240,14 @@
 
 
   <div class="settings-section">
+    <div class="settings-title">Categorias Personalizadas</div>
+    <div class="settings-card" id="custom-cat-settings">
+      <div style="color:var(--text4);font-size:13px;padding:8px 0;" id="custom-cat-empty">Nenhuma categoria criada ainda.</div>
+    </div>
+    <button type="button" onclick="openNewCategoryModal(null)" style="width:100%;margin-top:10px;padding:14px;background:rgba(245,166,35,0.1);border:1px dashed rgba(245,166,35,0.4);border-radius:var(--radius-md);color:var(--accent2);font-size:14px;font-weight:600;cursor:pointer;">➕ Nova Categoria</button>
+  </div>
+
+  <div class="settings-section">
     <div class="settings-title">Dados</div>
     <div class="settings-card">
       <div class="settings-row" onclick="importJSONFile()">
@@ -1570,11 +1578,12 @@
   </div>
 </div>
 
-<!-- ═══ NEW CATEGORY MODAL ═══ -->
+<!-- ═══ NEW/EDIT CATEGORY MODAL ═══ -->
 <div class="modal-overlay" id="new-cat-modal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Nova Categoria</div>
+    <div class="modal-title" id="new-cat-modal-title">Nova Categoria</div>
+    <input type="hidden" id="new-cat-editing">
     <div style="margin-top:18px;">
       <div class="field">
         <label>Emoji</label>
@@ -1585,7 +1594,7 @@
         <input type="text" id="new-cat-name" placeholder="Ex: Academia, Farmácia...">
       </div>
     </div>
-    <button type="button" class="btn btn-primary" onclick="saveNewCategory()">Criar Categoria</button>
+    <button type="button" class="btn btn-primary" id="new-cat-save-btn" onclick="saveNewCategory()">Criar Categoria</button>
     <button type="button" class="btn btn-secondary" onclick="cancelNewCategory()">Cancelar</button>
   </div>
 </div>
@@ -1874,10 +1883,26 @@ let _newCatFromSelect = null;
 
 function openNewCategoryModal(fromSelectId) {
   _newCatFromSelect = fromSelectId || null;
+  document.getElementById('new-cat-editing').value = '';
   document.getElementById('new-cat-emoji').value = '';
   document.getElementById('new-cat-name').value = '';
+  document.getElementById('new-cat-modal-title').textContent = 'Nova Categoria';
+  document.getElementById('new-cat-save-btn').textContent = 'Criar Categoria';
   document.getElementById('new-cat-modal').classList.add('open');
   setTimeout(() => document.getElementById('new-cat-emoji').focus(), 200);
+}
+
+function openEditCategoryModal(oldName) {
+  const cat = customCategories.find(c => c.name === oldName);
+  if (!cat) return;
+  _newCatFromSelect = null;
+  document.getElementById('new-cat-editing').value = oldName;
+  document.getElementById('new-cat-emoji').value = cat.emoji;
+  document.getElementById('new-cat-name').value = cat.name;
+  document.getElementById('new-cat-modal-title').textContent = 'Editar Categoria';
+  document.getElementById('new-cat-save-btn').textContent = 'Salvar Alterações';
+  document.getElementById('new-cat-modal').classList.add('open');
+  setTimeout(() => document.getElementById('new-cat-name').focus(), 200);
 }
 
 function cancelNewCategory() {
@@ -1891,7 +1916,35 @@ function cancelNewCategory() {
 function saveNewCategory() {
   const name = document.getElementById('new-cat-name').value.trim();
   const emoji = document.getElementById('new-cat-emoji').value.trim() || '📌';
+  const editing = document.getElementById('new-cat-editing').value;
+
   if (!name) { showToast('⚠️ Informe o nome da categoria'); return; }
+
+  if (editing) {
+    // Modo edição: atualiza categoria existente
+    const idx = customCategories.findIndex(c => c.name === editing);
+    if (idx === -1) return;
+    const oldEmoji = customCategories[idx].emoji;
+    customCategories[idx] = { name, emoji, color: '#9ca3af' };
+    localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+
+    // Atualiza constantes
+    delete CAT_ICONS[editing]; delete CAT_KEYS[editing]; delete CAT_COLORS[editing];
+    const key = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'custom';
+    CAT_ICONS[name] = emoji; CAT_KEYS[name] = key; CAT_COLORS[name] = '#9ca3af';
+
+    // Atualiza gastos que usavam o nome antigo
+    expenses.forEach(e => { if (e.categoria === editing) e.categoria = name; });
+    saveExpenses();
+
+    refreshCategorySelects();
+    refreshCategoryChips();
+    renderCategoriesSettings();
+    closeModal('new-cat-modal');
+    showToast(`✓ Categoria atualizada para "${name}"!`);
+    return;
+  }
+
   if (CAT_ICONS[name]) { showToast('⚠️ Categoria já existe'); return; }
 
   const cat = { name, emoji, color: '#9ca3af' };
@@ -1899,12 +1952,11 @@ function saveNewCategory() {
   localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
 
   const key = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'custom';
-  CAT_ICONS[name] = emoji;
-  CAT_KEYS[name] = key;
-  CAT_COLORS[name] = '#9ca3af';
+  CAT_ICONS[name] = emoji; CAT_KEYS[name] = key; CAT_COLORS[name] = '#9ca3af';
 
   refreshCategorySelects();
   refreshCategoryChips();
+  renderCategoriesSettings();
 
   if (_newCatFromSelect) {
     const sel = document.getElementById(_newCatFromSelect);
@@ -1913,6 +1965,47 @@ function saveNewCategory() {
 
   closeModal('new-cat-modal');
   showToast(`✓ Categoria "${name}" criada!`);
+}
+
+function deleteCustomCategory(name) {
+  if (!confirm(`Excluir a categoria "${name}"? Gastos nessa categoria serão movidos para "Outros".`)) return;
+
+  // Move gastos para "Outros"
+  expenses.forEach(e => { if (e.categoria === name) e.categoria = 'Outros'; });
+  saveExpenses();
+
+  customCategories = customCategories.filter(c => c.name !== name);
+  localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+  delete CAT_ICONS[name]; delete CAT_KEYS[name]; delete CAT_COLORS[name];
+
+  refreshCategorySelects();
+  refreshCategoryChips();
+  renderCategoriesSettings();
+  renderHome();
+  renderAll();
+  showToast(`🗑️ Categoria "${name}" removida`);
+}
+
+function renderCategoriesSettings() {
+  const container = document.getElementById('custom-cat-settings');
+  if (!container) return;
+  const empty = document.getElementById('custom-cat-empty');
+  if (!customCategories.length) {
+    container.innerHTML = '<div style="color:var(--text4);font-size:13px;padding:8px 0;" id="custom-cat-empty">Nenhuma categoria criada ainda.</div>';
+    return;
+  }
+  container.innerHTML = customCategories.map(cat => `
+    <div class="settings-row" style="justify-content:space-between;">
+      <div class="settings-row-left">
+        <div class="settings-row-icon" style="background:rgba(245,166,35,0.12);font-size:18px;">${cat.emoji}</div>
+        <div class="settings-row-label">${cat.name}</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button type="button" onclick="openEditCategoryModal('${cat.name.replace(/'/g,"\\'")}')" style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--accent2);">✏️</button>
+        <button type="button" onclick="deleteCustomCategory('${cat.name.replace(/'/g,"\\'")}')" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--red-solid);">🗑️</button>
+      </div>
+    </div>
+  `).join('');
 }
 
 // ─── Classificação Automática ───────────────────────────────────────
@@ -5252,6 +5345,7 @@ function init() {
   loadCustomCategories();
   refreshCategorySelects();
   refreshCategoryChips();
+  renderCategoriesSettings();
   renderHome();
   const savedKey = getApiKey();
   if (savedKey) document.getElementById('api-key-input').value = savedKey;
