@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" id="manifest-placeholder">
-<title>GastosIA - Smart Finance v3.1</title>
+<title>GastosIA - Smart Finance v3.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -693,7 +693,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v3.1</span>
+    <span class="logo-version">v3.2</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1303,7 +1303,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v3.1.0</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v3.2.0</div>
       </div>
     </div>
   </div>
@@ -4906,7 +4906,7 @@ function exportJSON() {
   const orcamento = getOrcamento();
   
   const backup = {
-    version: '3.1',
+    version: '3.2',
     exportadoEm: new Date().toISOString(),
     resumo: {
       totalGastos: monthTotal.toFixed(2),
@@ -5578,11 +5578,11 @@ const manifest = {
   description: 'Controle financeiro inteligente com IA',
   start_url: '.',
   display: 'standalone',
-  background_color: '#111111',
+  background_color: '#F5A623',
   theme_color: '#F5A623',
   orientation: 'portrait',
   icons: [{
-    src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzExMTExMSIvPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSI1MTIiIGhlaWdodD0iMjAiIGZpbGw9IiNGNUE2MjMiIHJ4PSI0Ii8+PHRleHQgeD0iMjU2IiB5PSIyOTAiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjayxzYW5zLXNlcmlmIiBmb250LXNpemU9IjIwMCIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI0Y1QTYyMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+UiQ8L3RleHQ+PHJlY3QgeD0iNjAiIHk9IjQwMCIgd2lkdGg9IjU1IiBoZWlnaHQ9IjI1IiBmaWxsPSIjMkEyQTJBIiByeD0iNCIvPjxyZWN0IHg9IjEzMCIgeT0iMzY4IiB3aWR0aD0iNTUiIGhlaWdodD0iNTciIGZpbGw9IiNGNUE2MjMiIHJ4PSI0Ii8+PHJlY3QgeD0iMjAwIiB5PSIzODUiIHdpZHRoPSI1NSIgaGVpZ2h0PSI0MCIgZmlsbD0iIzJBMkEyQSIgcng9IjQiLz48cmVjdCB4PSIyNzAiIHk9IjM1MCIgd2lkdGg9IjU1IiBoZWlnaHQ9Ijc1IiBmaWxsPSIjRjVBNjIzIiByeD0iNCIvPjxwb2x5Z29uIHBvaW50cz0iMjk3LDMyMCAzMjUsMzUwIDI2OSwzNTAiIGZpbGw9IiNGNUE2MjMiLz48L3N2Zz4=",
+    src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iI0Y1QTYyMyIvPjx0ZXh0IHg9IjI1NiIgeT0iMjcwIiBmb250LWZhbWlseT0iQXJpYWwgQmxhY2ssc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMjAiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMxMTExMTEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPlIkPC90ZXh0PjxyZWN0IHg9IjcwIiB5PSIzOTAiIHdpZHRoPSI2MCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzExMTExMSIgcng9IjUiLz48cmVjdCB4PSIxNTAiIHk9IjM1NSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjY1IiBmaWxsPSIjMWExYTFhIiByeD0iNSIvPjxyZWN0IHg9IjIzMCIgeT0iMzc1IiB3aWR0aD0iNjAiIGhlaWdodD0iNDUiIGZpbGw9IiMxMTExMTEiIHJ4PSI1Ii8+PHJlY3QgeD0iMzEwIiB5PSIzMzAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI5MCIgZmlsbD0iIzFhMWExYSIgcng9IjUiLz48cG9seWdvbiBwb2ludHM9IjM0MCwzMDAgMzcwLDMzMCAzMTAsMzMwIiBmaWxsPSIjMWExYTFhIi8+PC9zdmc+",
     sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable'
   }]
 };
@@ -5786,7 +5786,7 @@ const manifestBlob = new Blob([JSON.stringify(manifest)],{type:'application/json
 document.getElementById('manifest-placeholder').href = URL.createObjectURL(manifestBlob);
 
 if ('serviceWorker' in navigator) {
-  const swCode = `const CACHE='gastosIA-v3.1';self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['.']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+  const swCode = `const CACHE='gastosIA-v3.2';self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['.']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
   const swBlob = new Blob([swCode],{type:'application/javascript'});
   navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 }
