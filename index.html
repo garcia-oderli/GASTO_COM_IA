@@ -2033,8 +2033,9 @@ function saveNewCategory() {
 
     // Migra gastos
     if (currentName !== name) {
-      expenses.forEach(e => { if (e.categoria === currentName) e.categoria = name; });
-      saveExpenses();
+      const affected = expenses.filter(e => e.categoria === currentName);
+      affected.forEach(e => { e.categoria = name; });
+      if (affected.length > 0) affected.forEach(e => supaSaveExpense(e));
     }
 
     refreshCategorySelects();
@@ -2069,8 +2070,9 @@ function saveNewCategory() {
     }
 
     // Atualiza gastos que usavam o nome antigo
-    expenses.forEach(e => { if (e.categoria === editing) e.categoria = name; });
-    saveExpenses();
+    const affected = expenses.filter(e => e.categoria === editing);
+    affected.forEach(e => { e.categoria = name; });
+    if (affected.length > 0) affected.forEach(e => supaSaveExpense(e));
 
     refreshCategorySelects();
     refreshCategoryChips();
@@ -2115,8 +2117,9 @@ function deleteCustomCategory(name) {
   }
 
   // Move gastos para "Outros"
-  expenses.forEach(e => { if (e.categoria === name) e.categoria = 'Outros'; });
-  saveExpenses();
+  const moved = expenses.filter(e => e.categoria === name);
+  moved.forEach(e => { e.categoria = 'Outros'; });
+  if (moved.length > 0) moved.forEach(e => supaSaveExpense(e));
 
   customCategories = customCategories.filter(c => c.name !== name);
   localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
@@ -4839,18 +4842,21 @@ function updateExpense() {
     };
     
     // Usar API segura de atualização
-    const result = DataLayerManager.updateExpense(currentEditId, updates);
-    saveExpenses();
+    const savedId = currentEditId;
+    DataLayerManager.updateExpense(savedId, updates);
     closeModal('edit-modal');
     renderHome();
     renderAll();
-    showToast('✓ Gasto atualizado!');
-    
+    showToast('✓ Salvando...');
+
     // Invalida cache
     cachedInsights = null;
     localStorage.removeItem(INSIGHTS_KEY);
-    
     currentEditId = null;
+
+    // Persiste no Supabase e recarrega
+    const updated = expenses.find(e => e.id === savedId);
+    if (updated) supaSaveExpense(updated).then(() => supaLoadAll());
   } catch (err) {
     showToast('❌ Erro ao atualizar: ' + err.message);
     console.error('Erro ao atualizar gasto:', err);
