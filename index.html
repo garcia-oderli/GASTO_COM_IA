@@ -6193,28 +6193,39 @@ function renderRelatorio() {
       var cat = entry[0], val = entry[1];
       var pct = totalGastos > 0 ? (val/totalGastos*100) : 0;
       var cor = CAT_COLORS[cat] || '#888888';
-      html += '<div style="margin-bottom:10px;">';
-      html += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:13px;color:#F5F5F5;">' + cat + '</span><div style="text-align:right;"><span style="font-size:13px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(val) + '</span><span style="font-size:10px;color:#555;margin-left:6px;">' + pct.toFixed(0) + '%</span></div></div>';
-      html += '<div style="height:4px;background:#2A2A2A;border-radius:2px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + cor + ';border-radius:2px;"></div></div>';
+      var icon = CAT_ICONS[cat] || '📦';
+      var qtd = gastosMes.filter(function(e){ return e.categoria === cat; }).length;
+      html += '<div style="margin-bottom:12px;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+      html += '<span style="font-size:14px;color:#F5F5F5;">' + icon + ' ' + cat + '<span style="font-size:10px;color:#555;margin-left:6px;">' + qtd + ' lançamento' + (qtd>1?'s':'') + '</span></span>';
+      html += '<div style="text-align:right;"><span style="font-size:13px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(val) + '</span><span style="font-size:10px;color:#555;margin-left:6px;">' + pct.toFixed(0) + '%</span></div>';
+      html += '</div>';
+      html += '<div style="height:5px;background:#2A2A2A;border-radius:3px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + cor + ';border-radius:3px;"></div></div>';
       html += '</div>';
     });
     html += '</div>';
   }
 
-  // Lançamentos
+  // Lançamentos agrupados por categoria
   if (gastosMes.length > 0) {
     html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;overflow:hidden;margin-bottom:20px;">';
-    html += '<div style="padding:14px 16px;border-bottom:1px solid #2A2A2A;"><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#F5A623;">Lançamentos (' + gastosMes.length + ')</div></div>';
-    diasOrdenados.forEach(function(dia) {
-      var itens = porDia[dia];
-      var totalDia = itens.reduce(function(s,e){ return s+Number(e.valor); }, 0);
-      var parts = dia.split('-');
-      var dataFmt = parts[2]+'/'+parts[1]+'/'+parts[0];
+    html += '<div style="padding:14px 16px;border-bottom:1px solid #2A2A2A;"><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#F5A623;">Lançamentos por Categoria (' + gastosMes.length + ')</div></div>';
+    cats.forEach(function(entry) {
+      var cat = entry[0];
+      var icon = CAT_ICONS[cat] || '📦';
+      var cor = CAT_COLORS[cat] || '#888';
+      var itenscat = gastosMes.filter(function(e){ return e.categoria === cat; }).sort(function(a,b){ return b.data.localeCompare(a.data); });
+      var totalCat = itenscat.reduce(function(s,e){ return s+Number(e.valor); }, 0);
       html += '<div style="border-bottom:1px solid #1A1A1A;">';
-      html += '<div style="display:flex;justify-content:space-between;padding:8px 16px;background:#222222;"><span style="font-size:11px;color:#888;font-family:IBM Plex Mono,monospace;">' + dataFmt + '</span><span style="font-size:11px;color:#888;font-family:IBM Plex Mono,monospace;">' + fmt(totalDia) + '</span></div>';
-      itens.forEach(function(e) {
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#222;">';
+      html += '<span style="font-size:12px;font-weight:700;color:' + cor + ';">' + icon + ' ' + cat + '</span>';
+      html += '<span style="font-size:12px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:700;">' + fmt(totalCat) + '</span>';
+      html += '</div>';
+      itenscat.forEach(function(e) {
+        var parts = e.data.split('-');
+        var dataFmt = parts[2]+'/'+parts[1];
         html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-top:1px solid #1A1A1A;">';
-        html += '<div><div style="font-size:13px;color:#F5F5F5;">' + (e.fornecedor||e.categoria||'—') + '</div><div style="font-size:11px;color:#888;">' + e.categoria + (e.pagamento?' · '+e.pagamento:'') + '</div></div>';
+        html += '<div><div style="font-size:13px;color:#F5F5F5;">' + (e.fornecedor||e.categoria||'—') + '</div><div style="font-size:11px;color:#666;">' + dataFmt + (e.pagamento?' · '+e.pagamento:'') + '</div></div>';
         html += '<span style="font-size:14px;color:#F44336;font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(e.valor) + '</span>';
         html += '</div>';
       });
