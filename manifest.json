@@ -9,8 +9,14 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iI0Y1QTYyMyIvPjx0ZXh0IHg9IjI1NiIgeT0iMjcwIiBmb250LWZhbWlseT0iQXJpYWwgQmxhY2ssc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMjAiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMxMTExMTEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPlIkPC90ZXh0PjxyZWN0IHg9IjcwIiB5PSIzOTAiIHdpZHRoPSI2MCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzExMTExMSIgcng9IjUiLz48cmVjdCB4PSIxNTAiIHk9IjM1NSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjY1IiBmaWxsPSIjMWExYTFhIiByeD0iNSIvPjxyZWN0IHg9IjIzMCIgeT0iMzc1IiB3aWR0aD0iNjAiIGhlaWdodD0iNDUiIGZpbGw9IiMxMTExMTEiIHJ4PSI1Ii8+PHJlY3QgeD0iMzEwIiB5PSIzMzAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI5MCIgZmlsbD0iIzFhMWExYSIgcng9IjUiLz48cG9seWdvbiBwb2ludHM9IjM0MCwzMDAgMzcwLDMzMCAzMTAsMzMwIiBmaWxsPSIjMWExYTFhIi8+PC9zdmc+",
+      "src": "/icon.svg",
       "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
