@@ -217,7 +217,8 @@
   .modal-handle { width: 48px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 24px; }
   .modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; margin-bottom: 24px; letter-spacing: -0.02em; user-select: none; -webkit-user-select: none; }
   .modal-handle { user-select: none; -webkit-user-select: none; }
-  .detail-row, .detail-key, .detail-amount { user-select: none; -webkit-user-select: none; }
+  #detail-modal .modal { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  #detail-modal .modal * { user-select: none; -webkit-user-select: none; }
 
   /* ═══ IMAGE DROP ZONE ═══ */
   .drop-zone { border: 2px dashed var(--border2); border-radius: var(--radius-md); padding: 40px 24px; text-align: center; cursor: pointer; transition: all var(--animation-smooth); position: relative; overflow: hidden; background: var(--glass); }
@@ -1510,8 +1511,8 @@
     <div class="modal-title" id="detail-title">Detalhe do Gasto</div>
     <div id="detail-body"></div>
     <div style="display:flex;gap:8px;margin-top:16px;">
-      <button type="button" class="btn btn-secondary" style="flex:1;" id="detail-edit-btn" onclick="editExpenseOpen()">✏️ Editar</button>
-      <button type="button" class="btn btn-secondary" style="flex:1;color:var(--red-solid);border-color:rgba(239,68,68,0.3);" id="detail-delete-btn">🗑️ Excluir</button>
+      <button type="button" class="btn btn-secondary" style="flex:1;touch-action:manipulation;" id="detail-edit-btn" onclick="editExpenseOpen()">✏️ Editar</button>
+      <button type="button" class="btn btn-secondary" style="flex:1;color:var(--red-solid);border-color:rgba(239,68,68,0.3);touch-action:manipulation;" id="detail-delete-btn">🗑️ Excluir</button>
     </div>
     <button type="button" class="btn btn-secondary" style="width:100%;" onclick="closeModal('detail-modal')">Fechar</button>
   </div>
@@ -4121,6 +4122,13 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if(e.target===o) closeModal(o.id); });
 });
+
+// Garante que o botão Editar funcione mesmo com menu de seleção de texto aberto no Android
+document.getElementById('detail-edit-btn').addEventListener('touchstart', function(e) {
+  e.preventDefault();
+  if (window.getSelection) window.getSelection().removeAllRanges();
+  editExpenseOpen();
+}, { passive: false });
 
 // Classificação automática ao digitar fornecedor
 document.getElementById('f-fornecedor').addEventListener('input', function() {
