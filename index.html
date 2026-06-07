@@ -215,7 +215,9 @@
   .modal { background: var(--bg-solid); border: 1px solid var(--glass-border); border-radius: 28px 28px 0 0; width: 100%; max-width: 500px; padding: 28px 24px max(28px, env(safe-area-inset-bottom)); max-height: 90dvh; overflow-y: auto; transform: translateY(100%); transition: transform var(--animation-bounce); box-shadow: var(--shadow-xl); }
   .modal-overlay.open .modal { transform: translateY(0); }
   .modal-handle { width: 48px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 24px; }
-  .modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; margin-bottom: 24px; letter-spacing: -0.02em; }
+  .modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; margin-bottom: 24px; letter-spacing: -0.02em; user-select: none; -webkit-user-select: none; }
+  .modal-handle { user-select: none; -webkit-user-select: none; }
+  .detail-row, .detail-key, .detail-amount { user-select: none; -webkit-user-select: none; }
 
   /* ═══ IMAGE DROP ZONE ═══ */
   .drop-zone { border: 2px dashed var(--border2); border-radius: var(--radius-md); padding: 40px 24px; text-align: center; cursor: pointer; transition: all var(--animation-smooth); position: relative; overflow: hidden; background: var(--glass); }
@@ -4516,9 +4518,13 @@ function editExpenseOpen() {
   if (!currentDetailId) return;
   const e = expenses.find(x => x.id === currentDetailId);
   if (!e) return;
-  
+
   currentEditId = currentDetailId;
-  
+
+  // Limpa seleção de texto para evitar popup do Google no Android
+  if (window.getSelection) window.getSelection().removeAllRanges();
+  if (document.activeElement) document.activeElement.blur();
+
   // Preenche os campos com os dados atuais
   document.getElementById('e-valor').value = e.valor;
   document.getElementById('e-data').value = e.data;
@@ -4526,7 +4532,7 @@ function editExpenseOpen() {
   document.getElementById('e-fornecedor').value = e.fornecedor || '';
   document.getElementById('e-pagamento').value = e.pagamento || '';
   document.getElementById('e-descricao').value = e.descricao || '';
-  
+
   closeModal('detail-modal');
   document.getElementById('edit-modal').classList.add('open');
 }
