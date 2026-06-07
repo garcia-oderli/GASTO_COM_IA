@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" id="manifest-placeholder">
-<title>GastosIA - Smart Finance v3.0</title>
+<title>GastosIA - Smart Finance v3.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -217,7 +217,14 @@
   .modal-handle { width: 48px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 24px; }
   .modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; margin-bottom: 24px; letter-spacing: -0.02em; user-select: none; -webkit-user-select: none; }
   .modal-handle { user-select: none; -webkit-user-select: none; }
-  .detail-row, .detail-key, .detail-amount { user-select: none; -webkit-user-select: none; }
+  .modal-overlay .modal { -webkit-touch-callout: none; }
+  .modal-overlay .modal label,
+  .modal-overlay .modal-title,
+  .modal-overlay .modal-handle,
+  .modal-overlay .detail-row,
+  .modal-overlay .detail-key,
+  .modal-overlay .detail-val,
+  .modal-overlay .detail-amount { user-select: none; -webkit-user-select: none; }
 
   /* ═══ IMAGE DROP ZONE ═══ */
   .drop-zone { border: 2px dashed var(--border2); border-radius: var(--radius-md); padding: 40px 24px; text-align: center; cursor: pointer; transition: all var(--animation-smooth); position: relative; overflow: hidden; background: var(--glass); }
@@ -245,7 +252,9 @@
   .ai-text { font-size: 14px; color: var(--accent3); font-weight: 500; }
 
   /* ═══ BUTTONS ═══ */
-  .btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 16px 24px; border-radius: var(--radius-sm); font-family: var(--font-display); font-size: 16px; font-weight: 700; cursor: pointer; border: none; transition: all var(--animation-smooth); text-align: center; min-height: 52px; letter-spacing: -0.01em; }
+  .btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 16px 24px; border-radius: var(--radius-sm); font-family: var(--font-display); font-size: 16px; font-weight: 700; cursor: pointer; border: none; transition: all var(--animation-smooth); text-align: center; min-height: 52px; letter-spacing: -0.01em; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .emoji-pick-btn { background: var(--surface); border: 1px solid var(--glass-border); border-radius: 8px; padding: 8px; font-size: 22px; cursor: pointer; touch-action: manipulation; line-height: 1; transition: transform 0.1s; }
+  .emoji-pick-btn:active { transform: scale(0.9); background: var(--surface2); }
   .btn-primary { background: var(--accent); color: #ffffff; box-shadow: var(--shadow-md); }
   .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
   .btn-primary:active { transform: translateY(0); }
@@ -684,7 +693,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v3.0</span>
+    <span class="logo-version">v3.1</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -968,97 +977,97 @@
       <div style="font-size:13px; color:var(--text4); margin-bottom:20px;">Ajuste os sliders para garantir que o total seja 100%. Valores acima de 100% serão destacados em vermelho.</div>
       
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🏠 Moradia</span>
+        <span id="budget-label-moradia" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🏠 Moradia</span>
         <input type="range" id="budget-moradia" min="0" max="50" value="30" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-moradia-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">30%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🍽 Alimentação</span>
+        <span id="budget-label-alimentacao" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🍽 Alimentação</span>
         <input type="range" id="budget-alimentacao" min="0" max="30" value="15" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-alimentacao-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">15%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🚗 Transporte</span>
+        <span id="budget-label-transporte" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🚗 Transporte</span>
         <input type="range" id="budget-transporte" min="0" max="25" value="10" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-transporte-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">10%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🏥 Saúde</span>
+        <span id="budget-label-saude" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🏥 Saúde</span>
         <input type="range" id="budget-saude" min="0" max="20" value="8" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-saude-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">8%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🎮 Lazer</span>
+        <span id="budget-label-lazer" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🎮 Lazer</span>
         <input type="range" id="budget-lazer" min="0" max="20" value="8" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-lazer-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">8%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📚 Educação</span>
+        <span id="budget-label-educacao" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📚 Educação</span>
         <input type="range" id="budget-educacao" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-educacao-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🛡️ Seguros</span>
+        <span id="budget-label-seguros" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🛡️ Seguros</span>
         <input type="range" id="budget-seguros" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-seguros-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📱 Assinaturas</span>
+        <span id="budget-label-assinaturas" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📱 Assinaturas</span>
         <input type="range" id="budget-assinaturas" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-assinaturas-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">✈️ Viagem</span>
+        <span id="budget-label-viagem" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">✈️ Viagem</span>
         <input type="range" id="budget-viagem" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-viagem-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🛍️ Compras</span>
+        <span id="budget-label-compras" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🛍️ Compras</span>
         <input type="range" id="budget-compras" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-compras-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">💅 Beleza</span>
+        <span id="budget-label-beleza" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">💅 Beleza</span>
         <input type="range" id="budget-beleza" min="0" max="10" value="3" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-beleza-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">3%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🐾 Pets</span>
+        <span id="budget-label-pets" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🐾 Pets</span>
         <input type="range" id="budget-pets" min="0" max="10" value="2" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-pets-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">2%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🎁 Presentes</span>
+        <span id="budget-label-presentes" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">🎁 Presentes</span>
         <input type="range" id="budget-presentes" min="0" max="10" value="3" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-presentes-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">3%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">💳 Dívidas</span>
+        <span id="budget-label-dividas" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">💳 Dívidas</span>
         <input type="range" id="budget-dividas" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-dividas-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📈 Investimentos</span>
+        <span id="budget-label-investimentos" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📈 Investimentos</span>
         <input type="range" id="budget-investimentos" min="0" max="25" value="10" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-investimentos-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">10%</span>
       </div>
-      
+
       <div class="budget-item" style="margin-bottom:16px; display:flex; align-items:center; gap:12px;">
-        <span style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📦 Outros</span>
+        <span id="budget-label-outros" style="width:120px; font-size:14px; font-weight:600; color:var(--text);">📦 Outros</span>
         <input type="range" id="budget-outros" min="0" max="15" value="5" step="1" style="flex:1;" onchange="updateTotalPercent()">
         <span id="budget-outros-val" style="width:50px; text-align:right; font-family:var(--font-mono); font-size:14px; color:var(--text2);">5%</span>
       </div>
@@ -1240,6 +1249,14 @@
 
 
   <div class="settings-section">
+    <div class="settings-title">Categorias Personalizadas</div>
+    <div class="settings-card" id="custom-cat-settings">
+      <div style="color:var(--text4);font-size:13px;padding:8px 0;" id="custom-cat-empty">Nenhuma categoria criada ainda.</div>
+    </div>
+    <button type="button" onclick="openNewCategoryModal(null)" style="width:100%;margin-top:10px;padding:14px;background:rgba(245,166,35,0.1);border:1px dashed rgba(245,166,35,0.4);border-radius:var(--radius-md);color:var(--accent2);font-size:14px;font-weight:600;cursor:pointer;">➕ Nova Categoria</button>
+  </div>
+
+  <div class="settings-section">
     <div class="settings-title">Dados</div>
     <div class="settings-card">
       <div class="settings-row" onclick="importJSONFile()">
@@ -1286,7 +1303,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v3.0.0</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v3.1.0</div>
       </div>
     </div>
   </div>
@@ -1502,8 +1519,8 @@
     <div class="modal-title" id="detail-title">Detalhe do Gasto</div>
     <div id="detail-body"></div>
     <div style="display:flex;gap:8px;margin-top:16px;">
-      <button type="button" class="btn btn-secondary" style="flex:1;" id="detail-edit-btn" onclick="editExpenseOpen()">✏️ Editar</button>
-      <button type="button" class="btn btn-secondary" style="flex:1;color:var(--red-solid);border-color:rgba(239,68,68,0.3);" id="detail-delete-btn">🗑️ Excluir</button>
+      <button type="button" class="btn btn-secondary" style="flex:1;touch-action:manipulation;" id="detail-edit-btn" onclick="editExpenseOpen()">✏️ Editar</button>
+      <button type="button" class="btn btn-secondary" style="flex:1;color:var(--red-solid);border-color:rgba(239,68,68,0.3);touch-action:manipulation;" id="detail-delete-btn">🗑️ Excluir</button>
     </div>
     <button type="button" class="btn btn-secondary" style="width:100%;" onclick="closeModal('detail-modal')">Fechar</button>
   </div>
@@ -1570,22 +1587,61 @@
   </div>
 </div>
 
-<!-- ═══ NEW CATEGORY MODAL ═══ -->
+<!-- ═══ NEW/EDIT CATEGORY MODAL ═══ -->
 <div class="modal-overlay" id="new-cat-modal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Nova Categoria</div>
+    <div class="modal-title" id="new-cat-modal-title">Nova Categoria</div>
+    <input type="hidden" id="new-cat-editing">
     <div style="margin-top:18px;">
       <div class="field">
         <label>Emoji</label>
-        <input type="text" id="new-cat-emoji" placeholder="Ex: 🏋️" maxlength="4" style="font-size:22px;text-align:center;letter-spacing:4px;">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+          <!-- Grade de emojis rápidos -->
+          <div id="emoji-grid" style="display:flex;flex-wrap:wrap;gap:6px;">
+            <!-- Alimentação / Compras -->
+            <button type="button" onclick="pickEmoji(this,'🍽')" class="emoji-pick-btn">🍽</button>
+            <button type="button" onclick="pickEmoji(this,'🍔')" class="emoji-pick-btn">🍔</button>
+            <button type="button" onclick="pickEmoji(this,'🍕')" class="emoji-pick-btn">🍕</button>
+            <button type="button" onclick="pickEmoji(this,'🍣')" class="emoji-pick-btn">🍣</button>
+            <button type="button" onclick="pickEmoji(this,'🧃')" class="emoji-pick-btn">🧃</button>
+            <button type="button" onclick="pickEmoji(this,'☕')" class="emoji-pick-btn">☕</button>
+            <button type="button" onclick="pickEmoji(this,'🛒')" class="emoji-pick-btn">🛒</button>
+            <button type="button" onclick="pickEmoji(this,'🛍')" class="emoji-pick-btn">🛍</button>
+            <!-- Transporte / Casa -->
+            <button type="button" onclick="pickEmoji(this,'🚗')" class="emoji-pick-btn">🚗</button>
+            <button type="button" onclick="pickEmoji(this,'⛽')" class="emoji-pick-btn">⛽</button>
+            <button type="button" onclick="pickEmoji(this,'🏠')" class="emoji-pick-btn">🏠</button>
+            <button type="button" onclick="pickEmoji(this,'💡')" class="emoji-pick-btn">💡</button>
+            <!-- Saúde / Beleza -->
+            <button type="button" onclick="pickEmoji(this,'🏥')" class="emoji-pick-btn">🏥</button>
+            <button type="button" onclick="pickEmoji(this,'💊')" class="emoji-pick-btn">💊</button>
+            <button type="button" onclick="pickEmoji(this,'💅')" class="emoji-pick-btn">💅</button>
+            <button type="button" onclick="pickEmoji(this,'🏋️')" class="emoji-pick-btn">🏋️</button>
+            <!-- Lazer / Educação -->
+            <button type="button" onclick="pickEmoji(this,'🎮')" class="emoji-pick-btn">🎮</button>
+            <button type="button" onclick="pickEmoji(this,'🎬')" class="emoji-pick-btn">🎬</button>
+            <button type="button" onclick="pickEmoji(this,'📚')" class="emoji-pick-btn">📚</button>
+            <button type="button" onclick="pickEmoji(this,'✈️')" class="emoji-pick-btn">✈️</button>
+            <!-- Finanças / Outros -->
+            <button type="button" onclick="pickEmoji(this,'💳')" class="emoji-pick-btn">💳</button>
+            <button type="button" onclick="pickEmoji(this,'💰')" class="emoji-pick-btn">💰</button>
+            <button type="button" onclick="pickEmoji(this,'📱')" class="emoji-pick-btn">📱</button>
+            <button type="button" onclick="pickEmoji(this,'🐾')" class="emoji-pick-btn">🐾</button>
+            <button type="button" onclick="pickEmoji(this,'🎁')" class="emoji-pick-btn">🎁</button>
+            <button type="button" onclick="pickEmoji(this,'🔧')" class="emoji-pick-btn">🔧</button>
+            <button type="button" onclick="pickEmoji(this,'🏫')" class="emoji-pick-btn">🏫</button>
+            <button type="button" onclick="pickEmoji(this,'👶')" class="emoji-pick-btn">👶</button>
+          </div>
+        </div>
+        <input type="text" id="new-cat-emoji" readonly inputmode="none" placeholder="selecione acima" maxlength="4" style="font-size:22px;text-align:center;letter-spacing:4px;pointer-events:none;cursor:default;user-select:none;-webkit-user-select:none;">
       </div>
       <div class="field">
         <label>Nome da Categoria *</label>
         <input type="text" id="new-cat-name" placeholder="Ex: Academia, Farmácia...">
       </div>
     </div>
-    <button type="button" class="btn btn-primary" onclick="saveNewCategory()">Criar Categoria</button>
+    <button type="button" class="btn btn-primary" id="new-cat-save-btn" onclick="saveNewCategory()">Criar Categoria</button>
     <button type="button" class="btn btn-secondary" onclick="cancelNewCategory()">Cancelar</button>
   </div>
 </div>
@@ -1829,6 +1885,9 @@ const CAT_COLORS = {
 const CUSTOM_CAT_KEY = 'gastosIA_customCategories';
 let customCategories = [];
 
+const NATIVE_CAT_OVERRIDES_KEY = 'gastosIA_nativeCatOverrides';
+// [{ catKey: 'alimentacao', name: 'Comida', emoji: '🍔' }]
+
 function loadCustomCategories() {
   try { customCategories = JSON.parse(localStorage.getItem(CUSTOM_CAT_KEY) || '[]'); } catch(e) { customCategories = []; }
   customCategories.forEach(cat => {
@@ -1837,6 +1896,32 @@ function loadCustomCategories() {
     CAT_KEYS[cat.name] = key;
     CAT_COLORS[cat.name] = cat.color || '#9ca3af';
   });
+  // Aplica overrides de categorias nativas
+  loadNativeCatOverrides();
+}
+
+function loadNativeCatOverrides() {
+  try {
+    const overrides = JSON.parse(localStorage.getItem(NATIVE_CAT_OVERRIDES_KEY) || '[]');
+    overrides.forEach(ov => {
+      // Acha o nome atual que aponta para esse catKey
+      const currentName = Object.keys(CAT_KEYS).find(k => CAT_KEYS[k] === ov.catKey);
+      if (currentName && currentName !== ov.name) {
+        const color = CAT_COLORS[currentName];
+        delete CAT_ICONS[currentName];
+        delete CAT_KEYS[currentName];
+        delete CAT_COLORS[currentName];
+        CAT_ICONS[ov.name] = ov.emoji;
+        CAT_KEYS[ov.name] = ov.catKey;
+        CAT_COLORS[ov.name] = color;
+      } else if (currentName) {
+        CAT_ICONS[currentName] = ov.emoji; // só emoji mudou
+      }
+      // Atualiza label do orçamento
+      const labelEl = document.getElementById(`budget-label-${ov.catKey}`);
+      if (labelEl) labelEl.textContent = `${ov.emoji} ${ov.name}`;
+    });
+  } catch(e) {}
 }
 
 function refreshCategorySelects() {
@@ -1872,12 +1957,41 @@ function refreshCategoryChips() {
 
 let _newCatFromSelect = null;
 
+function pickEmoji(btn, emoji) {
+  document.getElementById('new-cat-emoji').value = emoji;
+  document.querySelectorAll('.emoji-pick-btn').forEach(b => b.style.background = '');
+  if (btn) btn.style.background = 'rgba(245,166,35,0.25)';
+}
+
+function _highlightEmojiBtn(emoji) {
+  document.querySelectorAll('.emoji-pick-btn').forEach(b => {
+    b.style.background = b.textContent.trim() === emoji ? 'rgba(245,166,35,0.25)' : '';
+  });
+}
+
 function openNewCategoryModal(fromSelectId) {
   _newCatFromSelect = fromSelectId || null;
+  document.getElementById('new-cat-editing').value = '';
   document.getElementById('new-cat-emoji').value = '';
   document.getElementById('new-cat-name').value = '';
+  document.getElementById('new-cat-modal-title').textContent = 'Nova Categoria';
+  document.getElementById('new-cat-save-btn').textContent = 'Criar Categoria';
   document.getElementById('new-cat-modal').classList.add('open');
-  setTimeout(() => document.getElementById('new-cat-emoji').focus(), 200);
+  setTimeout(() => document.getElementById('new-cat-name').focus(), 300);
+}
+
+function openEditCategoryModal(oldName) {
+  const cat = customCategories.find(c => c.name === oldName);
+  if (!cat) return;
+  _newCatFromSelect = null;
+  document.getElementById('new-cat-editing').value = oldName;
+  document.getElementById('new-cat-emoji').value = cat.emoji;
+  document.getElementById('new-cat-name').value = cat.name;
+  document.getElementById('new-cat-modal-title').textContent = 'Editar Categoria';
+  document.getElementById('new-cat-save-btn').textContent = 'Salvar Alterações';
+  document.getElementById('new-cat-modal').classList.add('open');
+  _highlightEmojiBtn(cat.emoji);
+  setTimeout(() => document.getElementById('new-cat-name').focus(), 300);
 }
 
 function cancelNewCategory() {
@@ -1891,7 +2005,81 @@ function cancelNewCategory() {
 function saveNewCategory() {
   const name = document.getElementById('new-cat-name').value.trim();
   const emoji = document.getElementById('new-cat-emoji').value.trim() || '📌';
+  const editing = document.getElementById('new-cat-editing').value;
+
   if (!name) { showToast('⚠️ Informe o nome da categoria'); return; }
+
+  // Edição de categoria NATIVA
+  if (editing && editing.startsWith('native:')) {
+    const catKey = editing.replace('native:', '');
+    const currentName = Object.keys(CAT_KEYS).find(k => CAT_KEYS[k] === catKey);
+    if (!currentName) return;
+    const color = CAT_COLORS[currentName];
+
+    // Atualiza constantes em memória
+    delete CAT_ICONS[currentName]; delete CAT_KEYS[currentName]; delete CAT_COLORS[currentName];
+    CAT_ICONS[name] = emoji; CAT_KEYS[name] = catKey; CAT_COLORS[name] = color;
+
+    // Salva override persistente
+    const overrides = JSON.parse(localStorage.getItem(NATIVE_CAT_OVERRIDES_KEY) || '[]');
+    const idx = overrides.findIndex(o => o.catKey === catKey);
+    if (idx >= 0) overrides[idx] = { catKey, name, emoji };
+    else overrides.push({ catKey, name, emoji });
+    localStorage.setItem(NATIVE_CAT_OVERRIDES_KEY, JSON.stringify(overrides));
+
+    // Atualiza label do orçamento
+    const labelEl = document.getElementById(`budget-label-${catKey}`);
+    if (labelEl) labelEl.textContent = `${emoji} ${name}`;
+
+    // Migra gastos
+    if (currentName !== name) {
+      expenses.forEach(e => { if (e.categoria === currentName) e.categoria = name; });
+      saveExpenses();
+    }
+
+    refreshCategorySelects();
+    refreshCategoryChips();
+    renderCategoriesSettings();
+    closeModal('new-cat-modal');
+    showToast(`✓ Categoria atualizada para "${name}"!`);
+    return;
+  }
+
+  if (editing) {
+    // Modo edição: atualiza categoria existente
+    const idx = customCategories.findIndex(c => c.name === editing);
+    if (idx === -1) return;
+    const oldKey = CAT_KEYS[editing]; // captura antes de deletar
+    customCategories[idx] = { name, emoji, color: '#9ca3af' };
+    localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+
+    // Atualiza constantes
+    delete CAT_ICONS[editing]; delete CAT_KEYS[editing]; delete CAT_COLORS[editing];
+    const newKey = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'custom';
+    CAT_ICONS[name] = emoji; CAT_KEYS[name] = newKey; CAT_COLORS[name] = '#9ca3af';
+
+    // Migra orçamento: renomeia a chave de oldKey para newKey
+    if (oldKey !== newKey) {
+      const budgets = JSON.parse(localStorage.getItem('userBudgets') || '{}');
+      if (budgets[oldKey] !== undefined) {
+        budgets[newKey] = budgets[oldKey];
+        delete budgets[oldKey];
+        localStorage.setItem('userBudgets', JSON.stringify(budgets));
+      }
+    }
+
+    // Atualiza gastos que usavam o nome antigo
+    expenses.forEach(e => { if (e.categoria === editing) e.categoria = name; });
+    saveExpenses();
+
+    refreshCategorySelects();
+    refreshCategoryChips();
+    renderCategoriesSettings();
+    closeModal('new-cat-modal');
+    showToast(`✓ Categoria atualizada para "${name}"!`);
+    return;
+  }
+
   if (CAT_ICONS[name]) { showToast('⚠️ Categoria já existe'); return; }
 
   const cat = { name, emoji, color: '#9ca3af' };
@@ -1899,12 +2087,11 @@ function saveNewCategory() {
   localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
 
   const key = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'custom';
-  CAT_ICONS[name] = emoji;
-  CAT_KEYS[name] = key;
-  CAT_COLORS[name] = '#9ca3af';
+  CAT_ICONS[name] = emoji; CAT_KEYS[name] = key; CAT_COLORS[name] = '#9ca3af';
 
   refreshCategorySelects();
   refreshCategoryChips();
+  renderCategoriesSettings();
 
   if (_newCatFromSelect) {
     const sel = document.getElementById(_newCatFromSelect);
@@ -1913,6 +2100,83 @@ function saveNewCategory() {
 
   closeModal('new-cat-modal');
   showToast(`✓ Categoria "${name}" criada!`);
+}
+
+function deleteCustomCategory(name) {
+  if (!confirm(`Excluir a categoria "${name}"? Gastos nessa categoria serão movidos para "Outros".`)) return;
+
+  const oldKey = CAT_KEYS[name]; // captura antes de deletar
+
+  // Remove orçamento planejado desta categoria
+  const budgets = JSON.parse(localStorage.getItem('userBudgets') || '{}');
+  if (budgets[oldKey] !== undefined) {
+    delete budgets[oldKey];
+    localStorage.setItem('userBudgets', JSON.stringify(budgets));
+  }
+
+  // Move gastos para "Outros"
+  expenses.forEach(e => { if (e.categoria === name) e.categoria = 'Outros'; });
+  saveExpenses();
+
+  customCategories = customCategories.filter(c => c.name !== name);
+  localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+  delete CAT_ICONS[name]; delete CAT_KEYS[name]; delete CAT_COLORS[name];
+
+  refreshCategorySelects();
+  refreshCategoryChips();
+  renderCategoriesSettings();
+  renderHome();
+  renderAll();
+  showToast(`🗑️ Categoria "${name}" removida`);
+}
+
+function renderCategoriesSettings() {
+  const container = document.getElementById('custom-cat-settings');
+  if (!container) return;
+
+  // Categorias nativas (têm catKey fixo)
+  const nativeNames = Object.keys(CAT_KEYS).filter(n => !customCategories.find(c => c.name === n));
+  const nativeRows = nativeNames.map(name => {
+    const emoji = CAT_ICONS[name] || '📦';
+    const n = name.replace(/'/g,"\\'");
+    return `<div class="settings-row" style="justify-content:space-between;">
+      <div class="settings-row-left">
+        <div class="settings-row-icon" style="background:rgba(245,166,35,0.12);font-size:18px;">${emoji}</div>
+        <div><div class="settings-row-label">${name}</div><div class="settings-row-desc" style="font-size:11px;">Nativa</div></div>
+      </div>
+      <button type="button" onclick="openEditNativeCategoryModal('${n}')" style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--accent2);">✏️</button>
+    </div>`;
+  }).join('');
+
+  // Categorias customizadas
+  const customRows = customCategories.map(cat => {
+    const n = cat.name.replace(/'/g,"\\'");
+    return `<div class="settings-row" style="justify-content:space-between;">
+      <div class="settings-row-left">
+        <div class="settings-row-icon" style="background:rgba(99,102,241,0.12);font-size:18px;">${cat.emoji}</div>
+        <div><div class="settings-row-label">${cat.name}</div><div class="settings-row-desc" style="font-size:11px;">Personalizada</div></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button type="button" onclick="openEditCategoryModal('${n}')" style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--accent2);">✏️</button>
+        <button type="button" onclick="deleteCustomCategory('${n}')" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--red-solid);">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = nativeRows + customRows;
+}
+
+function openEditNativeCategoryModal(name) {
+  const catKey = CAT_KEYS[name];
+  const emoji = CAT_ICONS[name] || '📦';
+  document.getElementById('new-cat-editing').value = `native:${catKey}`;
+  document.getElementById('new-cat-emoji').value = emoji;
+  document.getElementById('new-cat-name').value = name;
+  document.getElementById('new-cat-modal-title').textContent = 'Editar Categoria';
+  document.getElementById('new-cat-save-btn').textContent = 'Salvar Alterações';
+  document.getElementById('new-cat-modal').classList.add('open');
+  _highlightEmojiBtn(emoji);
+  setTimeout(() => document.getElementById('new-cat-name').focus(), 300);
 }
 
 // ─── Classificação Automática ───────────────────────────────────────
@@ -2405,12 +2669,21 @@ function getTotalIncomeAll() {
 function autoClassify(fornecedor) {
   if (!fornecedor) return null;
   const lower = fornecedor.toLowerCase();
+
+  // 1. Histórico tem prioridade: se o usuário já categorizou este fornecedor, repete
+  const prev = expenses.find(e => e.fornecedor && e.fornecedor.toLowerCase() === lower);
+  if (prev) return prev.categoria;
+
+  // 2. Se existe categoria "Delivery", mapeia palavras-chave de delivery para ela
+  if (CAT_ICONS['Delivery']) {
+    const deliveryKw = ['ifood','rappi','uber eats','delivery','pedido','motoboy','zé delivery','loggi'];
+    if (deliveryKw.some(k => lower.includes(k))) return 'Delivery';
+  }
+
+  // 3. Mapa fixo como fallback
   for (const [keyword, cat] of Object.entries(AUTO_CLASSIFY_MAP)) {
     if (lower.includes(keyword)) return cat;
   }
-  // Aprendizado com histórico: se o fornecedor já foi cadastrado antes, usa a categoria anterior
-  const prev = expenses.find(e => e.fornecedor && e.fornecedor.toLowerCase() === lower);
-  if (prev) return prev.categoria;
   return null;
 }
 
@@ -3919,6 +4192,15 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if(e.target===o) closeModal(o.id); });
 });
 
+// Fix global: impede popup Android de bloquear qualquer botão dentro de modais
+document.addEventListener('touchstart', function(e) {
+  const btn = e.target.closest('.modal-overlay button');
+  if (!btn || btn.disabled) return;
+  e.preventDefault();
+  if (window.getSelection) window.getSelection().removeAllRanges();
+  setTimeout(() => btn.click(), 0);
+}, { passive: false });
+
 // Classificação automática ao digitar fornecedor
 document.getElementById('f-fornecedor').addEventListener('input', function() {
   const cat = autoClassify(this.value);
@@ -4618,7 +4900,7 @@ function exportJSON() {
   const orcamento = getOrcamento();
   
   const backup = {
-    version: '3.0',
+    version: '3.1',
     exportadoEm: new Date().toISOString(),
     resumo: {
       totalGastos: monthTotal.toFixed(2),
@@ -5252,6 +5534,7 @@ function init() {
   loadCustomCategories();
   refreshCategorySelects();
   refreshCategoryChips();
+  renderCategoriesSettings();
   renderHome();
   const savedKey = getApiKey();
   if (savedKey) document.getElementById('api-key-input').value = savedKey;
@@ -5497,7 +5780,7 @@ const manifestBlob = new Blob([JSON.stringify(manifest)],{type:'application/json
 document.getElementById('manifest-placeholder').href = URL.createObjectURL(manifestBlob);
 
 if ('serviceWorker' in navigator) {
-  const swCode = `const CACHE='gastosIA-v3';self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['.']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+  const swCode = `const CACHE='gastosIA-v3.1';self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['.']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
   const swBlob = new Blob([swCode],{type:'application/javascript'});
   navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
 }
@@ -5973,28 +6256,39 @@ function renderRelatorio() {
       var cat = entry[0], val = entry[1];
       var pct = totalGastos > 0 ? (val/totalGastos*100) : 0;
       var cor = CAT_COLORS[cat] || '#888888';
-      html += '<div style="margin-bottom:10px;">';
-      html += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:13px;color:#F5F5F5;">' + cat + '</span><div style="text-align:right;"><span style="font-size:13px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(val) + '</span><span style="font-size:10px;color:#555;margin-left:6px;">' + pct.toFixed(0) + '%</span></div></div>';
-      html += '<div style="height:4px;background:#2A2A2A;border-radius:2px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + cor + ';border-radius:2px;"></div></div>';
+      var icon = CAT_ICONS[cat] || '📦';
+      var qtd = gastosMes.filter(function(e){ return e.categoria === cat; }).length;
+      html += '<div style="margin-bottom:12px;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+      html += '<span style="font-size:14px;color:#F5F5F5;">' + icon + ' ' + cat + '<span style="font-size:10px;color:#555;margin-left:6px;">' + qtd + ' lançamento' + (qtd>1?'s':'') + '</span></span>';
+      html += '<div style="text-align:right;"><span style="font-size:13px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(val) + '</span><span style="font-size:10px;color:#555;margin-left:6px;">' + pct.toFixed(0) + '%</span></div>';
+      html += '</div>';
+      html += '<div style="height:5px;background:#2A2A2A;border-radius:3px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + cor + ';border-radius:3px;"></div></div>';
       html += '</div>';
     });
     html += '</div>';
   }
 
-  // Lançamentos
+  // Lançamentos agrupados por categoria
   if (gastosMes.length > 0) {
     html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;overflow:hidden;margin-bottom:20px;">';
-    html += '<div style="padding:14px 16px;border-bottom:1px solid #2A2A2A;"><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#F5A623;">Lançamentos (' + gastosMes.length + ')</div></div>';
-    diasOrdenados.forEach(function(dia) {
-      var itens = porDia[dia];
-      var totalDia = itens.reduce(function(s,e){ return s+Number(e.valor); }, 0);
-      var parts = dia.split('-');
-      var dataFmt = parts[2]+'/'+parts[1]+'/'+parts[0];
+    html += '<div style="padding:14px 16px;border-bottom:1px solid #2A2A2A;"><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#F5A623;">Lançamentos por Categoria (' + gastosMes.length + ')</div></div>';
+    cats.forEach(function(entry) {
+      var cat = entry[0];
+      var icon = CAT_ICONS[cat] || '📦';
+      var cor = CAT_COLORS[cat] || '#888';
+      var itenscat = gastosMes.filter(function(e){ return e.categoria === cat; }).sort(function(a,b){ return b.data.localeCompare(a.data); });
+      var totalCat = itenscat.reduce(function(s,e){ return s+Number(e.valor); }, 0);
       html += '<div style="border-bottom:1px solid #1A1A1A;">';
-      html += '<div style="display:flex;justify-content:space-between;padding:8px 16px;background:#222222;"><span style="font-size:11px;color:#888;font-family:IBM Plex Mono,monospace;">' + dataFmt + '</span><span style="font-size:11px;color:#888;font-family:IBM Plex Mono,monospace;">' + fmt(totalDia) + '</span></div>';
-      itens.forEach(function(e) {
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#222;">';
+      html += '<span style="font-size:12px;font-weight:700;color:' + cor + ';">' + icon + ' ' + cat + '</span>';
+      html += '<span style="font-size:12px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:700;">' + fmt(totalCat) + '</span>';
+      html += '</div>';
+      itenscat.forEach(function(e) {
+        var parts = e.data.split('-');
+        var dataFmt = parts[2]+'/'+parts[1];
         html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-top:1px solid #1A1A1A;">';
-        html += '<div><div style="font-size:13px;color:#F5F5F5;">' + (e.fornecedor||e.categoria||'—') + '</div><div style="font-size:11px;color:#888;">' + e.categoria + (e.pagamento?' · '+e.pagamento:'') + '</div></div>';
+        html += '<div><div style="font-size:13px;color:#F5F5F5;">' + (e.fornecedor||e.categoria||'—') + '</div><div style="font-size:11px;color:#666;">' + dataFmt + (e.pagamento?' · '+e.pagamento:'') + '</div></div>';
         html += '<span style="font-size:14px;color:#F44336;font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(e.valor) + '</span>';
         html += '</div>';
       });
