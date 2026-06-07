@@ -1403,6 +1403,7 @@
           <option value="Dívidas">💳 Dívidas</option>
           <option value="Investimentos">📈 Investimentos</option>
           <option value="Outros" selected>📦 Outros</option>
+          <option value="_new_">➕ Nova Categoria</option>
         </select>
       </div>
       <div class="field">
@@ -1449,8 +1450,8 @@
       </div>
     </div>
 
-    <button class="btn btn-primary" onclick="saveExpense()">Salvar Gasto</button>
-    <button class="btn btn-secondary" onclick="closeModal('add-modal')">Cancelar</button>
+    <button type="button" class="btn btn-primary" onclick="saveExpense()">Salvar Gasto</button>
+    <button type="button" class="btn btn-secondary" onclick="closeModal('add-modal')">Cancelar</button>
   </div>
 </div>
 
@@ -1474,6 +1475,7 @@
         <option value="Compras">🛍️ Compras</option>
         <option value="Dívidas">💳 Dívidas</option>
         <option value="Outros">📦 Outros</option>
+        <option value="_new_">➕ Nova Categoria</option>
       </select>
     </div>
     <div class="field"><label>Fornecedor</label><input type="text" id="rec-fornecedor" placeholder="Ex: Locadora, Spotify..."></div>
@@ -1486,8 +1488,8 @@
         <option value="Pix">⚡ Pix</option>
       </select>
     </div>
-    <button class="btn btn-primary" onclick="saveRecorrente()">Salvar Recorrente</button>
-    <button class="btn btn-secondary" onclick="closeModal('rec-modal')">Cancelar</button>
+    <button type="button" class="btn btn-primary" onclick="saveRecorrente()">Salvar Recorrente</button>
+    <button type="button" class="btn btn-secondary" onclick="closeModal('rec-modal')">Cancelar</button>
   </div>
 </div>
 
@@ -1498,10 +1500,10 @@
     <div class="modal-title" id="detail-title">Detalhe do Gasto</div>
     <div id="detail-body"></div>
     <div style="display:flex;gap:8px;margin-top:16px;">
-      <button class="btn btn-secondary" style="flex:1;" id="detail-edit-btn" onclick="editExpenseOpen()">✏️ Editar</button>
-      <button class="btn btn-secondary" style="flex:1;color:var(--red-solid);border-color:rgba(239,68,68,0.3);" id="detail-delete-btn">🗑️ Excluir</button>
+      <button type="button" class="btn btn-secondary" style="flex:1;" id="detail-edit-btn" onclick="editExpenseOpen()">✏️ Editar</button>
+      <button type="button" class="btn btn-secondary" style="flex:1;color:var(--red-solid);border-color:rgba(239,68,68,0.3);" id="detail-delete-btn">🗑️ Excluir</button>
     </div>
-    <button class="btn btn-secondary" style="width:100%;" onclick="closeModal('detail-modal')">Fechar</button>
+    <button type="button" class="btn btn-secondary" style="width:100%;" onclick="closeModal('detail-modal')">Fechar</button>
   </div>
 </div>
 
@@ -1538,6 +1540,7 @@
           <option value="Dívidas">💳 Dívidas</option>
           <option value="Investimentos">📈 Investimentos</option>
           <option value="Outros">📦 Outros</option>
+          <option value="_new_">➕ Nova Categoria</option>
         </select>
       </div>
       <div class="field">
@@ -1560,8 +1563,28 @@
         <textarea id="e-descricao" placeholder="Ex: Arroz 5kg, feijão 1kg..."></textarea>
       </div>
     </div>
-    <button class="btn btn-primary" onclick="updateExpense()">Salvar Alterações</button>
-    <button class="btn btn-secondary" onclick="closeModal('edit-modal')">Cancelar</button>
+    <button type="button" class="btn btn-primary" onclick="updateExpense()">Salvar Alterações</button>
+    <button type="button" class="btn btn-secondary" onclick="closeModal('edit-modal')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ═══ NEW CATEGORY MODAL ═══ -->
+<div class="modal-overlay" id="new-cat-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nova Categoria</div>
+    <div style="margin-top:18px;">
+      <div class="field">
+        <label>Emoji</label>
+        <input type="text" id="new-cat-emoji" placeholder="Ex: 🏋️" maxlength="4" style="font-size:22px;text-align:center;letter-spacing:4px;">
+      </div>
+      <div class="field">
+        <label>Nome da Categoria *</label>
+        <input type="text" id="new-cat-name" placeholder="Ex: Academia, Farmácia...">
+      </div>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="saveNewCategory()">Criar Categoria</button>
+    <button type="button" class="btn btn-secondary" onclick="cancelNewCategory()">Cancelar</button>
   </div>
 </div>
 
@@ -1799,6 +1822,96 @@ const CAT_COLORS = {
   'Assinaturas':'#a78bfa','Viagem':'#4ade80','Compras':'#e879f9','Beleza':'#fb923c',
   'Pets':'#F5A623','Presentes':'#ec4899','Dívidas':'#dc2626','Investimentos':'#10b981','Outros':'#94a3b8'
 };
+
+// ─── Categorias Customizadas ────────────────────────────────────────
+const CUSTOM_CAT_KEY = 'gastosIA_customCategories';
+let customCategories = [];
+
+function loadCustomCategories() {
+  try { customCategories = JSON.parse(localStorage.getItem(CUSTOM_CAT_KEY) || '[]'); } catch(e) { customCategories = []; }
+  customCategories.forEach(cat => {
+    const key = cat.name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'custom';
+    CAT_ICONS[cat.name] = cat.emoji;
+    CAT_KEYS[cat.name] = key;
+    CAT_COLORS[cat.name] = cat.color || '#9ca3af';
+  });
+}
+
+function refreshCategorySelects() {
+  ['f-categoria', 'e-categoria', 'rec-categoria'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    Array.from(sel.options).forEach(opt => { if (opt.dataset.custom === 'true') opt.remove(); });
+    const newOpt = sel.querySelector('option[value="_new_"]');
+    customCategories.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat.name;
+      opt.textContent = `${cat.emoji} ${cat.name}`;
+      opt.dataset.custom = 'true';
+      sel.insertBefore(opt, newOpt);
+    });
+  });
+}
+
+function refreshCategoryChips() {
+  const filterBar = document.getElementById('cat-filter');
+  if (!filterBar) return;
+  filterBar.querySelectorAll('[data-custom="true"]').forEach(el => el.remove());
+  customCategories.forEach(cat => {
+    const chip = document.createElement('div');
+    chip.className = 'filter-chip';
+    chip.dataset.cat = cat.name;
+    chip.dataset.custom = 'true';
+    chip.setAttribute('onclick', 'filterCat(this)');
+    chip.textContent = `${cat.emoji} ${cat.name}`;
+    filterBar.appendChild(chip);
+  });
+}
+
+let _newCatFromSelect = null;
+
+function openNewCategoryModal(fromSelectId) {
+  _newCatFromSelect = fromSelectId || null;
+  document.getElementById('new-cat-emoji').value = '';
+  document.getElementById('new-cat-name').value = '';
+  document.getElementById('new-cat-modal').classList.add('open');
+  setTimeout(() => document.getElementById('new-cat-emoji').focus(), 200);
+}
+
+function cancelNewCategory() {
+  if (_newCatFromSelect) {
+    const sel = document.getElementById(_newCatFromSelect);
+    if (sel) sel.value = sel.dataset.prevValue || 'Outros';
+  }
+  closeModal('new-cat-modal');
+}
+
+function saveNewCategory() {
+  const name = document.getElementById('new-cat-name').value.trim();
+  const emoji = document.getElementById('new-cat-emoji').value.trim() || '📌';
+  if (!name) { showToast('⚠️ Informe o nome da categoria'); return; }
+  if (CAT_ICONS[name]) { showToast('⚠️ Categoria já existe'); return; }
+
+  const cat = { name, emoji, color: '#9ca3af' };
+  customCategories.push(cat);
+  localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+
+  const key = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'custom';
+  CAT_ICONS[name] = emoji;
+  CAT_KEYS[name] = key;
+  CAT_COLORS[name] = '#9ca3af';
+
+  refreshCategorySelects();
+  refreshCategoryChips();
+
+  if (_newCatFromSelect) {
+    const sel = document.getElementById(_newCatFromSelect);
+    if (sel) sel.value = name;
+  }
+
+  closeModal('new-cat-modal');
+  showToast(`✓ Categoria "${name}" criada!`);
+}
 
 // ─── Classificação Automática ───────────────────────────────────────
 // A IA aprende com uso: mapeia fornecedores conhecidos para categorias
@@ -3810,6 +3923,21 @@ document.getElementById('f-fornecedor').addEventListener('input', function() {
   if (cat) document.getElementById('f-categoria').value = cat;
 });
 
+// Detectar seleção de "Nova Categoria" nos selects
+['f-categoria', 'e-categoria', 'rec-categoria'].forEach(id => {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  sel.dataset.prevValue = sel.value;
+  sel.addEventListener('change', function() {
+    if (this.value === '_new_') {
+      this.value = this.dataset.prevValue || 'Outros';
+      openNewCategoryModal(id);
+    } else {
+      this.dataset.prevValue = this.value;
+    }
+  });
+});
+
 // ═══════════════════════════════════════════════════════════════════
 // IMAGE HANDLING & AI OCR
 // ═══════════════════════════════════════════════════════════════════
@@ -5115,6 +5243,9 @@ importZone.addEventListener('drop', e=>{
 // INIT
 // ═══════════════════════════════════════════════════════════════════
 function init() {
+  loadCustomCategories();
+  refreshCategorySelects();
+  refreshCategoryChips();
   renderHome();
   const savedKey = getApiKey();
   if (savedKey) document.getElementById('api-key-input').value = savedKey;
