@@ -1690,10 +1690,6 @@ let currentUser = null;
 async function supaLoadAll() {
   if (!currentUser) return;
   try {
-    // Adota registros sem dono
-    await supa.from('gastos').update({ user_id: currentUser.id }).is('user_id', null);
-    await supa.from('rendas').update({ user_id: currentUser.id }).is('user_id', null);
-
     // Busca tudo do Supabase — fonte única de verdade
     const [gRes, rRes] = await Promise.all([
       supa.from('gastos').select('*').eq('user_id', currentUser.id).order('data', { ascending: false }),
@@ -1731,7 +1727,6 @@ async function initAuth() {
     currentUser = session.user;
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('app-root').style.display = '';
-    try { await supa.rpc('adotar_registros_sem_dono'); } catch(e) {}
     supaLoadAll();
   } else {
     document.getElementById('auth-screen').style.display = '';
@@ -1773,8 +1768,6 @@ async function authLogin() {
   currentUser = data.user;
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-root').style.display = '';
-  // Adota registros sem user_id (migração de dados anteriores)
-  try { await supa.rpc('adotar_registros_sem_dono'); } catch(e) {}
   supaLoadAll();
 }
 
@@ -1799,7 +1792,10 @@ async function authLogout() {
   await supa.auth.signOut();
   currentUser = null;
   expenses = []; incomes = [];
-  localStorage.clear();
+  // Remove apenas dados da conta — preserva API key, orçamento e preferências do dispositivo
+  ['gastos_ia_v1','gastos_ia_income_v1','gastos_ia_insights_v1',
+   'gastosIA_layer_base','gastosIA_layer_processed','gastosIA_layer_audit','gastosIA_layer_backup'
+  ].forEach(k => { try { localStorage.removeItem(k); } catch(_) {} });
   document.getElementById('auth-screen').style.display = '';
   document.getElementById('app-root').style.display = 'none';
 }
@@ -1830,7 +1826,8 @@ async function supaSaveExpense(exp) {
 }
 
 async function supaDeleteExpense(id) {
-  try { await supa.from('gastos').delete().eq('id', id); } catch(e) {}
+  if (!currentUser) return;
+  try { await supa.from('gastos').delete().eq('id', id).eq('user_id', currentUser.id); } catch(e) {}
 }
 
 async function supaSaveIncome(inc) {
@@ -1844,7 +1841,8 @@ async function supaSaveIncome(inc) {
 }
 
 async function supaDeleteIncome(id) {
-  try { await supa.from('rendas').delete().eq('id', id); } catch(e) {}
+  if (!currentUser) return;
+  try { await supa.from('rendas').delete().eq('id', id).eq('user_id', currentUser.id); } catch(e) {}
 }
 </script>
 <script>
@@ -2141,27 +2139,25 @@ function renderCategoriesSettings() {
   const nativeNames = Object.keys(CAT_KEYS).filter(n => !customCategories.find(c => c.name === n));
   const nativeRows = nativeNames.map(name => {
     const emoji = CAT_ICONS[name] || '📦';
-    const n = name.replace(/'/g,"\\'");
     return `<div class="settings-row" style="justify-content:space-between;">
       <div class="settings-row-left">
         <div class="settings-row-icon" style="background:rgba(245,166,35,0.12);font-size:18px;">${emoji}</div>
-        <div><div class="settings-row-label">${name}</div><div class="settings-row-desc" style="font-size:11px;">Nativa</div></div>
+        <div><div class="settings-row-label">${esc(name)}</div><div class="settings-row-desc" style="font-size:11px;">Nativa</div></div>
       </div>
-      <button type="button" onclick="openEditNativeCategoryModal('${n}')" style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--accent2);">✏️</button>
+      <button type="button" onclick="openEditNativeCategoryModal('${escJs(name)}')" style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--accent2);">✏️</button>
     </div>`;
   }).join('');
 
   // Categorias customizadas
   const customRows = customCategories.map(cat => {
-    const n = cat.name.replace(/'/g,"\\'");
     return `<div class="settings-row" style="justify-content:space-between;">
       <div class="settings-row-left">
-        <div class="settings-row-icon" style="background:rgba(99,102,241,0.12);font-size:18px;">${cat.emoji}</div>
-        <div><div class="settings-row-label">${cat.name}</div><div class="settings-row-desc" style="font-size:11px;">Personalizada</div></div>
+        <div class="settings-row-icon" style="background:rgba(99,102,241,0.12);font-size:18px;">${esc(cat.emoji)}</div>
+        <div><div class="settings-row-label">${esc(cat.name)}</div><div class="settings-row-desc" style="font-size:11px;">Personalizada</div></div>
       </div>
       <div style="display:flex;gap:8px;">
-        <button type="button" onclick="openEditCategoryModal('${n}')" style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--accent2);">✏️</button>
-        <button type="button" onclick="deleteCustomCategory('${n}')" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--red-solid);">🗑️</button>
+        <button type="button" onclick="openEditCategoryModal('${escJs(cat.name)}')" style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--accent2);">✏️</button>
+        <button type="button" onclick="deleteCustomCategory('${escJs(cat.name)}')" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--red-solid);">🗑️</button>
       </div>
     </div>`;
   }).join('');
@@ -2206,8 +2202,9 @@ const AUTO_CLASSIFY_MAP = {
   'presente': 'Presentes', 'gift': 'Presentes', 'flor': 'Presentes'
 };
 
-let expenses = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-let incomes  = JSON.parse(localStorage.getItem(INCOME_KEY) || '[]');
+// Supabase é a fonte única — arrays são populados em supaLoadAll() após o login
+let expenses = [];
+let incomes  = [];
 let currentFilter = 'all';
 let currentDetailId = null;
 let currentImageBase64 = null;
@@ -2581,6 +2578,15 @@ function toggleMonthLock(offsetMonths = 0) {
 
 // ─── Helpers ──────────────────────────────────────────────────────
 function fmt(v) { return 'R$' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+// Escapa dados do usuário/IA antes de inserir em innerHTML (previne XSS)
+function esc(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+// Para valores interpolados dentro de strings JS em atributos onclick="fn('...')"
+function escJs(v) {
+  return esc(String(v ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'"));
+}
 
 function normalizeDateString(rawDate) {
   if (!rawDate) return '';
@@ -3156,7 +3162,7 @@ function renderAlerts(monthTotal) {
 
   const el = document.getElementById('alerts-container');
   el.innerHTML = alerts.map(a => `
-    <div class="alert-banner ${a.type}">${a.icon} ${a.text}</div>
+    <div class="alert-banner ${a.type}">${a.icon} ${esc(a.text)}</div>
   `).join('');
 }
 
@@ -3206,13 +3212,13 @@ function renderIncomeList() {
       <div class="income-item-left">
         <div class="income-item-icon" style="background:rgba(16,185,129,0.12);">${INCOME_ICONS[i.tipo]||'💰'}</div>
         <div>
-          <div class="income-item-type">${i.tipo}</div>
+          <div class="income-item-type">${esc(i.tipo)}</div>
           <div class="income-item-name">${mesDisplay}</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div class="income-item-value">${fmt(i.valor)}</div>
-        <button class="income-item-delete" onclick="deleteIncome('${i.id}')">×</button>
+        <button class="income-item-delete" onclick="deleteIncome('${escJs(i.id)}')">×</button>
       </div>
     </div>`;
   }).join('')+'</div>';
@@ -3249,7 +3255,7 @@ function openCopyIncomeModal() {
   select.innerHTML = '<option value="">Escolha uma renda existente...</option>' +
     incomes.map((i, idx) => `
       <option value="${idx}">
-        ${INCOME_ICONS[i.tipo] || ''} ${i.tipo} · ${fmt(i.valor)} · ${new Date(i.mes + '-15').toLocaleDateString('pt-BR', {month: 'short', year: '2-digit'})}
+        ${INCOME_ICONS[i.tipo] || ''} ${esc(i.tipo)} · ${fmt(i.valor)} · ${new Date(i.mes + '-15').toLocaleDateString('pt-BR', {month: 'short', year: '2-digit'})}
       </option>
     `).join('');
   
@@ -3349,19 +3355,19 @@ function expenseCardHTML(e) {
   const d = parseExpenseDate(e.data);
   const dateStr = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
   const parcelaInfo = e.total_parcelas && e.total_parcelas > 1 ? ` (${e.numero_parcela}/${e.total_parcelas})` : '';
-  return `<div class="expense-card" onclick="openDetail('${e.id}')">
+  return `<div class="expense-card" onclick="openDetail('${escJs(e.id)}')">
     <div class="expense-icon cat-${catKey}">${icon}</div>
     <div class="expense-info">
-      <div class="expense-name">${e.fornecedor || e.categoria}${parcelaInfo}</div>
+      <div class="expense-name">${esc(e.fornecedor || e.categoria)}${parcelaInfo}</div>
       <div class="expense-meta">
-        <span class="badge badge-${catKey}">${e.categoria}</span>
+        <span class="badge badge-${catKey}">${esc(e.categoria)}</span>
         <span>${dateStr}</span>
-        ${e.pagamento ? '<span>'+PAY_ICONS[e.pagamento]+' '+e.pagamento+'</span>' : ''}
+        ${e.pagamento ? '<span>'+(PAY_ICONS[e.pagamento]||'')+' '+esc(e.pagamento)+'</span>' : ''}
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
       <div class="expense-amount">${fmt(e.valor)}</div>
-      <button class="delete-btn" onclick="event.stopPropagation();deleteExpense('${e.id}')">×</button>
+      <button class="delete-btn" onclick="event.stopPropagation();deleteExpense('${escJs(e.id)}')">×</button>
     </div>
   </div>`;
 }
@@ -3385,7 +3391,7 @@ function renderAll() {
   const catName = currentFilter === 'all' ? 'Total de Gastos' : currentFilter;
   el.innerHTML = `
     <div style="background:var(--surface);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
-      <div style="font-size:13px;color:var(--text4);text-transform:uppercase;font-weight:600;">${catName}</div>
+      <div style="font-size:13px;color:var(--text4);text-transform:uppercase;font-weight:600;">${esc(catName)}</div>
       <div style="font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--accent2);">${fmt(categoryTotal)}</div>
     </div>
     ${sorted.map(e => expenseCardHTML(e)).join('')}`;
@@ -3437,7 +3443,7 @@ function renderBarChart(containerId, data, colors) {
   if (!data.length) { el.innerHTML = '<div class="empty-state" style="padding:32px 0;"><p>Sem dados ainda</p></div>'; return; }
   el.innerHTML = data.map((d,i) => `
     <div class="chart-bar-wrap">
-      <div class="chart-bar-label"><span>${d.label}</span><span>${fmt(d.value)}</span></div>
+      <div class="chart-bar-label"><span>${esc(d.label)}</span><span>${fmt(d.value)}</span></div>
       <div class="chart-bar-track">
         <div class="chart-bar-fill" style="width:${(d.value/max*100).toFixed(1)}%;background:${colors[i%colors.length]}"></div>
       </div>
@@ -3484,7 +3490,7 @@ function renderPieChart(data, colors) {
   const legend = data.slice(0,6).map((d,i) => `
     <div class="pie-legend-item">
       <div class="pie-legend-dot" style="background:${colors[i]}"></div>
-      <span>${d.label}</span>
+      <span>${esc(d.label)}</span>
       <span class="pie-legend-pct">${d.pct.toFixed(1)}%</span>
     </div>`).join('');
 
@@ -3672,7 +3678,7 @@ function renderBudgetInsights() {
       <div class="insight-card danger" style="margin-bottom:12px;">
         <div class="insight-icon">${icon}</div>
         <div class="insight-body">
-          <div class="insight-title">${alert.category} acima do orçamento</div>
+          <div class="insight-title">${esc(alert.category)} acima do orçamento</div>
           <div class="insight-text">Você gastou ${fmt(alert.spent)} quando o orçado era ${fmt(alert.budget)}</div>
           <div class="insight-value red">+${fmt(alert.over)} (${pctOver}% acima)</div>
         </div>
@@ -3860,8 +3866,8 @@ function renderCutsLocally() {
     <div class="cut-item">
       <div class="cut-item-icon">${c.icon}</div>
       <div class="cut-item-body">
-        <div class="cut-item-title">${c.title}</div>
-        <div class="cut-item-desc">${c.desc}</div>
+        <div class="cut-item-title">${esc(c.title)}</div>
+        <div class="cut-item-desc">${esc(c.desc)}</div>
       </div>
       <div class="cut-item-saving">${fmt(c.saving)}</div>
     </div>`).join('');
@@ -4083,12 +4089,12 @@ function displayInsights(insights) {
     return;
   }
   el.innerHTML = insights.map(i => `
-    <div class="insight-card ${i.type||'info'}">
-      <div class="insight-icon">${i.icon||'💡'}</div>
+    <div class="insight-card ${esc(i.type||'info')}">
+      <div class="insight-icon">${esc(i.icon||'💡')}</div>
       <div class="insight-body">
-        <div class="insight-title">${i.title}</div>
-        <div class="insight-text">${i.text}</div>
-        ${i.value ? `<div class="insight-value ${i.valueClass||''}">${i.value}</div>` : ''}
+        <div class="insight-title">${esc(i.title)}</div>
+        <div class="insight-text">${esc(i.text)}</div>
+        ${i.value ? `<div class="insight-value ${esc(i.valueClass||'')}">${esc(i.value)}</div>` : ''}
       </div>
     </div>`).join('');
 }
@@ -4103,8 +4109,8 @@ function displayConsultorAnalise(analise) {
     <div class="insight-card ${analise.resumoGeral.situacao === 'boa' ? 'success' : analise.resumoGeral.situacao === 'ruim' ? 'danger' : 'warning'}">
       <div class="insight-icon">${analise.resumoGeral.situacao === 'boa' ? '✅' : analise.resumoGeral.situacao === 'ruim' ? '⚠️' : '📊'}</div>
       <div class="insight-body">
-        <div class="insight-title">Situação: ${analise.resumoGeral.situacao.toUpperCase()}</div>
-        <div class="insight-text">${analise.resumoGeral.relacaoGastosAlario}</div>
+        <div class="insight-title">Situação: ${esc(analise.resumoGeral.situacao.toUpperCase())}</div>
+        <div class="insight-text">${esc(analise.resumoGeral.relacaoGastosAlario)}</div>
       </div>
     </div>`;
   
@@ -4115,7 +4121,7 @@ function displayConsultorAnalise(analise) {
       <div class="insight-icon">⚠️</div>
       <div class="insight-body">
         <div class="insight-title">Principais Problemas</div>
-        <div class="insight-text">${analise.principaisProblemas.map(p => `• ${p}`).join('<br>')}</div>
+        <div class="insight-text">${analise.principaisProblemas.map(p => `• ${esc(p)}`).join('<br>')}</div>
       </div>
     </div>`;
   }
@@ -4127,7 +4133,7 @@ function displayConsultorAnalise(analise) {
       <div class="insight-icon">💰</div>
       <div class="insight-body">
         <div class="insight-title">Sugestões de Corte</div>
-        <div class="insight-text">${analise.sugestoesDeCorte.map(s => `• ${s.acao}: <strong>${s.economia}</strong>`).join('<br>')}</div>
+        <div class="insight-text">${analise.sugestoesDeCorte.map(s => `• ${esc(s.acao)}: <strong>${esc(s.economia)}</strong>`).join('<br>')}</div>
       </div>
     </div>`;
   }
@@ -4139,7 +4145,7 @@ function displayConsultorAnalise(analise) {
       <div class="insight-icon">💡</div>
       <div class="insight-body">
         <div class="insight-title">Oportunidades de Melhoria</div>
-        <div class="insight-text">${analise.oportunidadesMelhoria.map(o => `• ${o}`).join('<br>')}</div>
+        <div class="insight-text">${analise.oportunidadesMelhoria.map(o => `• ${esc(o)}`).join('<br>')}</div>
       </div>
     </div>`;
   }
@@ -4151,7 +4157,7 @@ function displayConsultorAnalise(analise) {
       <div class="insight-icon">🚨</div>
       <div class="insight-body">
         <div class="insight-title">Alerta Importante</div>
-        <div class="insight-text">${analise.alerta}</div>
+        <div class="insight-text">${esc(analise.alerta)}</div>
       </div>
     </div>`;
   }
@@ -4464,7 +4470,7 @@ async function importCSV(file, resultsEl) {
           results.push(`${dataStr} · ${cat} · ${fmt(valor)}`);
         }
 
-        resultsEl.innerHTML = results.slice(0,5).map(r=>`<div>✓ ${r}</div>`).join('') +
+        resultsEl.innerHTML = results.slice(0,5).map(r=>`<div>✓ ${esc(r)}</div>`).join('') +
           (results.length > 5 ? `<div>... e mais ${results.length-5}</div>` : '') +
           (duplicated > 0 ? `<div style="color:#f59e0b;">⚠️ ${duplicated} duplicação(ões) evitada(s)</div>` : '');
         resolve(count);
@@ -4547,7 +4553,7 @@ async function importExcel(file, resultsEl) {
             results.push(`${dataStr} · ${cat} · ${fmt(valor)}`);
           }
 
-          resultsEl.innerHTML = results.slice(0,5).map(r=>`<div>✓ ${r}</div>`).join('') +
+          resultsEl.innerHTML = results.slice(0,5).map(r=>`<div>✓ ${esc(r)}</div>`).join('') +
             (results.length > 5 ? `<div>... e mais ${results.length-5}</div>` : '');
           resolve(count);
         } catch(err) { reject(err); }
@@ -4598,7 +4604,7 @@ async function importOFX(file, resultsEl) {
           results.push(`${dataStr} · ${cat} · ${fmt(valor)}`);
         });
 
-        resultsEl.innerHTML = results.slice(0,5).map(r=>`<div>✓ ${r}</div>`).join('') +
+        resultsEl.innerHTML = results.slice(0,5).map(r=>`<div>✓ ${esc(r)}</div>`).join('') +
           (results.length > 5 ? `<div>... e mais ${results.length-5}</div>` : '');
         resolve(count);
       } catch(err) { reject(err); }
@@ -4658,7 +4664,7 @@ Ignore entradas/créditos. Use apenas débitos/pagamentos. Classifique a categor
           count++;
           results.push(`${expense.data} · ${expense.categoria} · ${fmt(expense.valor)}`);
         });
-        resultsEl.innerHTML = results.slice(0,5).map(r=>`<div>✓ ${r}</div>`).join('') +
+        resultsEl.innerHTML = results.slice(0,5).map(r=>`<div>✓ ${esc(r)}</div>`).join('') +
           (results.length>5 ? `<div>... e mais ${results.length-5}</div>` : '');
         resolve(count);
       } catch(err) { reject(err); }
@@ -4674,11 +4680,12 @@ Ignore entradas/créditos. Use apenas débitos/pagamentos. Classifique a categor
 function addParcelasAuto(baseExpense, totalParcelas) {
   if (totalParcelas <= 1) {
     expenses.unshift(baseExpense);
-    return;
+    return [baseExpense];
   }
   const idParcela = baseExpense.id; // Todas compartilham o mesmo id_parcela
   const valorParcela = baseExpense.valor / totalParcelas;
   const dataPrimeira = parseExpenseDate(baseExpense.data);
+  const parcelas = [];
 
   // Cria cada parcela em um mês diferente
   for (let i = 1; i <= totalParcelas; i++) {
@@ -4697,7 +4704,9 @@ function addParcelasAuto(baseExpense, totalParcelas) {
       criadoEm: new Date().toISOString()
     };
     expenses.unshift(parcela);
+    parcelas.push(parcela);
   }
+  return parcelas;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -4726,10 +4735,10 @@ function saveExpense() {
 
     // Se tem parcelamento, cria múltiplas despesas automáticas
     if (totalParcelas > 1) {
-      addParcelasAuto(expenseData, totalParcelas);
+      const parcelas = addParcelasAuto(expenseData, totalParcelas);
       saveExpenses();
       // Sobe parcelas para Supabase
-      expenses.slice(0, totalParcelas).forEach(function(e) { supaSaveExpense(e); });
+      parcelas.forEach(function(e) { supaSaveExpense(e); });
       closeModal('add-modal');
       renderHome();
       showToast('✓ Compra em ' + totalParcelas + 'x salva!');
@@ -4767,14 +4776,14 @@ function openDetail(id) {
   const d = parseExpenseDate(e.data);
   const dateStr = d.toLocaleDateString('pt-BR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   let html = `<div class="detail-amount">${fmt(e.valor)}</div>`;
-  if (e.imagem) html += `<img class="detail-img" src="${e.imagem}" alt="Nota fiscal">`;
+  if (e.imagem) html += `<img class="detail-img" src="${esc(e.imagem)}" alt="Nota fiscal">`;
   html += `
     <div class="detail-row"><span class="detail-key">Data</span><span class="detail-val">${dateStr}</span></div>
-    <div class="detail-row"><span class="detail-key">Categoria</span><span class="detail-val">${CAT_ICONS[e.categoria]||''} ${e.categoria}</span></div>
-    ${e.fornecedor?`<div class="detail-row"><span class="detail-key">Estabelecimento</span><span class="detail-val">${e.fornecedor}</span></div>`:''}
-    ${e.pagamento?`<div class="detail-row"><span class="detail-key">Pagamento</span><span class="detail-val">${PAY_ICONS[e.pagamento]||''} ${e.pagamento}</span></div>`:''}
-    ${e.total_parcelas && e.total_parcelas > 1 ?`<div class="detail-row"><span class="detail-key">Parcelamento</span><span class="detail-val">💳 ${e.numero_parcela}/${e.total_parcelas}</span></div>`:''}
-    ${e.descricao?`<div class="detail-row"><span class="detail-key">Descrição</span><span class="detail-val">${e.descricao}</span></div>`:''}
+    <div class="detail-row"><span class="detail-key">Categoria</span><span class="detail-val">${CAT_ICONS[e.categoria]||''} ${esc(e.categoria)}</span></div>
+    ${e.fornecedor?`<div class="detail-row"><span class="detail-key">Estabelecimento</span><span class="detail-val">${esc(e.fornecedor)}</span></div>`:''}
+    ${e.pagamento?`<div class="detail-row"><span class="detail-key">Pagamento</span><span class="detail-val">${PAY_ICONS[e.pagamento]||''} ${esc(e.pagamento)}</span></div>`:''}
+    ${e.total_parcelas && e.total_parcelas > 1 ?`<div class="detail-row"><span class="detail-key">Parcelamento</span><span class="detail-val">💳 ${esc(e.numero_parcela)}/${esc(e.total_parcelas)}</span></div>`:''}
+    ${e.descricao?`<div class="detail-row"><span class="detail-key">Descrição</span><span class="detail-val">${esc(e.descricao)}</span></div>`:''}
   `;
   document.getElementById('detail-body').innerHTML = html;
   document.getElementById('detail-delete-btn').onclick = () => { deleteExpense(id); closeModal('detail-modal'); };
@@ -5297,7 +5306,7 @@ function generateAdvancedPDF(filterMonth = null, filterYear = null) {
         html += `<h2>🏆 Top 3 Maiores Gastos</h2><table><thead><tr><th>ABC</th><th>Data</th><th>Categoria</th><th>Descrição</th><th style="text-align:right">Valor</th></tr></thead><tbody>`;
         top3.forEach(e => {
           const d = parseExpenseDate(e.data).toLocaleDateString('pt-BR');
-          html += `<tr class="abc-${e.abc.toLowerCase()}"><td class="abc-${e.abc.toLowerCase()}">${e.abc}</td><td>${d}</td><td>${CAT_ICONS[e.categoria] || '📦'} ${e.categoria}</td><td>${e.fornecedor || '—'}</td><td style="text-align:right;font-weight:700;">R$ ${e.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td></tr>`;
+          html += `<tr class="abc-${e.abc.toLowerCase()}"><td class="abc-${e.abc.toLowerCase()}">${e.abc}</td><td>${d}</td><td>${CAT_ICONS[e.categoria] || '📦'} ${esc(e.categoria)}</td><td>${esc(e.fornecedor || '—')}</td><td style="text-align:right;font-weight:700;">R$ ${e.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td></tr>`;
         });
         html += `</tbody></table>`;
       }
@@ -5318,7 +5327,7 @@ function generateAdvancedPDF(filterMonth = null, filterYear = null) {
         const d = parseExpenseDate(e.data).toLocaleDateString('pt-BR');
         const type = classifyExpenseType(e.categoria, e.valor);
         const rowClass = e.isAnomaly ? 'anomaly' : '';
-        html += `<tr class="${rowClass}"><td>${d}</td><td>${CAT_ICONS[e.categoria] || '📦'} ${e.categoria}</td><td>${e.fornecedor || '—'}</td><td>${type}</td><td style="text-align:right;font-weight:600;">R$ ${e.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td></tr>`;
+        html += `<tr class="${rowClass}"><td>${d}</td><td>${CAT_ICONS[e.categoria] || '📦'} ${esc(e.categoria)}</td><td>${esc(e.fornecedor || '—')}</td><td>${type}</td><td style="text-align:right;font-weight:600;">R$ ${e.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td></tr>`;
       });
       html += `</tbody></table>`;
       
@@ -5726,7 +5735,7 @@ function renderOrcamentoVsGastos() {
     comparisons.push(`
       <div style="margin-bottom:20px; padding:16px; background:var(--surface); border:1px solid var(--glass-border); border-radius:var(--radius-md);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <span style="font-size:15px; font-weight:600; color:var(--text);">${icon} ${catName}</span>
+          <span style="font-size:15px; font-weight:600; color:var(--text);">${esc(icon)} ${esc(catName)}</span>
           <span style="font-size:13px; font-weight:600; color:${status === 'over' ? '#ef4444' : '#10b981'};">${pctUsed}% usado</span>
         </div>
         <div style="height:8px; background:var(--surface2); border-radius:4px; overflow:hidden; margin-bottom:8px;">
@@ -5831,7 +5840,7 @@ function renderRecorrentes() {
     <div class="rec-item" onclick="lancaRecorrente(${i})">
       <span class="rec-item-del" onclick="delRecorrente(event,${i})">✕</span>
       <div class="rec-item-icon">${CAT_IC[r.categoria]||'📦'}</div>
-      <div class="rec-item-name">${r.nome}</div>
+      <div class="rec-item-name">${esc(r.nome)}</div>
       <div class="rec-item-valor">R$ ${Number(r.valor).toFixed(2).replace('.',',')}</div>
     </div>`).join('') + '<button class="rec-add-btn" onclick="openRecModal()">+</button>';
 }
@@ -5954,8 +5963,8 @@ function renderCartoes() {
       html += '<div style="background:linear-gradient(135deg,' + c.cor + '22 0%,#1C1C1C 100%);border-bottom:1px solid #2A2A2A;padding:16px;">';
       html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
       html += '<div>';
-      html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:18px;color:#F5F5F5;letter-spacing:0.06em;">' + c.nome + '</div>';
-      html += '<div style="font-family:IBM Plex Mono,monospace;font-size:12px;color:#888;margin-top:2px;">•••• •••• •••• ' + (c.final||'????') + '</div>';
+      html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:18px;color:#F5F5F5;letter-spacing:0.06em;">' + esc(c.nome) + '</div>';
+      html += '<div style="font-family:IBM Plex Mono,monospace;font-size:12px;color:#888;margin-top:2px;">•••• •••• •••• ' + esc(c.final||'????') + '</div>';
       html += '</div>';
       html += '<div style="text-align:right;">';
       html += '<div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.08em;">Fatura atual' + alertaVenc + '</div>';
@@ -5987,7 +5996,7 @@ function renderCartoes() {
         html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Lançamentos do ciclo (' + gastosCiclo.length + ')</div>';
         gastosCiclo.slice(0, 5).forEach(function(e) {
           html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1A1A1A;">';
-          html += '<div><div style="font-size:13px;color:#F5F5F5;">' + (e.fornecedor || e.categoria || '—') + '</div><div style="font-size:11px;color:#555;">' + e.data.split('-').reverse().join('/') + ' · ' + e.categoria + '</div></div>';
+          html += '<div><div style="font-size:13px;color:#F5F5F5;">' + esc(e.fornecedor || e.categoria || '—') + '</div><div style="font-size:11px;color:#555;">' + e.data.split('-').reverse().join('/') + ' · ' + esc(e.categoria) + '</div></div>';
           html += '<span style="font-family:IBM Plex Mono,monospace;font-size:13px;color:#F44336;font-weight:600;">R$ ' + Number(e.valor).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</span>';
           html += '</div>';
         });
@@ -6001,8 +6010,8 @@ function renderCartoes() {
 
       // Botões
       html += '<div style="display:flex;gap:8px;margin-top:12px;">';
-      html += '<button onclick="editarCartao(&apos;' + c.id + '&apos;)" style="flex:1;background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:10px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">✏️ Editar</button>';
-      html += '<button onclick="associarGastosCartao(&apos;' + c.id + '&apos;)" style="flex:2;background:' + c.cor + ';color:#111;border:none;border-radius:8px;padding:10px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">🔗 Associar Gastos</button>';
+      html += '<button onclick="editarCartao(&apos;' + escJs(c.id) + '&apos;)" style="flex:1;background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:10px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">✏️ Editar</button>';
+      html += '<button onclick="associarGastosCartao(&apos;' + escJs(c.id) + '&apos;)" style="flex:2;background:' + c.cor + ';color:#111;border:none;border-radius:8px;padding:10px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:13px;cursor:pointer;">🔗 Associar Gastos</button>';
       html += '</div>';
 
       html += '</div></div>'; // fecha padding + card
@@ -6095,8 +6104,8 @@ async function associarGastosCartao(cartaoId) {
   var c = cartoes.find(function(x) { return x.id === cartaoId; });
   var lista = semCartao.map(function(e) {
     return '<label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1A1A1A;cursor:pointer;">' +
-      '<input type="checkbox" value="' + e.id + '" style="width:16px;height:16px;accent-color:#F5A623;" />' +
-      '<div><div style="font-size:13px;color:#F5F5F5;">' + (e.fornecedor||e.categoria||'—') + '</div>' +
+      '<input type="checkbox" value="' + esc(e.id) + '" style="width:16px;height:16px;accent-color:#F5A623;" />' +
+      '<div><div style="font-size:13px;color:#F5F5F5;">' + esc(e.fornecedor||e.categoria||'—') + '</div>' +
       '<div style="font-size:11px;color:#555;">' + e.data.split('-').reverse().join('/') + ' · R$ ' + Number(e.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}) + '</div></div>' +
       '</label>';
   }).join('');
@@ -6106,11 +6115,11 @@ async function associarGastosCartao(cartaoId) {
   overlay.id = 'overlay-assoc';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
   overlay.innerHTML = '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:14px;padding:20px;width:100%;max-width:400px;max-height:80vh;overflow-y:auto;">' +
-    '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;color:#F5A623;margin-bottom:14px;text-transform:uppercase;">Associar ao ' + c.nome + '</div>' +
+    '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;color:#F5A623;margin-bottom:14px;text-transform:uppercase;">Associar ao ' + esc(c.nome) + '</div>' +
     '<div id="lista-assoc">' + lista + '</div>' +
     '<div style="display:flex;gap:8px;margin-top:14px;">' +
     '<button onclick="document.getElementById(&apos;overlay-assoc&apos;).remove()" style="flex:1;background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:12px;font-family:Barlow Condensed,sans-serif;font-weight:700;cursor:pointer;">Cancelar</button>' +
-    '<button onclick="confirmarAssociacao(&apos;' + cartaoId + '&apos;)" style="flex:2;background:#F5A623;color:#111;border:none;border-radius:8px;padding:12px;font-family:Barlow Condensed,sans-serif;font-weight:700;cursor:pointer;">Associar Selecionados</button>' +
+    '<button onclick="confirmarAssociacao(&apos;' + escJs(cartaoId) + '&apos;)" style="flex:2;background:#F5A623;color:#111;border:none;border-radius:8px;padding:12px;font-family:Barlow Condensed,sans-serif;font-weight:700;cursor:pointer;">Associar Selecionados</button>' +
     '</div></div>';
   document.body.appendChild(overlay);
 }
@@ -6128,7 +6137,6 @@ async function confirmarAssociacao(cartaoId) {
   expenses.forEach(function(e) {
     if (ids.includes(e.id)) e.cartao_id = cartaoId;
   });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
 
   document.getElementById('overlay-assoc').remove();
   showToast('✓ ' + ids.length + ' gasto(s) associado(s)!');
@@ -6148,7 +6156,7 @@ function toggleCampoCartao() {
     // Popula com cartões cadastrados
     selectCartao.innerHTML = '<option value="">Nenhum (sem cartão)</option>';
     cartoes.forEach(function(c) {
-      selectCartao.innerHTML += '<option value="' + c.id + '">' + c.nome + ' •' + (c.final||'??') + '</option>';
+      selectCartao.innerHTML += '<option value="' + esc(c.id) + '">' + esc(c.nome) + ' •' + esc(c.final||'??') + '</option>';
     });
   } else {
     fieldCartao.style.display = 'none';
@@ -6245,7 +6253,7 @@ function renderRelatorio() {
       var qtd = gastosMes.filter(function(e){ return e.categoria === cat; }).length;
       html += '<div style="margin-bottom:12px;">';
       html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
-      html += '<span style="font-size:14px;color:#F5F5F5;">' + icon + ' ' + cat + '<span style="font-size:10px;color:#555;margin-left:6px;">' + qtd + ' lançamento' + (qtd>1?'s':'') + '</span></span>';
+      html += '<span style="font-size:14px;color:#F5F5F5;">' + icon + ' ' + esc(cat) + '<span style="font-size:10px;color:#555;margin-left:6px;">' + qtd + ' lançamento' + (qtd>1?'s':'') + '</span></span>';
       html += '<div style="text-align:right;"><span style="font-size:13px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(val) + '</span><span style="font-size:10px;color:#555;margin-left:6px;">' + pct.toFixed(0) + '%</span></div>';
       html += '</div>';
       html += '<div style="height:5px;background:#2A2A2A;border-radius:3px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + cor + ';border-radius:3px;"></div></div>';
@@ -6266,14 +6274,14 @@ function renderRelatorio() {
       var totalCat = itenscat.reduce(function(s,e){ return s+Number(e.valor); }, 0);
       html += '<div style="border-bottom:1px solid #1A1A1A;">';
       html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#222;">';
-      html += '<span style="font-size:12px;font-weight:700;color:' + cor + ';">' + icon + ' ' + cat + '</span>';
+      html += '<span style="font-size:12px;font-weight:700;color:' + cor + ';">' + icon + ' ' + esc(cat) + '</span>';
       html += '<span style="font-size:12px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:700;">' + fmt(totalCat) + '</span>';
       html += '</div>';
       itenscat.forEach(function(e) {
         var parts = e.data.split('-');
         var dataFmt = parts[2]+'/'+parts[1];
         html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-top:1px solid #1A1A1A;">';
-        html += '<div><div style="font-size:13px;color:#F5F5F5;">' + (e.fornecedor||e.categoria||'—') + '</div><div style="font-size:11px;color:#666;">' + dataFmt + (e.pagamento?' · '+e.pagamento:'') + '</div></div>';
+        html += '<div><div style="font-size:13px;color:#F5F5F5;">' + esc(e.fornecedor||e.categoria||'—') + '</div><div style="font-size:11px;color:#666;">' + dataFmt + (e.pagamento?' · '+esc(e.pagamento):'') + '</div></div>';
         html += '<span style="font-size:14px;color:#F44336;font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(e.valor) + '</span>';
         html += '</div>';
       });
