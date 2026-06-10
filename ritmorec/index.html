@@ -679,7 +679,7 @@
   <span class="footer-author">Oderli Garcia © 2026</span>
   <span class="footer-sep">·</span>
   <span class="footer-brand">RitmoProd</span>
-  <span class="footer-ver">RITMOREC v1.0</span>
+  <span class="footer-ver">RITMOREC v1.1</span>
 </footer>
 
 
@@ -697,6 +697,7 @@ const S = {
   chunks:     [],
   audioBlob:  null,
   audioURL:   null,
+  audioName:  null,
   stream:     null,
 
   audioCtx:   null,
@@ -790,6 +791,15 @@ function init() {
 
   // Detect insecure context proactively
   checkSecureContext();
+
+  // O sistema libera o wake lock quando a tela apaga — readquirir ao voltar
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && S.recording && !S.paused) {
+      navigator.wakeLock?.request('screen')
+        .then(wl => { S.wakeLock = wl; })
+        .catch(() => {});
+    }
+  });
 }
 
 function checkSecureContext() {
@@ -854,14 +864,7 @@ async function saveConfig() {
   updateTranscribeRow();
 }
 
-// Pre-fill modal on open
-document.getElementById('modalCfg').addEventListener('transitionend', () => {
-  document.getElementById('cfgCk').value   = S.config.claudeKey;
-  document.getElementById('cfgGid').value  = S.config.googleClientId;
-  document.getElementById('cfgLang').value = S.config.lang;
-});
-// Actually populate on open:
-const _origOpenModal = openModal;
+// Pre-fill config modal on open
 window.openModal = function(id) {
   if (id === 'modalCfg') {
     document.getElementById('cfgCk').value   = S.config.claudeKey;
@@ -905,6 +908,7 @@ function resetSession() {
   S.chunks    = [];
   if (S.audioURL) URL.revokeObjectURL(S.audioURL);
   S.audioBlob = null;
+  S.audioName = null;
   S.audioURL  = null;
   S.seconds   = 0;
   updateTimerDisplay();
@@ -1042,7 +1046,7 @@ function bestMime() {
 
 function downloadAudio() {
   if (!S.audioURL) return;
-  const ext  = (S.mediaRec?.mimeType || '').includes('mp4') ? 'm4a' : 'webm';
+  const ext  = audioExt();
   const name = sanitize(document.getElementById('meetTitle').value || 'reuniao');
   const a = document.createElement('a');
   a.href = S.audioURL;
@@ -1374,8 +1378,8 @@ Regras: seja formal, objetivo, profissional. Se alguma info não estiver na tran
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2048,
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4096,
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -1425,7 +1429,7 @@ function printAta() {
   const title = document.getElementById('meetTitle').value.trim() || 'Reunião';
   const w = window.open('', '_blank');
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <title>ATA — ${title}</title>
+    <title>ATA — ${escapeHTML(title)}</title>
     <style>
       body { font-family: Arial, sans-serif; font-size: 13px; line-height: 1.7; color: #111; padding: 32px 48px; max-width: 780px; margin: 0 auto; }
       h1 { font-size: 20px; color: #333; border-bottom: 2px solid #F5A623; padding-bottom: 6px; }
@@ -1510,7 +1514,7 @@ async function performDriveUpload(token) {
       await driveUpText(token, S.transcript, `TRANSCRICAO_${name}_${d}.txt`);
     }
     if (S.audioBlob) {
-      const ext = (S.mediaRec?.mimeType || '').includes('mp4') ? 'm4a' : 'webm';
+      const ext = audioExt();
       await driveUpBlob(token, S.audioBlob, `AUDIO_${name}_${d}.${ext}`, S.audioBlob.type);
     }
     toast('Salvo no Google Drive!', 'ok');
@@ -1609,6 +1613,19 @@ function dateFmt() {
   return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
 }
 
+function audioExt() {
+  // Áudio de upload externo não passa pelo MediaRecorder — usar o tipo do blob,
+  // senão a extensão do arquivo original, antes de cair no padrão webm
+  const t = (S.audioBlob?.type || S.mediaRec?.mimeType || '').toLowerCase();
+  if (t.includes('mp4') || t.includes('aac'))  return 'm4a';
+  if (t.includes('mpeg') || t.includes('mp3')) return 'mp3';
+  if (t.includes('wav'))  return 'wav';
+  if (t.includes('ogg'))  return 'ogg';
+  if (t.includes('webm')) return 'webm';
+  const m = (S.audioName || '').match(/\.(\w+)$/);
+  return m ? m[1].toLowerCase() : 'webm';
+}
+
 let _toastT;
 function toast(msg, type = '') {
   const el = document.getElementById('toast');
@@ -1627,6 +1644,7 @@ function handleAudioUpload(input) {
 
   if (S.audioURL) URL.revokeObjectURL(S.audioURL);
   S.audioBlob = file;
+  S.audioName = file.name;
   S.audioURL  = URL.createObjectURL(file);
 
   // Show info
@@ -1678,7 +1696,7 @@ async function transcribeAudio(provider) {
   toast('Transcrevendo áudio...', '');
 
   try {
-    const ext  = (S.mediaRec?.mimeType || '').includes('mp4') ? 'm4a' : 'webm';
+    const ext  = audioExt();
     const form = new FormData();
     form.append('file',            S.audioBlob, `audio.${ext}`);
     form.append('model',           provider === 'groq' ? 'whisper-large-v3' : 'whisper-1');
@@ -1720,6 +1738,10 @@ async function transcribeAudio(provider) {
    START
 ═══════════════════════════════════════════════════ */
 window.addEventListener('load', checkAuth);
+
+if ('serviceWorker' in navigator && window.isSecureContext) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
 </script>
 </body>
 </html>
