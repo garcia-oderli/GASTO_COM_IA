@@ -3376,19 +3376,22 @@ function expenseCardHTML(e) {
 // RENDER ALL EXPENSES
 // ═══════════════════════════════════════════════════════════════════
 function renderAll() {
-  const filtered = currentFilter==='all' ? [...expenses] : expenses.filter(e=>e.categoria===currentFilter);
+  // Escopo: mês atual (consistente com Home e Relatório)
+  const monthExp = getMonthExpenses();
+  const filtered = currentFilter==='all' ? [...monthExp] : monthExp.filter(e=>e.categoria===currentFilter);
   const sorted = filtered.sort((a,b)=> {
     const dateA = parseExpenseDate(a.data);
     const dateB = parseExpenseDate(b.data);
     return dateB - dateA || new Date(b.criadoEm) - new Date(a.criadoEm);
   });
   const el = document.getElementById('all-list');
+  const mesAtualLabel = new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   if (!sorted.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>Nenhum gasto</h3><p>Nada encontrado para este filtro</p></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>Nenhum gasto</h3><p>Nada encontrado em ${esc(mesAtualLabel)}</p></div>`;
     return;
   }
   const categoryTotal = sorted.reduce((s, e) => s + e.valor, 0);
-  const catName = currentFilter === 'all' ? 'Total de Gastos' : currentFilter;
+  const catName = (currentFilter === 'all' ? 'Total de Gastos' : currentFilter) + ' · ' + mesAtualLabel;
   el.innerHTML = `
     <div style="background:var(--surface);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
       <div style="font-size:13px;color:var(--text4);text-transform:uppercase;font-weight:600;">${esc(catName)}</div>
@@ -3453,9 +3456,9 @@ function renderBarChart(containerId, data, colors) {
 
 function renderAnaliseCategorias() {
   const totals = {};
-  expenses.forEach(e=>{ totals[e.categoria]=(totals[e.categoria]||0)+e.valor; });
+  getMonthExpenses().forEach(e=>{ totals[e.categoria]=(totals[e.categoria]||0)+e.valor; });
   const total = Object.values(totals).reduce((s,v)=>s+v,0);
-  const data = Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({ label:CAT_ICONS[k]+' '+k, value:v, pct:total>0?(v/total*100):0 }));
+  const data = Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({ label:(CAT_ICONS[k]||'📦')+' '+k, value:v, pct:total>0?(v/total*100):0 }));
   const colors = data.map(d => {
     const cat = d.label.split(' ').slice(1).join(' ');
     return CAT_COLORS[cat] || '#F5A623';
@@ -3620,7 +3623,7 @@ function renderAnaliseComparativo() {
 
 function renderAnalisePayment() {
   const totals = {};
-  expenses.forEach(e=>{ const p=e.pagamento||'Não informado'; totals[p]=(totals[p]||0)+e.valor; });
+  getMonthExpenses().forEach(e=>{ const p=e.pagamento||'Não informado'; totals[p]=(totals[p]||0)+e.valor; });
   const data = Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({label:k, value:v}));
   const colors = ['#F5A623','#ec4899','#10b981','#f59e0b','#14b8a6'];
   renderBarChart('pay-chart', data, colors);
@@ -6190,7 +6193,7 @@ function renderRelatorio() {
   if (elSub) elSub.textContent = label;
 
   const gastosMes = expenses.filter(function(e) {
-    const d = new Date(e.data + 'T00:00:00');
+    const d = parseExpenseDate(e.data);
     return d.getFullYear() === relAno && d.getMonth() === relMes;
   });
 
