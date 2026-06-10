@@ -5778,7 +5778,13 @@ function renderOrcamentoVsGastos() {
 }
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  navigator.serviceWorker.register('/sw.js').then(reg => reg.update()).catch(()=>{});
+  // Quando um SW novo assume, recarrega para exibir a versão nova imediatamente
+  const hadController = !!navigator.serviceWorker.controller;
+  let swReloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController && !swReloaded) { swReloaded = true; location.reload(); }
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════════
