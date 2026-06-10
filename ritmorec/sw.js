@@ -1,4 +1,4 @@
-const CACHE = 'ritmorec-v1.1';
+const CACHE = 'ritmorec-v1.2';
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/', '/manifest.json', '/icon.svg', '/icon-192.png', '/icon-512.png'])));
   self.skipWaiting();

@@ -679,7 +679,7 @@
   <span class="footer-author">Oderli Garcia © 2026</span>
   <span class="footer-sep">·</span>
   <span class="footer-brand">RitmoProd</span>
-  <span class="footer-ver">RITMOREC v1.1</span>
+  <span class="footer-ver">RITMOREC v1.2</span>
 </footer>
 
 
@@ -724,6 +724,8 @@ const S = {
     openaiKey:      localStorage.getItem('mr_oai')   || ''
   }
 };
+
+const IS_MOBILE = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
 /* ═══════════════════════════════════════════════════
    AUTH
@@ -929,15 +931,6 @@ async function startRecording() {
     return;
   }
 
-  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-
-  if (isMobile) {
-    // No mobile: SpeechRecognition primeiro, MediaRecorder depois com stream separado
-    startRecognition();
-    // Aguarda SR iniciar antes de abrir o MediaRecorder
-    await new Promise(r => setTimeout(r, 600));
-  }
-
   if (!navigator.mediaDevices?.getUserMedia) {
     showInsecureWarning();
     toast('Microfone não disponível neste browser', 'err');
@@ -975,7 +968,15 @@ async function startRecording() {
   S.mediaRec.start(500);
 
   startVisualizer(S.stream);
-  if (!isMobile) startRecognition();
+  // Transcrição ao vivo só no desktop — no mobile o SpeechRecognition disputa
+  // o microfone com o MediaRecorder e perde trechos nas religadas; o fluxo
+  // confiável é gravar e transcrever o áudio completo via GROQ ao final
+  if (!IS_MOBILE) {
+    startRecognition();
+  } else if (!S.transcript) {
+    document.getElementById('transcriptBox').innerHTML =
+      '<span style="color:var(--txt2);font-style:italic">Transcrição ao vivo desativada no celular — ao parar, use 🎙 GROQ para transcrever o áudio completo.</span>';
+  }
 
   S.seconds  = 0;
   S.timerIv  = setInterval(() => { S.seconds++; updateTimerDisplay(); }, 1000);
@@ -998,7 +999,7 @@ function pauseRecording() {
 
 function resumeRecording() {
   try { if (S.mediaRec?.state === 'paused') S.mediaRec.resume(); } catch(e){}
-  startRecognition();
+  if (!IS_MOBILE) startRecognition();
   S.timerIv = setInterval(() => { S.seconds++; updateTimerDisplay(); }, 1000);
   S.paused  = false;
   updateUI();
@@ -1029,7 +1030,15 @@ function onRecordStop() {
   }
   updateTranscribeRow();
   drawIdle();
-  toast('Gravação salva', 'ok');
+  if (IS_MOBILE && !S.transcript.trim()) {
+    if (S.config.groqKey) {
+      toast('Gravação salva — toque em 🎙 GROQ para transcrever', 'ok');
+    } else {
+      toast('Gravação salva — configure a chave Groq (grátis) em ⚙ para transcrever', 'warn');
+    }
+  } else {
+    toast('Gravação salva', 'ok');
+  }
 }
 
 function bestMime() {
@@ -1149,10 +1158,8 @@ function startRecognition() {
   try { S.recognition?.abort(); } catch(e){}
   if (S._recRestartTimer) { clearTimeout(S._recRestartTimer); S._recRestartTimer = null; }
 
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-
   S.recognition                = new SR();
-  S.recognition.continuous     = !isMobile; // mobile não suporta bem continuous
+  S.recognition.continuous     = true;
   S.recognition.interimResults = true;
   S.recognition.lang           = S.config.lang;
   S.recognition.maxAlternatives = 1;
@@ -1184,12 +1191,11 @@ function startRecognition() {
   S.recognition.onend = () => {
     setMicIndicator(false);
     if (S.recording && !S.paused) {
-      // mobile precisa de pequena pausa antes de reiniciar
       S._recRestartTimer = setTimeout(() => {
         if (S.recording && !S.paused) {
           try { startRecognition(); } catch(e){}
         }
-      }, isMobile ? 300 : 50);
+      }, 50);
     }
   };
 
