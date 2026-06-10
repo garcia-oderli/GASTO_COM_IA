@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v3.8</title>
+<title>GastosIA - Smart Finance v4.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -274,6 +274,10 @@
   .empty-state-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.6; }
   .empty-state h3 { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text3); margin-bottom: 8px; letter-spacing: -0.01em; }
   .empty-state p { font-size: 14px; line-height: 1.5; }
+  .empty-cta { display:inline-flex; align-items:center; gap:7px; margin-top:18px; padding:11px 18px; background:var(--accent); color:#111; border:none; border-radius:10px; font-family:var(--font-body); font-size:14px; font-weight:700; cursor:pointer; }
+  .empty-cta:active { transform:scale(0.96); }
+  .empty-cta.ghost { background:transparent; color:var(--accent); border:1px solid rgba(245,166,35,0.4); }
+  .empty-hint { margin-top:10px; font-size:12px; color:var(--text4); }
 
   /* ═══ DETAIL MODAL ═══ */
   .detail-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 15px; }
@@ -693,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v3.8</span>
+    <span class="logo-version">v4.0</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -837,8 +841,10 @@
   <div class="expense-list" id="recent-list">
     <div class="empty-state">
       <div class="empty-state-icon">📷</div>
-      <h3>Nenhum gasto ainda</h3>
-      <p>Toque no + para escanear sua primeira nota</p>
+      <h3>Comece por aqui</h3>
+      <p>Registre seu primeiro gasto em segundos.</p>
+      <button class="empty-cta" onclick="openScanDirect()">📷 Escanear uma nota</button>
+      <div class="empty-hint">ou toque no + para lançar manualmente</div>
     </div>
   </div>
 </div>
@@ -1303,7 +1309,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v3.8.0</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.0.0</div>
       </div>
     </div>
   </div>
@@ -2907,7 +2913,7 @@ function renderHome() {
   const recent = [...expenses].sort((a,b)=>new Date(b.criadoEm)-new Date(a.criadoEm)).slice(0,5);
   const el = document.getElementById('recent-list');
   if (!recent.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📷</div><h3>Nenhum gasto ainda</h3><p>Toque no + para escanear sua primeira nota</p></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📷</div><h3>Comece por aqui</h3><p>Registre seu primeiro gasto em segundos.</p><button class="empty-cta" onclick="openScanDirect()">📷 Escanear uma nota</button><div class="empty-hint">ou toque no + para lançar manualmente</div></div>`;
     return;
   }
   el.innerHTML = recent.map(e => expenseCardHTML(e)).join('');
@@ -3203,7 +3209,7 @@ function deleteIncome(id) {
 function renderIncomeList() {
   const el = document.getElementById('income-list');
   const total = getTotalIncome();
-  if (!incomes.length) { el.innerHTML = '<div style="text-align:center;padding:16px 0;font-size:13px;color:var(--text4);">Nenhuma renda cadastrada</div>'; document.getElementById('income-total-row').style.display='none'; return; }
+  if (!incomes.length) { el.innerHTML = '<div style="text-align:center;padding:16px 0;font-size:13px;color:var(--text4);">Cadastre sua renda para ver saldo e score do mês — use o campo acima.</div>'; document.getElementById('income-total-row').style.display='none'; return; }
 
   el.innerHTML = '<div style="margin-top:12px;">'+incomes.map(i => {
     const mesDisplay = i.mes ? new Date(i.mes + '-15').toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'}) : 'Sem data';
@@ -3387,7 +3393,10 @@ function renderAll() {
   const el = document.getElementById('all-list');
   const mesAtualLabel = new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   if (!sorted.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>Nenhum gasto</h3><p>Nada encontrado em ${esc(mesAtualLabel)}</p></div>`;
+    const cta = currentFilter==='all'
+      ? `<button class="empty-cta" onclick="openAddModal()">+ Adicionar gasto</button>`
+      : `<div class="empty-hint">Nenhum gasto de "${esc(currentFilter)}" neste mês</div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>Nada em ${esc(mesAtualLabel)}</h3><p>Este mês ainda não tem gastos registrados.</p>${cta}</div>`;
     return;
   }
   const categoryTotal = sorted.reduce((s, e) => s + e.valor, 0);
@@ -5708,7 +5717,7 @@ function renderOrcamentoVsGastos() {
   const el = document.getElementById('budget-comparison-wrap');
   
   if (!budgets) {
-    el.innerHTML = '<div class="empty-state"><p>Defina orçamentos na aba Orçamentos first</p></div>';
+    el.innerHTML = '<div class="empty-state"><p>Defina metas por categoria na aba Orçamentos para comparar aqui.</p></div>';
     return;
   }
   
@@ -5923,7 +5932,7 @@ function renderCartoes() {
     var html = '';
 
     if (cartoes.length === 0) {
-      html = '<div style="text-align:center;padding:60px 20px;color:#555;"><div style="font-size:48px;margin-bottom:16px;">💳</div><div style="font-size:14px;">Nenhum cartão cadastrado</div><div style="font-size:12px;margin-top:8px;color:#444;">Clique em "+ Cartão" para adicionar</div></div>';
+      html = '<div style="text-align:center;padding:60px 20px;color:#555;"><div style="font-size:48px;margin-bottom:16px;">💳</div><div style="font-size:14px;">Nenhum cartão cadastrado</div><div style="font-size:12px;margin-top:8px;color:#444;">Cadastre um cartão para acompanhar a fatura e o limite usado.</div><button class="empty-cta" style="margin-top:16px;" onclick="abrirModalCartao()">+ Cadastrar cartão</button></div>';
       el.innerHTML = html;
       return;
     }
