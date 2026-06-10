@@ -4293,7 +4293,6 @@ async function analyzeImage(base64, mimeType) {
 Analise a imagem fornecida e extraia os seguintes campos em formato JSON EXATO (sem markdown, sem explicações):
 {
   "valor": <número decimal, ex: 45.90>,
-  "data": "<YYYY-MM-DD>",
   "categoria": "<uma de: Alimentação, Transporte, Saúde, Moradia, Lazer, Educação, Outros>",
   "fornecedor": "<nome do estabelecimento ou empresa>",
   "pagamento": "<uma de: Dinheiro, Débito, Crédito, Pix, Vale Refeição, ou vazio se não identificado>",
@@ -4302,7 +4301,6 @@ Analise a imagem fornecida e extraia os seguintes campos em formato JSON EXATO (
 
 Regras:
 - valor: use o TOTAL da nota (valor final pago)
-- data: priorize VENCIMENTO ou DATA DE PAGAMENTO (não data de emissão/geração). Em boletos use o campo 'Vencimento'. Se não encontrar, use hoje ${new Date().toISOString().slice(0,10)}
 - Classifique a categoria com base no nome do estabelecimento (iFood→Alimentação, Uber→Transporte, etc.)
 - Se um campo não for identificável, use string vazia ou null
 - Responda APENAS com o JSON, sem nenhum texto adicional`;
@@ -4341,7 +4339,8 @@ Regras:
     const text = data.content[0].text.trim();
     const json = JSON.parse(text.replace(/```json?/g,'').replace(/```/g,'').trim());
     if (json.valor)      document.getElementById('f-valor').value = json.valor;
-    if (json.data)       document.getElementById('f-data').value = json.data;
+    // Data: sempre a do dia (OCR errava a data com frequência); o usuário pode ajustar manualmente
+    document.getElementById('f-data').value = new Date().toISOString().slice(0,10);
     if (json.categoria)  document.getElementById('f-categoria').value = json.categoria;
     if (json.fornecedor) document.getElementById('f-fornecedor').value = json.fornecedor;
     if (json.pagamento)  document.getElementById('f-pagamento').value = json.pagamento;
