@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#111111">
+<title>GastosIA · Manual do Usuário</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #111111; --surface: #1C1C1C; --surface2: #222222; --border: #2A2A2A;
+    --text: #F5F5F5; --text2: #CCCCCC; --text3: #888888; --text4: #555555;
+    --accent: #F5A623; --green: #4CAF50; --red: #F44336; --amber: #FF9800;
+    --radius: 12px;
+    --font-display: 'Barlow Condensed', sans-serif;
+    --font-body: 'Barlow', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--font-body);
+    line-height: 1.6; padding-bottom: 60px; -webkit-font-smoothing: antialiased;
+  }
+
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(17,17,17,0.92); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .back-btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text2);
+    border-radius: 8px; padding: 8px 14px; font-family: var(--font-body);
+    font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .back-btn:active { background: var(--surface2); }
+  .header-title {
+    font-family: var(--font-display); font-size: 20px; font-weight: 700;
+    color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 20px 18px; }
+
+  .hero {
+    background: linear-gradient(135deg, rgba(245,166,35,0.10), rgba(245,166,35,0.02));
+    border: 1px solid rgba(245,166,35,0.25); border-radius: var(--radius);
+    padding: 22px; margin-bottom: 24px;
+  }
+  .hero h1 { font-family: var(--font-display); font-size: 26px; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .hero p { color: var(--text2); font-size: 15px; }
+
+  /* índice */
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 28px; }
+  .toc-title { font-family: var(--font-mono); font-size: 11px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+  .toc a { display: block; color: var(--text2); text-decoration: none; padding: 7px 0; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .toc a:last-child { border-bottom: none; }
+  .toc a:active { color: var(--accent); }
+
+  section { margin-bottom: 34px; scroll-margin-top: 70px; }
+  .sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid var(--border); }
+  .sec-emoji { font-size: 24px; }
+  .sec-head h2 { font-family: var(--font-display); font-size: 21px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+
+  h3 { font-size: 16px; font-weight: 600; color: var(--accent); margin: 18px 0 8px; }
+  p { color: var(--text2); margin-bottom: 10px; font-size: 15px; }
+  ul, ol { margin: 0 0 12px 22px; color: var(--text2); }
+  li { margin-bottom: 7px; font-size: 15px; }
+  strong { color: var(--text); font-weight: 600; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 12px; }
+
+  .step { display: flex; gap: 14px; margin-bottom: 12px; }
+  .step-num {
+    flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: #111; font-family: var(--font-display);
+    font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center;
+  }
+  .step-body { padding-top: 2px; }
+
+  .tip { border-left: 3px solid var(--green); background: rgba(76,175,80,0.06); padding: 12px 14px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+  .warn { border-left: 3px solid var(--amber); background: rgba(255,152,0,0.06); padding: 12px 14px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+  .tip strong, .warn strong { color: var(--text); }
+
+  .pill { display: inline-block; font-family: var(--font-mono); font-size: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; color: var(--text2); }
+
+  .faq-q { font-weight: 600; color: var(--text); margin-top: 14px; margin-bottom: 4px; font-size: 15px; }
+  .faq-a { color: var(--text3); font-size: 14px; }
+
+  footer { text-align: center; padding: 24px 0 8px; color: var(--text4); font-size: 13px; border-top: 1px solid var(--border); margin-top: 30px; }
+  footer .ver { font-family: var(--font-mono); color: var(--accent); }
+  a.inline { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <a href="/" class="back-btn">‹ Voltar</a>
+    <span class="header-title">Manual</span>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>📖 Manual do GastosIA</h1>
+      <p>Tudo o que você precisa para controlar suas finanças com a ajuda da inteligência artificial. Toque em um tópico abaixo para ir direto a ele.</p>
+    </div>
+
+    <nav class="toc">
+      <div class="toc-title">Índice</div>
+      <a href="#inicio">1. Primeiros passos (login e instalação)</a>
+      <a href="#registrar">2. Registrar um gasto</a>
+      <a href="#scan">3. Escanear nota com a IA</a>
+      <a href="#voz">4. Lançar por voz</a>
+      <a href="#recorrentes">5. Gastos recorrentes</a>
+      <a href="#parcelas">6. Compras parceladas</a>
+      <a href="#renda">7. Renda e saldo do mês</a>
+      <a href="#categorias">8. Categorias</a>
+      <a href="#cartoes">9. Cartões de crédito</a>
+      <a href="#analise">10. Análise e gráficos</a>
+      <a href="#ia">11. Insights da IA</a>
+      <a href="#orcamento">12. Orçamento e score</a>
+      <a href="#relatorio">13. Relatório mensal</a>
+      <a href="#importar">14. Importar extratos</a>
+      <a href="#dados">15. Backup e segurança</a>
+      <a href="#faq">16. Perguntas frequentes</a>
+    </nav>
+
+    <section id="inicio">
+      <div class="sec-head"><span class="sec-emoji">🚀</span><h2>1. Primeiros passos</h2></div>
+      <p>O GastosIA é um aplicativo web (PWA): funciona no navegador e pode ser instalado na tela inicial do celular como um app normal.</p>
+      <h3>Criar conta e entrar</h3>
+      <div class="step"><div class="step-num">1</div><div class="step-body">Na tela inicial, escolha <strong>Cadastrar</strong>, informe seu e-mail e uma senha (mínimo 6 caracteres).</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Nas próximas vezes, use <strong>Entrar</strong> com o mesmo e-mail e senha.</div></div>
+      <div class="tip">🔒 Seus dados ficam guardados na nuvem com segurança e vinculados à sua conta. Você pode acessar do celular ou do computador com o mesmo login — tudo fica sincronizado.</div>
+      <h3>Instalar no celular</h3>
+      <ul>
+        <li><strong>Android (Chrome):</strong> toque no menu <span class="pill">⋮</span> → "Adicionar à tela inicial".</li>
+        <li><strong>iPhone (Safari):</strong> toque em compartilhar <span class="pill">↑</span> → "Adicionar à Tela de Início".</li>
+      </ul>
+      <div class="tip">O app se atualiza sozinho ao ser aberto. Você pode conferir a versão atual no número que aparece ao lado do nome, no topo (ex.: <span class="pill">v3.9</span>) ou em <strong>Config → Sobre</strong>.</div>
+    </section>
+
+    <section id="registrar">
+      <div class="sec-head"><span class="sec-emoji">➕</span><h2>2. Registrar um gasto</h2></div>
+      <p>Toque no botão laranja <strong>+</strong> (canto inferior direito) ou use os atalhos rápidos no topo da tela Início.</p>
+      <div class="step"><div class="step-num">1</div><div class="step-body">Informe o <strong>valor</strong> e a <strong>data</strong> (já vem preenchida com o dia de hoje).</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Escolha a <strong>categoria</strong>. Se você digitar o nome de um estabelecimento conhecido (ex.: iFood, Uber), o app sugere a categoria automaticamente.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Opcional: preencha fornecedor, forma de pagamento e uma descrição.</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body">Toque em <strong>Salvar Gasto</strong>.</div></div>
+      <p>Para ver detalhes, editar ou apagar um gasto, toque sobre ele na lista. Os atalhos do topo (<strong>Alimentação</strong>, <strong>Combustível</strong>, <strong>Mercado</strong>) já abrem o formulário com a categoria escolhida.</p>
+    </section>
+
+    <section id="scan">
+      <div class="sec-head"><span class="sec-emoji">📷</span><h2>3. Escanear nota com a IA</h2></div>
+      <p>O atalho <strong>SCAN</strong> usa inteligência artificial para ler uma foto de nota fiscal, cupom ou boleto e preencher os campos automaticamente.</p>
+      <div class="step"><div class="step-num">1</div><div class="step-body">Toque em <strong>SCAN</strong> e tire a foto ou escolha uma imagem da galeria.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Aguarde a IA extrair <strong>valor, categoria, fornecedor, pagamento e descrição</strong>.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Confira os dados e toque em salvar.</div></div>
+      <div class="warn">⚠️ A <strong>data</strong> é sempre preenchida com o dia de hoje, porque a leitura automática de datas em notas costuma errar. Se o gasto for de outro dia, ajuste a data manualmente antes de salvar.</div>
+      <div class="tip">Para usar o SCAN é preciso ter uma chave de IA configurada em <strong>Config → Claude API Key</strong>. Sem ela, basta preencher os campos manualmente.</div>
+    </section>
+
+    <section id="voz">
+      <div class="sec-head"><span class="sec-emoji">🎙️</span><h2>4. Lançar por voz</h2></div>
+      <p>No formulário de novo gasto, toque no ícone de microfone e fale naturalmente, por exemplo: <em>"quarenta e cinco reais de almoço"</em>.</p>
+      <p>O app tenta identificar o <strong>valor</strong>, a <strong>descrição</strong> e a <strong>categoria</strong> a partir da sua fala. Confira e ajuste se necessário antes de salvar.</p>
+    </section>
+
+    <section id="recorrentes">
+      <div class="sec-head"><span class="sec-emoji">🔁</span><h2>5. Gastos recorrentes</h2></div>
+      <p>Para contas que se repetem todo mês (aluguel, assinaturas, academia), crie um <strong>recorrente</strong> e lance com um toque.</p>
+      <div class="step"><div class="step-num">1</div><div class="step-body">Na tela Início, na faixa <strong>RECORRENTES</strong>, toque no <strong>+</strong>.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Dê um nome, valor, categoria e (opcional) fornecedor e pagamento.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Depois, é só tocar no recorrente para abrir o formulário já preenchido — confirme a data e salve.</div></div>
+      <div class="tip">Para remover um recorrente, toque no <strong>✕</strong> no canto do item.</div>
+    </section>
+
+    <section id="parcelas">
+      <div class="sec-head"><span class="sec-emoji">💳</span><h2>6. Compras parceladas</h2></div>
+      <p>Ao registrar um gasto, informe o número de <strong>parcelas</strong>. O app divide o valor e cria automaticamente uma despesa em cada mês seguinte, na mesma data.</p>
+      <p>Assim, uma compra de R$ 1.200 em 12x aparece como R$ 100 por mês — e cada mês mostra só o que realmente pesa naquele período.</p>
+    </section>
+
+    <section id="renda">
+      <div class="sec-head"><span class="sec-emoji">💰</span><h2>7. Renda e saldo do mês</h2></div>
+      <p>Cadastre quanto você recebe para o app calcular seu saldo e sua saúde financeira.</p>
+      <div class="step"><div class="step-num">1</div><div class="step-body">Na tela Início, abra o painel de <strong>renda</strong> e adicione salário, freelance ou outras entradas, escolhendo o mês.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">O cartão <strong>Saldo do Mês</strong> mostra quanto sobra (renda − gastos) e o percentual da renda já gasto.</div></div>
+      <div class="tip">Use a opção de <strong>copiar renda para vários meses</strong> para não precisar recadastrar o salário todo mês.</div>
+    </section>
+
+    <section id="categorias">
+      <div class="sec-head"><span class="sec-emoji">🏷️</span><h2>8. Categorias</h2></div>
+      <p>O app já vem com categorias prontas (Alimentação, Transporte, Saúde, Moradia, Lazer, Educação e mais). Em <strong>Config → Categorias</strong> você pode:</p>
+      <ul>
+        <li><strong>Criar</strong> categorias personalizadas com emoji e cor próprios;</li>
+        <li><strong>Editar</strong> o nome ou o ícone de qualquer categoria;</li>
+        <li><strong>Excluir</strong> categorias que você criou.</li>
+      </ul>
+      <div class="warn">⚠️ As categorias personalizadas ficam salvas <strong>neste dispositivo</strong>. Em um aparelho novo, os gastos aparecem normalmente, mas categorias criadas por você podem mostrar um ícone genérico (📦) até serem recriadas.</div>
+    </section>
+
+    <section id="cartoes">
+      <div class="sec-head"><span class="sec-emoji">💳</span><h2>9. Cartões de crédito</h2></div>
+      <p>Na aba <strong>Cartões</strong> você acompanha a fatura de cada cartão.</p>
+      <div class="step"><div class="step-num">1</div><div class="step-body">Toque em <strong>+ Cartão</strong> e informe nome, final, limite, dia de fechamento e dia de vencimento.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Ao registrar um gasto no crédito/débito, selecione o cartão no formulário.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">O cartão mostra o total da fatura do ciclo atual, o limite usado e os dias até o vencimento. Use <strong>Associar Gastos</strong> para vincular despesas antigas.</div></div>
+    </section>
+
+    <section id="analise">
+      <div class="sec-head"><span class="sec-emoji">📊</span><h2>10. Análise e gráficos</h2></div>
+      <p>A aba <strong>Análise</strong> mostra para onde seu dinheiro vai, com gráficos por:</p>
+      <ul>
+        <li><strong>Categorias</strong> — barras e pizza com a divisão dos gastos;</li>
+        <li><strong>Evolução</strong> — comparação ao longo das semanas e meses;</li>
+        <li><strong>Comparativo</strong> — meses anteriores e projeção dos próximos;</li>
+        <li><strong>Pagamento</strong> — quanto você gasta em dinheiro, pix, cartão etc.</li>
+      </ul>
+      <div class="tip">As abas Início, Gastos, Análise e Relatório consideram sempre o <strong>mês atual</strong>, então os totais batem entre elas. Para ver outros meses, use o Relatório.</div>
+    </section>
+
+    <section id="ia">
+      <div class="sec-head"><span class="sec-emoji">🤖</span><h2>11. Insights da IA</h2></div>
+      <p>A aba <strong>IA</strong> (Insights) gera uma análise no estilo consultor financeiro: aponta problemas, sugere cortes e mostra oportunidades de economia.</p>
+      <p>Se você configurou uma chave de IA, a análise é feita pela inteligência artificial. Sem chave, o app gera uma análise local com base nos seus números — sem custo.</p>
+      <h3>Configurar a IA (opcional)</h3>
+      <ul>
+        <li><strong>Claude (recomendado):</strong> em <strong>Config → Claude API Key</strong>, cole sua chave obtida em <a class="inline" href="https://console.anthropic.com">console.anthropic.com</a>. Necessária para o SCAN de notas.</li>
+        <li><strong>Ollama (IA local):</strong> para quem roda modelos no próprio computador, é possível apontar o app para um servidor Ollama em Config.</li>
+      </ul>
+    </section>
+
+    <section id="orcamento">
+      <div class="sec-head"><span class="sec-emoji">🎯</span><h2>12. Orçamento e score</h2></div>
+      <p>Defina um <strong>limite mensal</strong> em <strong>Config → Orçamento</strong>. O app mostra uma barra de progresso na tela Início e avisa quando você se aproxima ou ultrapassa o limite.</p>
+      <p>O <strong>Score Financeiro</strong> (0 a 100) resume sua saúde financeira considerando controle de gastos, poupança, diversificação e organização. Quanto maior, melhor.</p>
+      <p>Na aba <strong>Orçamentos</strong> dá para definir metas por categoria (em % da renda) e comparar com o que foi realmente gasto.</p>
+    </section>
+
+    <section id="relatorio">
+      <div class="sec-head"><span class="sec-emoji">📄</span><h2>13. Relatório mensal</h2></div>
+      <p>A aba <strong>Relatório</strong> traz um resumo completo de qualquer mês: renda, gastos, saldo, percentual comprometido, divisão por categoria e a lista de lançamentos.</p>
+      <ul>
+        <li>Use as <strong>setas</strong> para navegar entre os meses.</li>
+        <li>Toque em <strong>imprimir/PDF</strong> para gerar um relatório pronto para salvar ou compartilhar.</li>
+      </ul>
+    </section>
+
+    <section id="importar">
+      <div class="sec-head"><span class="sec-emoji">📥</span><h2>14. Importar extratos</h2></div>
+      <p>Já tem os gastos em um arquivo? O app importa extratos e reconhece as transações automaticamente. Formatos aceitos:</p>
+      <ul>
+        <li><span class="pill">CSV</span> e <span class="pill">Excel (.xlsx)</span> — planilhas de banco;</li>
+        <li><span class="pill">OFX</span> — extrato bancário padrão;</li>
+        <li><span class="pill">PDF</span> — lido pela IA (requer chave configurada).</li>
+      </ul>
+      <div class="tip">A importação evita duplicar lançamentos que já existem e tenta classificar as categorias sozinha.</div>
+    </section>
+
+    <section id="dados">
+      <div class="sec-head"><span class="sec-emoji">🔐</span><h2>15. Backup e segurança</h2></div>
+      <p>Seus dados ficam salvos na nuvem e vinculados à sua conta — cada usuário só acessa os próprios gastos.</p>
+      <ul>
+        <li><strong>Exportar JSON</strong> — backup completo de dados e configurações;</li>
+        <li><strong>Exportar Excel</strong> — planilha com todos os gastos;</li>
+        <li><strong>Importar Backup JSON</strong> — restaura dados de um backup anterior;</li>
+        <li><strong>Limpar todos os dados</strong> — apaga seus gastos (ação irreversível, use com cuidado).</li>
+      </ul>
+      <div class="warn">⚠️ Ao <strong>sair da conta</strong>, os dados locais do dispositivo são limpos, mas tudo continua salvo na nuvem — basta entrar de novo para recuperar.</div>
+    </section>
+
+    <section id="faq">
+      <div class="sec-head"><span class="sec-emoji">❓</span><h2>16. Perguntas frequentes</h2></div>
+
+      <div class="card">
+        <div class="faq-q">Os valores não batem entre as telas. Por quê?</div>
+        <div class="faq-a">Início, Gastos, Análise e Relatório mostram sempre o <strong>mês atual</strong>. Se um gasto parcelado cai em meses futuros, ele aparece no mês correspondente. Para ver um mês específico, use o Relatório e navegue com as setas.</div>
+
+        <div class="faq-q">Preciso pagar para usar a IA?</div>
+        <div class="faq-a">A análise local é gratuita. Para o SCAN de notas e a análise feita pela IA, é preciso uma chave da Anthropic (Claude), que tem custo por uso cobrado pela própria Anthropic.</div>
+
+        <div class="faq-q">O app não atualizou para a versão nova.</div>
+        <div class="faq-a">Feche o app completamente e abra de novo (talvez duas vezes). Confirme a versão no topo. Se persistir, limpe os dados do app nas configurações do celular ou reinstale — seus gastos estão na nuvem e não se perdem.</div>
+
+        <div class="faq-q">Posso usar no computador e no celular?</div>
+        <div class="faq-a">Sim. Entre com o mesmo e-mail e senha nos dois — os dados ficam sincronizados.</div>
+
+        <div class="faq-q">Esqueci minha senha.</div>
+        <div class="faq-a">Use a opção de recuperação na tela de login do app para redefinir sua senha pelo e-mail cadastrado.</div>
+      </div>
+    </section>
+
+    <footer>
+      GastosIA · Smart Finance <span class="ver">v3.9</span><br>
+      Oderli Garcia © 2026 · RitmoProd
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-const CACHE = 'gastosIA-v3.8';
+const CACHE = 'gastosIA-v3.9';
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/', '/index.html', '/manifest.json', '/icon.svg'])));
   self.skipWaiting();
