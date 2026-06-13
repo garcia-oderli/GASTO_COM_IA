@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.0</title>
+<title>GastosIA - Smart Finance v4.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.0</span>
+    <span class="logo-version">v4.1</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1309,7 +1309,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.0.0</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.1.0</div>
       </div>
     </div>
   </div>
@@ -1401,7 +1401,7 @@
       <div class="valor-row">
         <div class="field">
           <label>Valor (R$) *</label>
-          <input type="number" id="f-valor" placeholder="0,00" step="0.01" min="0">
+          <input type="number" id="f-valor" placeholder="0,00" step="0.01" min="0" autocomplete="off">
         </div>
         <button class="voice-btn" id="voice-btn" onclick="startVoice()" title="Falar valor">🎙️</button>
       </div>
@@ -1433,7 +1433,7 @@
       </div>
       <div class="field">
         <label>Fornecedor / Estabelecimento</label>
-        <input type="text" id="f-fornecedor" placeholder="Ex: iFood, Uber, Supermercado...">
+        <input type="text" id="f-fornecedor" placeholder="Ex: iFood, Uber, Supermercado..." autocomplete="off">
       </div>
       <div class="field">
         <label>Forma de Pagamento</label>
@@ -1471,7 +1471,7 @@
       </div>
       <div class="field">
         <label>Descrição dos Itens</label>
-        <textarea id="f-descricao" placeholder="Ex: Arroz 5kg, feijão 1kg..."></textarea>
+        <textarea id="f-descricao" placeholder="Ex: Arroz 5kg, feijão 1kg..." autocomplete="off"></textarea>
       </div>
     </div>
 
@@ -1570,7 +1570,7 @@
       </div>
       <div class="field">
         <label>Fornecedor / Estabelecimento</label>
-        <input type="text" id="e-fornecedor" placeholder="Ex: iFood, Uber, Supermercado...">
+        <input type="text" id="e-fornecedor" placeholder="Ex: iFood, Uber, Supermercado..." autocomplete="off">
       </div>
       <div class="field">
         <label>Forma de Pagamento</label>
@@ -1585,7 +1585,7 @@
       </div>
       <div class="field">
         <label>Descrição dos Itens</label>
-        <textarea id="e-descricao" placeholder="Ex: Arroz 5kg, feijão 1kg..."></textarea>
+        <textarea id="e-descricao" placeholder="Ex: Arroz 5kg, feijão 1kg..." autocomplete="off"></textarea>
       </div>
     </div>
     <button type="button" class="btn btn-primary" onclick="updateExpense()">Salvar Alterações</button>
@@ -1734,6 +1734,7 @@ async function initAuth() {
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('app-root').style.display = '';
     supaLoadAll();
+    supaLoadCategories();
   } else {
     document.getElementById('auth-screen').style.display = '';
     document.getElementById('app-root').style.display = 'none';
@@ -1775,6 +1776,7 @@ async function authLogin() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-root').style.display = '';
   supaLoadAll();
+  supaLoadCategories();
 }
 
 async function authRegister() {
@@ -1792,6 +1794,7 @@ async function authRegister() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-root').style.display = '';
   supaLoadAll();
+  supaLoadCategories();
 }
 
 async function authLogout() {
@@ -1809,7 +1812,7 @@ async function authLogout() {
 
 
 async function supaSaveExpense(exp) {
-  if (!currentUser || !exp || !exp.id) return;
+  if (!currentUser || !exp || !exp.id) return false;
   try {
     const payload = {
       id: String(exp.id),
@@ -1827,13 +1830,56 @@ async function supaSaveExpense(exp) {
     if (error) {
       console.error('supaSaveExpense error:', error);
       showToast('⚠️ Erro ao salvar na nuvem: ' + error.message);
+      return false;
     }
-  } catch(e) { console.error('supaSaveExpense:', e); }
+    return true;
+  } catch(e) { console.error('supaSaveExpense:', e); return false; }
 }
 
 async function supaDeleteExpense(id) {
   if (!currentUser) return;
   try { await supa.from('gastos').delete().eq('id', id).eq('user_id', currentUser.id); } catch(e) {}
+}
+
+async function supaLoadCategories() {
+  if (!currentUser) return;
+  try {
+    const { data, error } = await supa.from('categorias').select('*').eq('user_id', currentUser.id);
+    if (error) { console.error('supaLoadCategories:', error); return; }
+    if (data && data.length > 0) {
+      // Supabase é fonte de verdade: substitui localStorage
+      customCategories = data.map(r => ({ name: r.name, emoji: r.emoji, color: r.color || '#9ca3af' }));
+      localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+      customCategories.forEach(cat => {
+        CAT_ICONS[cat.name] = cat.emoji;
+        CAT_KEYS[cat.name] = cat.name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'custom';
+        CAT_COLORS[cat.name] = cat.color || '#9ca3af';
+      });
+    } else if (customCategories.length > 0) {
+      // Migra categorias locais para Supabase (primeira vez)
+      customCategories.forEach(cat => supaSaveCategory(cat));
+    }
+    refreshCategorySelects();
+    refreshCategoryChips();
+    renderCategoriesSettings();
+  } catch(e) { console.error('supaLoadCategories:', e); }
+}
+
+async function supaSaveCategory(cat) {
+  if (!currentUser) return;
+  try {
+    await supa.from('categorias').upsert({
+      user_id: currentUser.id,
+      name: cat.name,
+      emoji: cat.emoji,
+      color: cat.color || '#9ca3af'
+    });
+  } catch(e) { console.error('supaSaveCategory:', e); }
+}
+
+async function supaDeleteCategory(name) {
+  if (!currentUser) return;
+  try { await supa.from('categorias').delete().eq('user_id', currentUser.id).eq('name', name); } catch(e) {}
 }
 
 async function supaSaveIncome(inc) {
@@ -2057,6 +2103,8 @@ function saveNewCategory() {
     const oldKey = CAT_KEYS[editing]; // captura antes de deletar
     customCategories[idx] = { name, emoji, color: '#9ca3af' };
     localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+    if (editing !== name) supaDeleteCategory(editing);
+    supaSaveCategory({ name, emoji, color: '#9ca3af' });
 
     // Atualiza constantes
     delete CAT_ICONS[editing]; delete CAT_KEYS[editing]; delete CAT_COLORS[editing];
@@ -2091,6 +2139,7 @@ function saveNewCategory() {
   const cat = { name, emoji, color: '#9ca3af' };
   customCategories.push(cat);
   localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+  supaSaveCategory(cat);
 
   const key = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'custom';
   CAT_ICONS[name] = emoji; CAT_KEYS[name] = key; CAT_COLORS[name] = '#9ca3af';
@@ -2127,6 +2176,7 @@ function deleteCustomCategory(name) {
 
   customCategories = customCategories.filter(c => c.name !== name);
   localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+  supaDeleteCategory(name);
   delete CAT_ICONS[name]; delete CAT_KEYS[name]; delete CAT_COLORS[name];
 
   refreshCategorySelects();
@@ -4724,6 +4774,8 @@ function addParcelasAuto(baseExpense, totalParcelas) {
 let _savingExpense = false;
 function saveExpense() {
   if (_savingExpense) return;
+  if (window.getSelection) window.getSelection().removeAllRanges();
+  if (document.activeElement) document.activeElement.blur();
   const valor = parseFloat(document.getElementById('f-valor').value);
   const data  = document.getElementById('f-data').value;
   if (!valor || valor <= 0) { showToast('⚠️ Informe o valor do gasto'); return; }
@@ -4758,9 +4810,14 @@ function saveExpense() {
       const newExpense = DataLayerManager.addExpense(expenseData);
       saveExpenses();
       closeModal('add-modal');
-      showToast('✓ Salvando...');
-      supaSaveExpense(newExpense).then(function() {
-        supaLoadAll();
+      renderHome();
+      supaSaveExpense(newExpense).then(function(ok) {
+        if (ok) {
+          supaLoadAll();
+          showToast('✓ Gasto salvo!');
+        } else {
+          showToast('⚠️ Erro ao salvar. Verifique sua conexão.');
+        }
       });
     }
     
