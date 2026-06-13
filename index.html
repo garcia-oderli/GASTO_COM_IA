@@ -1401,7 +1401,7 @@
       <div class="valor-row">
         <div class="field">
           <label>Valor (R$) *</label>
-          <input type="number" id="f-valor" placeholder="0,00" step="0.01" min="0">
+          <input type="number" id="f-valor" placeholder="0,00" step="0.01" min="0" autocomplete="off">
         </div>
         <button class="voice-btn" id="voice-btn" onclick="startVoice()" title="Falar valor">🎙️</button>
       </div>
@@ -1433,7 +1433,7 @@
       </div>
       <div class="field">
         <label>Fornecedor / Estabelecimento</label>
-        <input type="text" id="f-fornecedor" placeholder="Ex: iFood, Uber, Supermercado...">
+        <input type="text" id="f-fornecedor" placeholder="Ex: iFood, Uber, Supermercado..." autocomplete="off">
       </div>
       <div class="field">
         <label>Forma de Pagamento</label>
@@ -1471,7 +1471,7 @@
       </div>
       <div class="field">
         <label>Descrição dos Itens</label>
-        <textarea id="f-descricao" placeholder="Ex: Arroz 5kg, feijão 1kg..."></textarea>
+        <textarea id="f-descricao" placeholder="Ex: Arroz 5kg, feijão 1kg..." autocomplete="off"></textarea>
       </div>
     </div>
 
@@ -1570,7 +1570,7 @@
       </div>
       <div class="field">
         <label>Fornecedor / Estabelecimento</label>
-        <input type="text" id="e-fornecedor" placeholder="Ex: iFood, Uber, Supermercado...">
+        <input type="text" id="e-fornecedor" placeholder="Ex: iFood, Uber, Supermercado..." autocomplete="off">
       </div>
       <div class="field">
         <label>Forma de Pagamento</label>
@@ -1585,7 +1585,7 @@
       </div>
       <div class="field">
         <label>Descrição dos Itens</label>
-        <textarea id="e-descricao" placeholder="Ex: Arroz 5kg, feijão 1kg..."></textarea>
+        <textarea id="e-descricao" placeholder="Ex: Arroz 5kg, feijão 1kg..." autocomplete="off"></textarea>
       </div>
     </div>
     <button type="button" class="btn btn-primary" onclick="updateExpense()">Salvar Alterações</button>
@@ -1809,7 +1809,7 @@ async function authLogout() {
 
 
 async function supaSaveExpense(exp) {
-  if (!currentUser || !exp || !exp.id) return;
+  if (!currentUser || !exp || !exp.id) return false;
   try {
     const payload = {
       id: String(exp.id),
@@ -1827,8 +1827,10 @@ async function supaSaveExpense(exp) {
     if (error) {
       console.error('supaSaveExpense error:', error);
       showToast('⚠️ Erro ao salvar na nuvem: ' + error.message);
+      return false;
     }
-  } catch(e) { console.error('supaSaveExpense:', e); }
+    return true;
+  } catch(e) { console.error('supaSaveExpense:', e); return false; }
 }
 
 async function supaDeleteExpense(id) {
@@ -4724,6 +4726,8 @@ function addParcelasAuto(baseExpense, totalParcelas) {
 let _savingExpense = false;
 function saveExpense() {
   if (_savingExpense) return;
+  if (window.getSelection) window.getSelection().removeAllRanges();
+  if (document.activeElement) document.activeElement.blur();
   const valor = parseFloat(document.getElementById('f-valor').value);
   const data  = document.getElementById('f-data').value;
   if (!valor || valor <= 0) { showToast('⚠️ Informe o valor do gasto'); return; }
@@ -4758,9 +4762,14 @@ function saveExpense() {
       const newExpense = DataLayerManager.addExpense(expenseData);
       saveExpenses();
       closeModal('add-modal');
-      showToast('✓ Salvando...');
-      supaSaveExpense(newExpense).then(function() {
-        supaLoadAll();
+      renderHome();
+      supaSaveExpense(newExpense).then(function(ok) {
+        if (ok) {
+          supaLoadAll();
+          showToast('✓ Gasto salvo!');
+        } else {
+          showToast('⚠️ Erro ao salvar. Verifique sua conexão.');
+        }
       });
     }
     
