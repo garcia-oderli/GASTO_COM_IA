@@ -1734,6 +1734,7 @@ async function initAuth() {
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('app-root').style.display = '';
     supaLoadAll();
+    supaLoadCategories();
   } else {
     document.getElementById('auth-screen').style.display = '';
     document.getElementById('app-root').style.display = 'none';
@@ -1775,6 +1776,7 @@ async function authLogin() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-root').style.display = '';
   supaLoadAll();
+  supaLoadCategories();
 }
 
 async function authRegister() {
@@ -1792,6 +1794,7 @@ async function authRegister() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-root').style.display = '';
   supaLoadAll();
+  supaLoadCategories();
 }
 
 async function authLogout() {
@@ -1836,6 +1839,47 @@ async function supaSaveExpense(exp) {
 async function supaDeleteExpense(id) {
   if (!currentUser) return;
   try { await supa.from('gastos').delete().eq('id', id).eq('user_id', currentUser.id); } catch(e) {}
+}
+
+async function supaLoadCategories() {
+  if (!currentUser) return;
+  try {
+    const { data, error } = await supa.from('categorias').select('*').eq('user_id', currentUser.id);
+    if (error) { console.error('supaLoadCategories:', error); return; }
+    if (data && data.length > 0) {
+      // Supabase é fonte de verdade: substitui localStorage
+      customCategories = data.map(r => ({ name: r.name, emoji: r.emoji, color: r.color || '#9ca3af' }));
+      localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+      customCategories.forEach(cat => {
+        CAT_ICONS[cat.name] = cat.emoji;
+        CAT_KEYS[cat.name] = cat.name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'custom';
+        CAT_COLORS[cat.name] = cat.color || '#9ca3af';
+      });
+    } else if (customCategories.length > 0) {
+      // Migra categorias locais para Supabase (primeira vez)
+      customCategories.forEach(cat => supaSaveCategory(cat));
+    }
+    refreshCategorySelects();
+    refreshCategoryChips();
+    renderCategoriesSettings();
+  } catch(e) { console.error('supaLoadCategories:', e); }
+}
+
+async function supaSaveCategory(cat) {
+  if (!currentUser) return;
+  try {
+    await supa.from('categorias').upsert({
+      user_id: currentUser.id,
+      name: cat.name,
+      emoji: cat.emoji,
+      color: cat.color || '#9ca3af'
+    });
+  } catch(e) { console.error('supaSaveCategory:', e); }
+}
+
+async function supaDeleteCategory(name) {
+  if (!currentUser) return;
+  try { await supa.from('categorias').delete().eq('user_id', currentUser.id).eq('name', name); } catch(e) {}
 }
 
 async function supaSaveIncome(inc) {
@@ -2059,6 +2103,8 @@ function saveNewCategory() {
     const oldKey = CAT_KEYS[editing]; // captura antes de deletar
     customCategories[idx] = { name, emoji, color: '#9ca3af' };
     localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+    if (editing !== name) supaDeleteCategory(editing);
+    supaSaveCategory({ name, emoji, color: '#9ca3af' });
 
     // Atualiza constantes
     delete CAT_ICONS[editing]; delete CAT_KEYS[editing]; delete CAT_COLORS[editing];
@@ -2093,6 +2139,7 @@ function saveNewCategory() {
   const cat = { name, emoji, color: '#9ca3af' };
   customCategories.push(cat);
   localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+  supaSaveCategory(cat);
 
   const key = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'custom';
   CAT_ICONS[name] = emoji; CAT_KEYS[name] = key; CAT_COLORS[name] = '#9ca3af';
@@ -2129,6 +2176,7 @@ function deleteCustomCategory(name) {
 
   customCategories = customCategories.filter(c => c.name !== name);
   localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+  supaDeleteCategory(name);
   delete CAT_ICONS[name]; delete CAT_KEYS[name]; delete CAT_COLORS[name];
 
   refreshCategorySelects();
