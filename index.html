@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.1</title>
+<title>GastosIA - Smart Finance v4.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.1</span>
+    <span class="logo-version">v4.2</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1309,7 +1309,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.1.0</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.2.0</div>
       </div>
     </div>
   </div>
@@ -3139,19 +3139,40 @@ function renderScoreCard(monthTotal) {
 
 // ─── Projeção ─────────────────────────────────────────────────────
 /**
- * predictSpending: projeta o gasto total do mês com base na média diária atual.
+ * predictSpending: projeta o gasto do mês. A média diária vem dos últimos
+ * 90 dias (janela estável) — evita explodir a projeção no começo do mês,
+ * quando 1 ou 2 dias de gasto seriam multiplicados pelo mês inteiro.
+ * Projeção = já gasto no mês + ritmo dos 90 dias × dias que faltam.
  */
 function predictSpending() {
   const now = new Date();
   const dayOfMonth = now.getDate();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
-  const monthExp = getMonthExpenses();
-  if (!monthExp.length) return null;
-  const currentTotal = monthExp.reduce((s,e)=>s+e.valor,0);
-  const dailyAvg = currentTotal / dayOfMonth;
-  const projected = dailyAvg * daysInMonth;
   const remaining = daysInMonth - dayOfMonth;
-  return { projected, dailyAvg, remaining, currentTotal, daysInMonth, dayOfMonth };
+
+  // Gasto real já lançado neste mês
+  const currentTotal = getMonthExpenses().reduce((s,e)=>s+e.valor,0);
+
+  // Janela móvel de 90 dias para a média diária
+  const WINDOW = 90;
+  const cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate() - WINDOW);
+  let recentTotal = 0, earliest = now;
+  expenses.forEach(e => {
+    const d = parseExpenseDate(e.data);
+    if (d >= cutoff && d <= now) {
+      recentTotal += e.valor;
+      if (d < earliest) earliest = d;
+    }
+  });
+  if (recentTotal === 0) return null;
+
+  // Divide pelos dias de histórico realmente disponíveis (não sempre 90),
+  // para não subestimar o ritmo de uma conta nova.
+  const daysSpan = Math.min(WINDOW, Math.max(1, Math.round((now - earliest)/86400000) + 1));
+  const dailyAvg = recentTotal / daysSpan;
+
+  const projected = currentTotal + dailyAvg * remaining;
+  return { projected, dailyAvg, remaining, currentTotal, daysInMonth, dayOfMonth, windowDays: daysSpan };
 }
 
 function renderProjectionCard(monthTotal) {
@@ -3955,7 +3976,7 @@ function renderProjectionInsights() {
       <div class="projection-title">📅 Estimativa para ${new Date().toLocaleDateString('pt-BR',{month:'long'})}</div>
       <div class="projection-value">${fmt(proj.projected)}</div>
       <div class="projection-sub">
-        Baseado nos últimos ${proj.dayOfMonth} dias · Média: ${fmt(proj.dailyAvg)}/dia<br>
+        Baseado nos últimos ${proj.windowDays} dias · Média: ${fmt(proj.dailyAvg)}/dia<br>
         Gasto atual: ${fmt(proj.currentTotal)} · Faltam ${proj.remaining} dias
         ${willOverBudget ? `<br><strong style="color:#f87171;">⚠️ Pode ultrapassar orçamento em ${fmt(proj.projected-orcamento)}</strong>` : ''}
         ${willOverIncome ? `<br><strong style="color:#f87171;">🔴 Pode ultrapassar renda em ${fmt(proj.projected-totalIncome)}</strong>` : ''}
