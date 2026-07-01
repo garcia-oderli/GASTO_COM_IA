@@ -1,0 +1,130 @@
+From ce4ea5144f1fbd55cbd8cdf48138ffa6264f48e1 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 1 Jul 2026 22:43:59 +0000
+Subject: [PATCH] =?UTF-8?q?fix:=20proje=C3=A7=C3=A3o=20do=20m=C3=AAs=20usa?=
+ =?UTF-8?q?=20m=C3=A9dia=20dos=20=C3=BAltimos=2090=20dias?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+No começo do mês a projeção explodia: dividia o gasto acumulado pelo dia
+do mês (dia 1 → divide por 1) e multiplicava por 30/31. Um único gasto
+virava "hábito diário" e estourava a estimativa (ex: R$28.758 no dia 1).
+
+Agora predictSpending() calcula a média diária sobre uma janela móvel de
+90 dias e projeta: já gasto no mês + (média diária × dias restantes).
+
+- Denominador = dias de histórico realmente disponíveis (min(90, span)),
+  para não subestimar o ritmo de conta nova
+- Retorna null se não houver gasto nos últimos 90 dias
+- Corrige texto "Baseado nos últimos X dias" na carta de Insights, que
+  usava o dia do mês em vez da janela real
+- Bump de versão para v4.2
+
+https://claude.ai/code/session_01TuC9LuYkubGHZRw1cag1Aq
+---
+ index.html | 43 ++++++++++++++++++++++++++++++++-----------
+ sw.js      |  2 +-
+ 2 files changed, 33 insertions(+), 12 deletions(-)
+
+diff --git a/index.html b/index.html
+index 8cc007e..07b8b2a 100644
+--- a/index.html
++++ b/index.html
+@@ -8,7 +8,7 @@
+ <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+ <meta name="apple-mobile-web-app-title" content="GastosIA">
+ <link rel="manifest" href="/manifest.json">
+-<title>GastosIA - Smart Finance v4.1</title>
++<title>GastosIA - Smart Finance v4.2</title>
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+ <style>
+@@ -697,7 +697,7 @@
+       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
+       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
+     </svg>
+-    <span class="logo-version">v4.1</span>
++    <span class="logo-version">v4.2</span>
+   </div>
+   <div class="header-actions">
+     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
+@@ -1309,7 +1309,7 @@
+     <div class="settings-card">
+       <div class="settings-row" style="cursor:default;">
+         <div class="settings-row-label">GastosIA Smart Finance</div>
+-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.1.0</div>
++        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.2.0</div>
+       </div>
+     </div>
+   </div>
+@@ -3139,19 +3139,40 @@ function renderScoreCard(monthTotal) {
+ 
+ // ─── Projeção ─────────────────────────────────────────────────────
+ /**
+- * predictSpending: projeta o gasto total do mês com base na média diária atual.
++ * predictSpending: projeta o gasto do mês. A média diária vem dos últimos
++ * 90 dias (janela estável) — evita explodir a projeção no começo do mês,
++ * quando 1 ou 2 dias de gasto seriam multiplicados pelo mês inteiro.
++ * Projeção = já gasto no mês + ritmo dos 90 dias × dias que faltam.
+  */
+ function predictSpending() {
+   const now = new Date();
+   const dayOfMonth = now.getDate();
+   const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+-  const monthExp = getMonthExpenses();
+-  if (!monthExp.length) return null;
+-  const currentTotal = monthExp.reduce((s,e)=>s+e.valor,0);
+-  const dailyAvg = currentTotal / dayOfMonth;
+-  const projected = dailyAvg * daysInMonth;
+   const remaining = daysInMonth - dayOfMonth;
+-  return { projected, dailyAvg, remaining, currentTotal, daysInMonth, dayOfMonth };
++
++  // Gasto real já lançado neste mês
++  const currentTotal = getMonthExpenses().reduce((s,e)=>s+e.valor,0);
++
++  // Janela móvel de 90 dias para a média diária
++  const WINDOW = 90;
++  const cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate() - WINDOW);
++  let recentTotal = 0, earliest = now;
++  expenses.forEach(e => {
++    const d = parseExpenseDate(e.data);
++    if (d >= cutoff && d <= now) {
++      recentTotal += e.valor;
++      if (d < earliest) earliest = d;
++    }
++  });
++  if (recentTotal === 0) return null;
++
++  // Divide pelos dias de histórico realmente disponíveis (não sempre 90),
++  // para não subestimar o ritmo de uma conta nova.
++  const daysSpan = Math.min(WINDOW, Math.max(1, Math.round((now - earliest)/86400000) + 1));
++  const dailyAvg = recentTotal / daysSpan;
++
++  const projected = currentTotal + dailyAvg * remaining;
++  return { projected, dailyAvg, remaining, currentTotal, daysInMonth, dayOfMonth, windowDays: daysSpan };
+ }
+ 
+ function renderProjectionCard(monthTotal) {
+@@ -3955,7 +3976,7 @@ function renderProjectionInsights() {
+       <div class="projection-title">📅 Estimativa para ${new Date().toLocaleDateString('pt-BR',{month:'long'})}</div>
+       <div class="projection-value">${fmt(proj.projected)}</div>
+       <div class="projection-sub">
+-        Baseado nos últimos ${proj.dayOfMonth} dias · Média: ${fmt(proj.dailyAvg)}/dia<br>
++        Baseado nos últimos ${proj.windowDays} dias · Média: ${fmt(proj.dailyAvg)}/dia<br>
+         Gasto atual: ${fmt(proj.currentTotal)} · Faltam ${proj.remaining} dias
+         ${willOverBudget ? `<br><strong style="color:#f87171;">⚠️ Pode ultrapassar orçamento em ${fmt(proj.projected-orcamento)}</strong>` : ''}
+         ${willOverIncome ? `<br><strong style="color:#f87171;">🔴 Pode ultrapassar renda em ${fmt(proj.projected-totalIncome)}</strong>` : ''}
+diff --git a/sw.js b/sw.js
+index 23eb55a..b7e6649 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,4 +1,4 @@
+-const CACHE = 'gastosIA-v4.1';
++const CACHE = 'gastosIA-v4.2';
+ self.addEventListener('install', e => {
+   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/', '/index.html', '/manifest.json', '/icon.svg'])));
+   self.skipWaiting();
+-- 
+2.43.0
+
