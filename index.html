@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.2</title>
+<title>GastosIA - Smart Finance v4.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.2</span>
+    <span class="logo-version">v4.3</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -836,6 +836,16 @@
 
   <!-- PROJEÇÃO DO MÊS -->
   <div id="projection-wrap"></div>
+
+  <!-- ATALHO COMBUSTÍVEL -->
+  <div onclick="showPage('combustivel')" style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(245,166,35,0.12),rgba(28,28,28,0.4));border:1px solid rgba(245,166,35,0.25);border-radius:14px;padding:14px 16px;margin:4px 0 8px;cursor:pointer;">
+    <div style="font-size:28px;">⛽</div>
+    <div style="flex:1;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:#F5F5F5;letter-spacing:0.04em;">Combustível</div>
+      <div style="font-size:12px;color:#888;">Km rodados, consumo e custo por km</div>
+    </div>
+    <div style="font-size:20px;color:#F5A623;">›</div>
+  </div>
 
   <p class="section-title">Recentes</p>
   <div class="expense-list" id="recent-list">
@@ -1150,6 +1160,128 @@
   </div>
 </div>
 
+<!-- ═══ COMBUSTÍVEL PAGE ═══ -->
+<div class="page" id="page-combustivel">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="showPage('home')" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;line-height:1;">‹</button>
+        <div>
+          <div class="page-title">⛽ Combustível</div>
+          <div class="page-subtitle">Consumo e custo por km</div>
+        </div>
+      </div>
+      <button onclick="abrirModalAbastecimento()" style="display:flex;align-items:center;gap:6px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;">
+        + Abastecer
+      </button>
+    </div>
+  </div>
+  <div id="combustivel-content" style="padding:0 16px 100px;"></div>
+</div>
+
+<!-- MODAL ABASTECIMENTO -->
+<div id="modal-abastecimento" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9000;align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
+  <div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:16px;padding:24px;width:100%;max-width:380px;margin:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.08em;text-transform:uppercase;" id="modal-abast-title">Novo Abastecimento</div>
+      <button onclick="fecharModalAbastecimento()" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Veículo</label>
+        <select id="a-veiculo" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;"></select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Data</label>
+          <input id="a-data" type="date" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Odômetro (km)</label>
+          <input id="a-odometro" type="number" inputmode="decimal" placeholder="Ex: 45230" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Litros</label>
+          <input id="a-litros" type="number" inputmode="decimal" step="0.01" placeholder="Ex: 38,5" autocomplete="off" oninput="recalcValorAbast()" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Preço/Litro</label>
+          <input id="a-preco" type="number" inputmode="decimal" step="0.001" placeholder="Ex: 5,89" autocomplete="off" oninput="recalcValorAbast()" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Valor total (R$)</label>
+        <input id="a-valor" type="number" inputmode="decimal" step="0.01" placeholder="0,00" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Combustível</label>
+          <select id="a-combustivel" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;">
+            <option value="gasolina">Gasolina</option>
+            <option value="etanol">Etanol</option>
+            <option value="diesel">Diesel</option>
+            <option value="gnv">GNV</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Posto (opcional)</label>
+          <input id="a-posto" placeholder="Ex: Shell" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 0;">
+        <input id="a-tanque-cheio" type="checkbox" checked style="width:18px;height:18px;accent-color:#F5A623;" />
+        <span style="font-size:13px;color:#F5F5F5;">Enchi o tanque (tanque cheio)</span>
+      </label>
+      <div style="font-size:11px;color:#666;margin-top:-4px;">O consumo (km/L) é calculado entre tanques cheios.</div>
+    </div>
+    <div id="modal-abast-err" style="color:#F44336;font-size:12px;margin-top:8px;min-height:16px;"></div>
+    <button onclick="salvarAbastecimento()" style="width:100%;margin-top:12px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
+      SALVAR ABASTECIMENTO
+    </button>
+  </div>
+</div>
+
+<!-- MODAL VEÍCULO -->
+<div id="modal-veiculo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9100;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:16px;padding:24px;width:100%;max-width:360px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.08em;text-transform:uppercase;" id="modal-veiculo-title">Novo Veículo</div>
+      <button onclick="fecharModalVeiculo()" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Nome</label>
+        <input id="v-nome" placeholder="Ex: Gol, Moto CG" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Tipo</label>
+        <div style="display:flex;gap:8px;" id="v-tipo-chips">
+          <div data-tipo="carro" data-emoji="🚗" onclick="selecionarTipoVeiculo(this)" style="flex:1;text-align:center;background:#111;border:1px solid #F5A623;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;color:#F5F5F5;">🚗 Carro</div>
+          <div data-tipo="moto" data-emoji="🏍️" onclick="selecionarTipoVeiculo(this)" style="flex:1;text-align:center;background:#111;border:1px solid #2A2A2A;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;color:#F5F5F5;">🏍️ Moto</div>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Combustível padrão</label>
+        <select id="v-combustivel" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;">
+          <option value="gasolina">Gasolina</option>
+          <option value="etanol">Etanol</option>
+          <option value="diesel">Diesel</option>
+          <option value="gnv">GNV</option>
+        </select>
+      </div>
+    </div>
+    <div id="modal-veiculo-err" style="color:#F44336;font-size:12px;margin-top:8px;min-height:16px;"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button id="v-excluir-btn" onclick="excluirVeiculo()" style="display:none;background:rgba(244,67,54,0.12);color:#F44336;border:1px solid rgba(244,67,54,0.3);border-radius:8px;padding:14px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🗑️</button>
+      <button onclick="salvarVeiculo()" style="flex:1;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
+        SALVAR VEÍCULO
+      </button>
+    </div>
+  </div>
+</div>
+
 
 <div class="page" id="page-relatorio">
   <div class="page-header">
@@ -1309,7 +1441,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.2.0</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.3.0</div>
       </div>
     </div>
   </div>
@@ -2756,7 +2888,7 @@ function autoClassify(fornecedor) {
 // UI: PAGE NAV
 // ═══════════════════════════════════════════════════════════════════
 const tabEls = document.querySelectorAll('.tab');
-const pageIds = ['home','gastos','analise','insights','orcamentos','relatorio','cartoes','config'];
+const pageIds = ['home','gastos','analise','insights','orcamentos','relatorio','cartoes','combustivel','config'];
 
 // ═══ FUNÇÕES DO SISTEMA DE CAMADAS ═══════════════════════════════════════════
 
@@ -2914,6 +3046,7 @@ function showPage(name, tabEl, navId) {
   if (name === 'orcamentos') initBudgetPage();
   if (name === 'relatorio')  renderRelatorio();
   if (name === 'cartoes')    renderCartoes();
+  if (name === 'combustivel') renderCombustivel();
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -6236,6 +6369,359 @@ async function confirmarAssociacao(cartaoId) {
   document.getElementById('overlay-assoc').remove();
   showToast('✓ ' + ids.length + ' gasto(s) associado(s)!');
   renderCartoes();
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// MÓDULO COMBUSTÍVEL
+// ═══════════════════════════════════════════════════════════════════
+var veiculos = [];
+var abastecimentos = [];
+var veiculoSelecionadoId = null;
+var veiculoEditandoId = null;
+var abastecimentoEditandoId = null;
+var tipoVeiculoSel = 'carro';
+var emojiVeiculoSel = '🚗';
+
+async function carregarVeiculos() {
+  if (!currentUser) return;
+  var res = await supa.from('veiculos').select('*').eq('user_id', currentUser.id).eq('ativo', true).order('criado_em');
+  veiculos = res.data || [];
+}
+
+async function carregarAbastecimentos(veiculoId) {
+  if (!currentUser || !veiculoId) { abastecimentos = []; return; }
+  var res = await supa.from('abastecimentos').select('*').eq('user_id', currentUser.id).eq('veiculo_id', veiculoId).order('odometro', { ascending: true });
+  abastecimentos = res.data || [];
+}
+
+// Calcula métricas por abastecimento (ordenado por odômetro) + médias
+function calcularMetricasVeiculo(lista) {
+  var arr = lista.slice().sort(function(a, b) { return Number(a.odometro) - Number(b.odometro); });
+  var odoLastFull = null, litrosAcc = 0;
+  var consumos = [];
+  for (var i = 0; i < arr.length; i++) {
+    var r = arr[i];
+    r._kmRodados = (i > 0) ? (Number(r.odometro) - Number(arr[i-1].odometro)) : null;
+    r._consumo = null;
+    r._custoKm = (r._kmRodados && r._kmRodados > 0) ? (Number(r.valor_total) / r._kmRodados) : null;
+    // Método tanque cheio
+    if (odoLastFull !== null) litrosAcc += Number(r.litros);
+    if (r.tanque_cheio) {
+      if (odoLastFull !== null && litrosAcc > 0 && Number(r.odometro) > odoLastFull) {
+        r._consumo = (Number(r.odometro) - odoLastFull) / litrosAcc;
+        consumos.push(r._consumo);
+      }
+      odoLastFull = Number(r.odometro);
+      litrosAcc = 0;
+    }
+  }
+  var somaValor = arr.reduce(function(s, r) { return s + Number(r.valor_total); }, 0);
+  var somaLitros = arr.reduce(function(s, r) { return s + Number(r.litros); }, 0);
+  var mesAtual = new Date().toISOString().slice(0, 7); // YYYY-MM
+  var gastoMes = arr.filter(function(r) { return String(r.data || '').slice(0, 7) === mesAtual; })
+                    .reduce(function(s, r) { return s + Number(r.valor_total); }, 0);
+  return {
+    ordenado: arr,
+    consumoMedio: consumos.length ? consumos.reduce(function(s, c) { return s + c; }, 0) / consumos.length : null,
+    precoMedio: somaLitros > 0 ? somaValor / somaLitros : null,
+    gastoMes: gastoMes,
+    totalGasto: somaValor
+  };
+}
+
+function selecionarVeiculo(id) {
+  veiculoSelecionadoId = id;
+  renderCombustivel();
+}
+
+function renderCombustivel() {
+  var el = document.getElementById('combustivel-content');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:#555;">Carregando...</div>';
+  carregarVeiculos().then(function() {
+    if (veiculos.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#555;"><div style="font-size:48px;margin-bottom:16px;">🚗</div><div style="font-size:14px;">Nenhum veículo cadastrado</div><div style="font-size:12px;margin-top:8px;color:#444;">Cadastre um veículo para registrar abastecimentos e acompanhar o consumo.</div><button class="empty-cta" style="margin-top:16px;" onclick="abrirModalVeiculo()">+ Cadastrar veículo</button></div>';
+      return;
+    }
+    if (!veiculoSelecionadoId || !veiculos.find(function(v) { return v.id === veiculoSelecionadoId; })) {
+      veiculoSelecionadoId = veiculos[0].id;
+    }
+    carregarAbastecimentos(veiculoSelecionadoId).then(function() {
+      var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
+      var m = calcularMetricasVeiculo(abastecimentos);
+      var html = '';
+
+      // Seletor de veículo (chips)
+      html += '<div style="display:flex;gap:8px;overflow-x:auto;padding:12px 0 14px;">';
+      veiculos.forEach(function(v) {
+        var ativo = v.id === veiculoSelecionadoId;
+        html += '<div onclick="selecionarVeiculo(&apos;' + escJs(v.id) + '&apos;)" style="flex:0 0 auto;display:flex;align-items:center;gap:6px;background:' + (ativo ? '#F5A623' : '#1C1C1C') + ';color:' + (ativo ? '#111' : '#F5F5F5') + ';border:1px solid ' + (ativo ? '#F5A623' : '#2A2A2A') + ';border-radius:20px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;">' + (v.emoji || '🚗') + ' ' + esc(v.nome) + '</div>';
+      });
+      html += '<div onclick="abrirModalVeiculo()" style="flex:0 0 auto;display:flex;align-items:center;background:#1C1C1C;color:#888;border:1px dashed #2A2A2A;border-radius:20px;padding:8px 14px;cursor:pointer;font-size:13px;">+ Veículo</div>';
+      html += '</div>';
+
+      // Card de estatísticas
+      var fmtNum = function(v, dec) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec }); };
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+      html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:18px;color:#F5F5F5;">' + (vSel.emoji || '🚗') + ' ' + esc(vSel.nome) + '</div>';
+      html += '<button onclick="editarVeiculo(&apos;' + escJs(vSel.id) + '&apos;)" style="background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;">⚙️ Editar</button>';
+      html += '</div>';
+
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">';
+      html += statBox('Consumo médio', m.consumoMedio != null ? fmtNum(m.consumoMedio, 1) + ' km/L' : '—', '#4CAF50');
+      html += statBox('Preço médio/L', m.precoMedio != null ? 'R$ ' + fmtNum(m.precoMedio, 2) : '—', '#F5A623');
+      html += statBox('Gasto no mês', 'R$ ' + fmtNum(m.gastoMes, 2), '#F44336');
+      html += statBox('Abastecimentos', String(abastecimentos.length), '#4A9EDF');
+      html += '</div>';
+
+      // Lista de abastecimentos (mais recente primeiro)
+      if (abastecimentos.length === 0) {
+        html += '<div style="text-align:center;padding:40px 20px;color:#555;"><div style="font-size:13px;">Nenhum abastecimento ainda</div><div style="font-size:12px;margin-top:6px;color:#444;">Toque em "+ Abastecer" para registrar o primeiro. O consumo aparece a partir do 2º.</div></div>';
+      } else {
+        html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Histórico</div>';
+        m.ordenado.slice().reverse().forEach(function(r) {
+          html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:12px 14px;margin-bottom:10px;">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
+          html += '<div>';
+          html += '<div style="font-family:IBM Plex Mono,monospace;font-size:15px;font-weight:700;color:#F5F5F5;">' + fmtNum(r.odometro, 0) + ' km</div>';
+          html += '<div style="font-size:11px;color:#888;margin-top:2px;">' + String(r.data || '').split('-').reverse().join('/') + ' · ' + fmtNum(r.litros, 2) + 'L' + (r.tanque_cheio ? '' : ' (parcial)') + (r.posto ? ' · ' + esc(r.posto) : '') + '</div>';
+          html += '</div>';
+          html += '<div style="text-align:right;"><div style="font-family:IBM Plex Mono,monospace;font-size:15px;font-weight:700;color:#F44336;">R$ ' + fmtNum(r.valor_total, 2) + '</div><div style="font-size:11px;color:#888;margin-top:2px;">R$ ' + fmtNum(r.preco_litro, 3) + '/L</div></div>';
+          html += '</div>';
+          // Métricas do leg
+          html += '<div style="display:flex;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid #2A2A2A;">';
+          html += legMetric('Rodou', r._kmRodados != null ? fmtNum(r._kmRodados, 0) + ' km' : '—');
+          html += legMetric('Consumo', r._consumo != null ? fmtNum(r._consumo, 1) + ' km/L' : '—');
+          html += legMetric('Custo/km', r._custoKm != null ? 'R$ ' + fmtNum(r._custoKm, 2) : '—');
+          html += '<div style="margin-left:auto;display:flex;gap:6px;">';
+          html += '<button onclick="abrirModalAbastecimento(&apos;' + escJs(r.id) + '&apos;)" style="background:#2A2A2A;color:#888;border:none;border-radius:6px;padding:5px 9px;font-size:12px;cursor:pointer;">✏️</button>';
+          html += '<button onclick="excluirAbastecimento(&apos;' + escJs(r.id) + '&apos;)" style="background:rgba(244,67,54,0.12);color:#F44336;border:none;border-radius:6px;padding:5px 9px;font-size:12px;cursor:pointer;">🗑️</button>';
+          html += '</div>';
+          html += '</div>';
+          html += '</div>';
+        });
+      }
+
+      el.innerHTML = html;
+    });
+  });
+}
+
+function statBox(label, valor, cor) {
+  return '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:14px;"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">' + esc(label) + '</div><div style="font-family:IBM Plex Mono,monospace;font-size:18px;font-weight:700;color:' + cor + ';">' + esc(valor) + '</div></div>';
+}
+function legMetric(label, valor) {
+  return '<div><div style="font-size:10px;color:#555;text-transform:uppercase;">' + esc(label) + '</div><div style="font-size:13px;color:#F5F5F5;font-family:IBM Plex Mono,monospace;font-weight:600;">' + esc(valor) + '</div></div>';
+}
+
+// ─── Modal Veículo ───
+function selecionarTipoVeiculo(elx) {
+  tipoVeiculoSel = elx.getAttribute('data-tipo');
+  emojiVeiculoSel = elx.getAttribute('data-emoji');
+  var chips = document.querySelectorAll('#v-tipo-chips > div');
+  chips.forEach(function(c) { c.style.border = (c === elx) ? '1px solid #F5A623' : '1px solid #2A2A2A'; });
+}
+
+function abrirModalVeiculo() {
+  veiculoEditandoId = null;
+  document.getElementById('modal-veiculo-title').textContent = 'Novo Veículo';
+  document.getElementById('v-nome').value = '';
+  document.getElementById('v-combustivel').value = 'gasolina';
+  document.getElementById('v-excluir-btn').style.display = 'none';
+  document.getElementById('modal-veiculo-err').textContent = '';
+  var carroChip = document.querySelector('#v-tipo-chips > div[data-tipo="carro"]');
+  if (carroChip) selecionarTipoVeiculo(carroChip);
+  document.getElementById('modal-veiculo').style.display = 'flex';
+}
+
+function fecharModalVeiculo() {
+  document.getElementById('modal-veiculo').style.display = 'none';
+}
+
+function editarVeiculo(id) {
+  var v = veiculos.find(function(x) { return x.id === id; });
+  if (!v) return;
+  veiculoEditandoId = id;
+  document.getElementById('modal-veiculo-title').textContent = 'Editar Veículo';
+  document.getElementById('v-nome').value = v.nome || '';
+  document.getElementById('v-combustivel').value = v.combustivel_padrao || 'gasolina';
+  document.getElementById('v-excluir-btn').style.display = '';
+  document.getElementById('modal-veiculo-err').textContent = '';
+  var chip = document.querySelector('#v-tipo-chips > div[data-tipo="' + (v.tipo || 'carro') + '"]');
+  if (chip) selecionarTipoVeiculo(chip);
+  document.getElementById('modal-veiculo').style.display = 'flex';
+}
+
+async function salvarVeiculo() {
+  var nome = document.getElementById('v-nome').value.trim();
+  var err = document.getElementById('modal-veiculo-err');
+  if (!nome) { err.textContent = 'Informe o nome do veículo.'; return; }
+  var payload = {
+    nome: nome, tipo: tipoVeiculoSel, emoji: emojiVeiculoSel,
+    combustivel_padrao: document.getElementById('v-combustivel').value,
+    user_id: currentUser.id, ativo: true
+  };
+  if (veiculoEditandoId) {
+    await supa.from('veiculos').update(payload).eq('id', veiculoEditandoId);
+  } else {
+    var ins = await supa.from('veiculos').insert(payload).select();
+    if (ins.data && ins.data[0]) veiculoSelecionadoId = ins.data[0].id;
+  }
+  fecharModalVeiculo();
+  renderCombustivel();
+  showToast('✓ Veículo salvo!');
+}
+
+async function excluirVeiculo() {
+  if (!veiculoEditandoId) return;
+  if (!confirm('Excluir este veículo? Os abastecimentos dele deixam de aparecer (os gastos já lançados permanecem).')) return;
+  await supa.from('veiculos').update({ ativo: false }).eq('id', veiculoEditandoId);
+  veiculoSelecionadoId = null;
+  fecharModalVeiculo();
+  renderCombustivel();
+  showToast('🗑️ Veículo removido');
+}
+
+// ─── Modal Abastecimento ───
+function recalcValorAbast() {
+  var litros = parseFloat(document.getElementById('a-litros').value);
+  var preco = parseFloat(document.getElementById('a-preco').value);
+  if (litros > 0 && preco > 0) {
+    document.getElementById('a-valor').value = (litros * preco).toFixed(2);
+  }
+}
+
+function popularSelectVeiculos() {
+  var sel = document.getElementById('a-veiculo');
+  sel.innerHTML = '';
+  veiculos.forEach(function(v) {
+    sel.innerHTML += '<option value="' + esc(v.id) + '">' + (v.emoji || '🚗') + ' ' + esc(v.nome) + '</option>';
+  });
+}
+
+function abrirModalAbastecimento(id) {
+  if (veiculos.length === 0) { showToast('Cadastre um veículo primeiro.'); abrirModalVeiculo(); return; }
+  popularSelectVeiculos();
+  var err = document.getElementById('modal-abast-err');
+  err.textContent = '';
+  if (id) {
+    var r = abastecimentos.find(function(x) { return x.id === id; });
+    if (!r) return;
+    abastecimentoEditandoId = id;
+    document.getElementById('modal-abast-title').textContent = 'Editar Abastecimento';
+    document.getElementById('a-veiculo').value = r.veiculo_id;
+    document.getElementById('a-data').value = r.data || '';
+    document.getElementById('a-odometro').value = r.odometro;
+    document.getElementById('a-litros').value = r.litros;
+    document.getElementById('a-preco').value = r.preco_litro;
+    document.getElementById('a-valor').value = r.valor_total;
+    document.getElementById('a-combustivel').value = r.combustivel || 'gasolina';
+    document.getElementById('a-posto').value = r.posto || '';
+    document.getElementById('a-tanque-cheio').checked = !!r.tanque_cheio;
+  } else {
+    abastecimentoEditandoId = null;
+    document.getElementById('modal-abast-title').textContent = 'Novo Abastecimento';
+    document.getElementById('a-veiculo').value = veiculoSelecionadoId || (veiculos[0] && veiculos[0].id);
+    document.getElementById('a-data').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('a-odometro').value = '';
+    document.getElementById('a-litros').value = '';
+    document.getElementById('a-preco').value = '';
+    document.getElementById('a-valor').value = '';
+    var vv = veiculos.find(function(x) { return x.id === (veiculoSelecionadoId || veiculos[0].id); });
+    document.getElementById('a-combustivel').value = (vv && vv.combustivel_padrao) || 'gasolina';
+    document.getElementById('a-posto').value = '';
+    document.getElementById('a-tanque-cheio').checked = true;
+  }
+  document.getElementById('modal-abastecimento').style.display = 'flex';
+}
+
+function fecharModalAbastecimento() {
+  document.getElementById('modal-abastecimento').style.display = 'none';
+}
+
+async function salvarAbastecimento() {
+  var err = document.getElementById('modal-abast-err');
+  var veiculoId = document.getElementById('a-veiculo').value;
+  var data = document.getElementById('a-data').value;
+  var odometro = parseFloat(document.getElementById('a-odometro').value);
+  var litros = parseFloat(document.getElementById('a-litros').value);
+  var preco = parseFloat(document.getElementById('a-preco').value);
+  var valorTotal = parseFloat(document.getElementById('a-valor').value);
+  var combustivel = document.getElementById('a-combustivel').value;
+  var posto = document.getElementById('a-posto').value.trim();
+  var tanqueCheio = document.getElementById('a-tanque-cheio').checked;
+
+  if (!veiculoId) { err.textContent = 'Selecione o veículo.'; return; }
+  if (!data) { err.textContent = 'Informe a data.'; return; }
+  if (!odometro || odometro <= 0) { err.textContent = 'Informe o odômetro (km do painel).'; return; }
+  if (!litros || litros <= 0) { err.textContent = 'Informe os litros.'; return; }
+  if (!valorTotal || valorTotal <= 0) {
+    if (litros > 0 && preco > 0) { valorTotal = litros * preco; }
+    else { err.textContent = 'Informe o valor total ou o preço por litro.'; return; }
+  }
+  if (!preco || preco <= 0) preco = valorTotal / litros;
+
+  var payload = {
+    veiculo_id: veiculoId, data: normalizeDateString(data),
+    odometro: odometro, litros: litros, preco_litro: preco, valor_total: valorTotal,
+    combustivel: combustivel, tanque_cheio: tanqueCheio, posto: posto || null,
+    user_id: currentUser.id
+  };
+
+  var descricao = litros.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + 'L @ R$' + preco.toFixed(3) + '/L';
+  var fornecedor = posto || 'Combustível';
+
+  if (abastecimentoEditandoId) {
+    var atual = abastecimentos.find(function(x) { return x.id === abastecimentoEditandoId; });
+    await supa.from('abastecimentos').update(payload).eq('id', abastecimentoEditandoId);
+    // Sincroniza o gasto vinculado
+    if (atual && atual.gasto_id) {
+      var g = expenses.find(function(e) { return e.id === atual.gasto_id; });
+      if (g) {
+        g.valor = valorTotal; g.data = payload.data; g.fornecedor = fornecedor; g.descricao = descricao;
+        supaSaveExpense(g);
+      }
+    }
+  } else {
+    // Cria o gasto vinculado (categoria Transporte) e guarda o id
+    var gastoId = null;
+    try {
+      var novo = DataLayerManager.addExpense({
+        valor: valorTotal, data: payload.data, categoria: 'Transporte',
+        fornecedor: fornecedor, pagamento: '', descricao: descricao,
+        imagem: null, cartao_id: null, criadoEm: new Date().toISOString()
+      });
+      gastoId = novo.id;
+      supaSaveExpense(novo);
+    } catch (e) {
+      console.error('gasto vinculado ao abastecimento falhou:', e);
+    }
+    payload.gasto_id = gastoId;
+    await supa.from('abastecimentos').insert(payload);
+  }
+
+  fecharModalAbastecimento();
+  renderCombustivel();
+  if (typeof renderHome === 'function') renderHome();
+  cachedInsights = null;
+  try { localStorage.removeItem(INSIGHTS_KEY); } catch (e) {}
+  showToast('✓ Abastecimento salvo!');
+}
+
+async function excluirAbastecimento(id) {
+  var r = abastecimentos.find(function(x) { return x.id === id; });
+  if (!r) return;
+  if (!confirm('Excluir este abastecimento? O gasto correspondente em Transporte também será removido.')) return;
+  await supa.from('abastecimentos').delete().eq('id', id);
+  if (r.gasto_id) {
+    supaDeleteExpense(r.gasto_id);
+    var idx = expenses.findIndex(function(e) { return e.id === r.gasto_id; });
+    if (idx >= 0) expenses.splice(idx, 1);
+  }
+  renderCombustivel();
+  if (typeof renderHome === 'function') renderHome();
+  showToast('🗑️ Abastecimento removido');
 }
 
 
