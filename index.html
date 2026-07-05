@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.3</title>
+<title>GastosIA - Smart Finance v4.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.3</span>
+    <span class="logo-version">v4.4</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -800,7 +800,7 @@
           <option value="Investimento">📈 Investimento</option>
           <option value="Outros">📦 Outros</option>
         </select>
-        <input type="month" id="income-mes" style="box-sizing:border-box;width:100%;padding:11px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--surface2);color:var(--text);font-size:13px;" />
+        <input type="month" id="income-mes" lang="pt-BR" style="box-sizing:border-box;width:100%;padding:11px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--surface2);color:var(--text);font-size:13px;" />
         <button class="income-add-btn" onclick="addIncome()">+ Adicionar Renda</button>
       </div>
       <div id="income-list"></div>
@@ -1186,6 +1186,9 @@
       <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.08em;text-transform:uppercase;" id="modal-abast-title">Novo Abastecimento</div>
       <button onclick="fecharModalAbastecimento()" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;">×</button>
     </div>
+    <input type="file" id="a-scan-input" accept="image/*" capture="environment" style="display:none;" onchange="if(event.target.files[0]) scanNotaAbastecimento(event.target.files[0])">
+    <button type="button" onclick="document.getElementById('a-scan-input').click()" style="width:100%;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px dashed rgba(74,158,223,0.5);border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">📷 Escanear nota (preenche sozinho)</button>
+    <div id="a-scan-status" style="display:none;font-size:12px;color:#4A9EDF;margin:-8px 0 12px;text-align:center;"></div>
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div>
         <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Veículo</label>
@@ -1194,7 +1197,7 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div>
           <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Data</label>
-          <input id="a-data" type="date" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+          <input id="a-data" type="date" lang="pt-BR" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
         </div>
         <div>
           <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Odômetro (km)</label>
@@ -1441,7 +1444,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.3.0</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.4.0</div>
       </div>
     </div>
   </div>
@@ -1539,7 +1542,7 @@
       </div>
       <div class="field">
         <label>Data *</label>
-        <input type="date" id="f-data">
+        <input type="date" id="f-data" lang="pt-BR">
       </div>
       <div class="field">
         <label>Categoria *</label>
@@ -1676,7 +1679,7 @@
       </div>
       <div class="field">
         <label>Data *</label>
-        <input type="date" id="e-data">
+        <input type="date" id="e-data" lang="pt-BR">
       </div>
       <div class="field">
         <label>Categoria *</label>
@@ -6430,6 +6433,43 @@ function calcularMetricasVeiculo(lista) {
   };
 }
 
+// Agrupa os abastecimentos por mês ou por semana (usa as métricas já calculadas)
+var resumoModoCombustivel = 'mes';
+function setResumoModo(modo) { resumoModoCombustivel = modo; renderCombustivel(); }
+
+function resumoAgrupadoCombustivel(ordenado, modo) {
+  var MES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var pad = function(n) { return String(n).padStart(2, '0'); };
+  var map = {};
+  ordenado.forEach(function(r) {
+    var sortKey, label;
+    if (modo === 'semana') {
+      var d = parseExpenseDate(r.data);
+      var diff = (d.getDay() + 6) % 7; // dias desde a segunda-feira
+      var mon = new Date(d.getFullYear(), d.getMonth(), d.getDate() - diff);
+      var sun = new Date(d.getFullYear(), d.getMonth(), d.getDate() - diff + 6);
+      sortKey = mon.getFullYear() + '-' + pad(mon.getMonth() + 1) + '-' + pad(mon.getDate());
+      label = pad(mon.getDate()) + '/' + pad(mon.getMonth() + 1) + '–' + pad(sun.getDate()) + '/' + pad(sun.getMonth() + 1);
+    } else {
+      var mes = String(r.data || '').slice(0, 7);
+      if (!mes) return;
+      sortKey = mes;
+      var p = mes.split('-');
+      label = MES_ABREV[parseInt(p[1], 10) - 1] + '/' + p[0].slice(2);
+    }
+    if (!map[sortKey]) map[sortKey] = { label: label, gasto: 0, litros: 0, km: 0, consumos: [] };
+    map[sortKey].gasto += Number(r.valor_total);
+    map[sortKey].litros += Number(r.litros);
+    if (r._kmRodados && r._kmRodados > 0) map[sortKey].km += r._kmRodados;
+    if (r._consumo != null) map[sortKey].consumos.push(r._consumo);
+  });
+  return Object.keys(map).sort().reverse().map(function(k) {
+    var o = map[k];
+    o.consumo = o.consumos.length ? o.consumos.reduce(function(s, c) { return s + c; }, 0) / o.consumos.length : null;
+    return o;
+  });
+}
+
 function selecionarVeiculo(id) {
   veiculoSelecionadoId = id;
   renderCombustivel();
@@ -6475,6 +6515,28 @@ function renderCombustivel() {
       html += statBox('Abastecimentos', String(abastecimentos.length), '#4A9EDF');
       html += '</div>';
 
+      // Resumo por mês/semana (evolução) + enviar por mensagem
+      var resumo = resumoAgrupadoCombustivel(m.ordenado, resumoModoCombustivel);
+      if (resumo.length) {
+        var chip = function(modo, txt) { var on = resumoModoCombustivel === modo; return '<div onclick="setResumoModo(&apos;' + modo + '&apos;)" style="cursor:pointer;padding:5px 14px;border-radius:16px;font-size:12px;font-weight:600;background:' + (on ? '#F5A623' : '#1C1C1C') + ';color:' + (on ? '#111' : '#888') + ';border:1px solid ' + (on ? '#F5A623' : '#2A2A2A') + ';">' + txt + '</div>'; };
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 8px;">';
+        html += '<div style="display:flex;gap:6px;">' + chip('mes', 'Mês') + chip('semana', 'Semana') + '</div>';
+        html += '<button onclick="compartilharResumoCombustivel()" style="background:rgba(76,175,80,0.12);color:#4CAF50;border:1px solid rgba(76,175,80,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">📤 Enviar</button>';
+        html += '</div>';
+        html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;overflow:hidden;margin-bottom:16px;">';
+        resumo.forEach(function(o, i) {
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;' + (i > 0 ? 'border-top:1px solid #2A2A2A;' : '') + '">';
+          html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:15px;color:#F5F5F5;min-width:56px;">' + esc(o.label) + '</div>';
+          html += '<div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:flex-end;">';
+          html += legMetric('Gasto', 'R$ ' + fmtNum(o.gasto, 2));
+          html += legMetric('Litros', fmtNum(o.litros, 1) + 'L');
+          html += legMetric('Rodou', o.km > 0 ? fmtNum(o.km, 0) + ' km' : '—');
+          html += legMetric('Consumo', o.consumo != null ? fmtNum(o.consumo, 1) + ' km/L' : '—');
+          html += '</div></div>';
+        });
+        html += '</div>';
+      }
+
       // Lista de abastecimentos (mais recente primeiro)
       if (abastecimentos.length === 0) {
         html += '<div style="text-align:center;padding:40px 20px;color:#555;"><div style="font-size:13px;">Nenhum abastecimento ainda</div><div style="font-size:12px;margin-top:6px;color:#444;">Toque em "+ Abastecer" para registrar o primeiro. O consumo aparece a partir do 2º.</div></div>';
@@ -6506,6 +6568,34 @@ function renderCombustivel() {
       el.innerHTML = html;
     });
   });
+}
+
+function compartilharResumoCombustivel() {
+  var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
+  var m = calcularMetricasVeiculo(abastecimentos);
+  var resumo = resumoAgrupadoCombustivel(m.ordenado, resumoModoCombustivel);
+  var fmtNum = function(v, d) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }); };
+  var linhas = ['⛽ Combustível — ' + (vSel ? vSel.nome : '')];
+  if (m.consumoMedio != null) linhas.push('Consumo médio: ' + fmtNum(m.consumoMedio, 1) + ' km/L');
+  if (m.precoMedio != null) linhas.push('Preço médio: R$ ' + fmtNum(m.precoMedio, 2) + '/L');
+  linhas.push('Gasto no mês: R$ ' + fmtNum(m.gastoMes, 2));
+  linhas.push('');
+  linhas.push(resumoModoCombustivel === 'semana' ? 'Por semana:' : 'Por mês:');
+  resumo.forEach(function(o) {
+    linhas.push('• ' + o.label + ': R$ ' + fmtNum(o.gasto, 2) + ' · ' + fmtNum(o.litros, 1) + 'L'
+      + (o.consumo != null ? ' · ' + fmtNum(o.consumo, 1) + ' km/L' : ''));
+  });
+  var texto = linhas.join('\n');
+  if (navigator.share) {
+    navigator.share({ title: 'Combustível', text: texto }).catch(function() {});
+  } else if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(texto).then(
+      function() { showToast('📋 Resumo copiado! Cole na mensagem.'); },
+      function() { showToast('⚠️ Não foi possível copiar.'); }
+    );
+  } else {
+    showToast('⚠️ Compartilhamento não suportado neste navegador.');
+  }
 }
 
 function statBox(label, valor, cor) {
@@ -6605,6 +6695,7 @@ function abrirModalAbastecimento(id) {
   popularSelectVeiculos();
   var err = document.getElementById('modal-abast-err');
   err.textContent = '';
+  var ss = document.getElementById('a-scan-status'); if (ss) ss.style.display = 'none';
   if (id) {
     var r = abastecimentos.find(function(x) { return x.id === id; });
     if (!r) return;
@@ -6638,6 +6729,62 @@ function abrirModalAbastecimento(id) {
 
 function fecharModalAbastecimento() {
   document.getElementById('modal-abastecimento').style.display = 'none';
+}
+
+// Escaneia a nota do posto e preenche os campos (odômetro fica manual — não vem na nota)
+async function scanNotaAbastecimento(file) {
+  var statusEl = document.getElementById('a-scan-status');
+  var mostra = function(txt, cor) { statusEl.style.display = 'block'; statusEl.style.color = cor || '#4A9EDF'; statusEl.textContent = txt; };
+  if (!getApiKey()) { showToast('⚠️ Configure a chave de IA em Config para escanear.'); return; }
+  mostra('🔎 Lendo a nota com IA...');
+  try {
+    var dataUrl = await new Promise(function(resolve, reject) {
+      var r = new FileReader(); r.onload = function(e) { resolve(e.target.result); }; r.onerror = reject; r.readAsDataURL(file);
+    });
+    var compressed = await compressImage(dataUrl, 1200, 0.75);
+    var base64 = compressed.split(',')[1];
+    var prompt = 'Você extrai dados de notas/cupons fiscais de POSTO DE COMBUSTÍVEL brasileiros. '
+      + 'Analise a imagem e devolva SOMENTE um JSON exato (sem markdown, sem texto):\n'
+      + '{\n'
+      + '  "litros": <número decimal, ex: 35.11>,\n'
+      + '  "preco_litro": <número decimal, ex: 3.29>,\n'
+      + '  "valor_total": <número decimal, ex: 115.51>,\n'
+      + '  "combustivel": "<uma de: gasolina, etanol, diesel, gnv>",\n'
+      + '  "posto": "<nome do posto/estabelecimento>"\n'
+      + '}\n'
+      + 'Regras: use ponto decimal. Se o litro não aparecer mas houver total e preço/litro, calcule. '
+      + 'Etanol/álcool→etanol; gasolina comum/aditivada→gasolina. Campo não identificado: null.';
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'x-api-key':getApiKey(), 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001', max_tokens: 512,
+        messages: [{ role:'user', content: [
+          { type:'image', source:{ type:'base64', media_type:'image/jpeg', data:base64 } },
+          { type:'text', text:prompt }
+        ] }]
+      })
+    });
+    if (!resp.ok) {
+      var eb = await resp.json().catch(function(){ return {}; });
+      throw new Error((eb.error && eb.error.message) || ('API ' + resp.status));
+    }
+    var data = await resp.json();
+    var text = data.content[0].text.trim().replace(/```json?/g, '').replace(/```/g, '').trim();
+    var json = JSON.parse(text);
+    if (json.litros)       document.getElementById('a-litros').value = json.litros;
+    if (json.preco_litro)  document.getElementById('a-preco').value = json.preco_litro;
+    if (json.valor_total)  document.getElementById('a-valor').value = json.valor_total;
+    else recalcValorAbast();
+    if (json.combustivel && ['gasolina','etanol','diesel','gnv'].indexOf(String(json.combustivel).toLowerCase()) >= 0)
+      document.getElementById('a-combustivel').value = String(json.combustivel).toLowerCase();
+    if (json.posto)        document.getElementById('a-posto').value = json.posto;
+    document.getElementById('a-data').value = new Date().toISOString().slice(0, 10);
+    mostra('✓ Preenchido! Confira e informe o odômetro (km do painel).', '#4CAF50');
+  } catch (err) {
+    console.error('scanNotaAbastecimento:', err);
+    mostra('⚠️ Não consegui ler. Preencha manualmente.', '#F44336');
+  }
 }
 
 async function salvarAbastecimento() {
