@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.4.1</title>
+<title>GastosIA - Smart Finance v4.4.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.4.1</span>
+    <span class="logo-version">v4.4.2</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1186,8 +1186,12 @@
       <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.08em;text-transform:uppercase;" id="modal-abast-title">Novo Abastecimento</div>
       <button onclick="fecharModalAbastecimento()" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;">×</button>
     </div>
-    <input type="file" id="a-scan-input" accept="image/*" style="display:none;" onchange="if(event.target.files[0]) scanNotaAbastecimento(event.target.files[0])">
-    <button type="button" onclick="document.getElementById('a-scan-input').click()" style="width:100%;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px dashed rgba(74,158,223,0.5);border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">📷 Escanear nota (preenche sozinho)</button>
+    <input type="file" id="a-scan-input" accept="image/*" capture="environment" style="display:none;" onchange="if(event.target.files[0]) scanNotaAbastecimento(event.target.files[0])">
+    <input type="file" id="a-scan-input-gal" accept="image/*" style="display:none;" onchange="if(event.target.files[0]) scanNotaAbastecimento(event.target.files[0])">
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button type="button" onclick="document.getElementById('a-scan-input').click()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px dashed rgba(74,158,223,0.5);border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">📷 Tirar foto</button>
+      <button type="button" onclick="document.getElementById('a-scan-input-gal').click()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px dashed rgba(74,158,223,0.5);border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">🖼️ Galeria</button>
+    </div>
     <div id="a-scan-status" style="display:none;font-size:12px;color:#4A9EDF;margin:-8px 0 12px;text-align:center;"></div>
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div>
@@ -1444,7 +1448,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.4.1</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.4.2</div>
       </div>
     </div>
   </div>
@@ -1520,10 +1524,15 @@
     </div>
 
     <div class="drop-zone" id="drop-zone">
-      <input type="file" accept="image/*" id="file-input" onchange="handleFileSelect(event)">
+      <input type="file" accept="image/*" capture="environment" id="file-input-cam" style="display:none;" onchange="handleFileSelect(event)">
+      <input type="file" accept="image/*" id="file-input" style="display:none;" onchange="handleFileSelect(event)">
       <div class="drop-zone-icon">📷</div>
-      <div class="drop-zone-text">Tire uma foto ou selecione a nota fiscal</div>
-      <div class="drop-zone-sub">JPG, PNG, WebP · Câmera ou galeria</div>
+      <div class="drop-zone-text">Foto da nota fiscal</div>
+      <div class="drop-zone-sub">Preenche o gasto sozinho com IA</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;">
+        <button type="button" onclick="document.getElementById('file-input-cam').click()" style="flex:1;max-width:160px;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(245,166,35,0.15);color:var(--accent);border:1px dashed rgba(245,166,35,0.5);border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">📷 Tirar foto</button>
+        <button type="button" onclick="document.getElementById('file-input').click()" style="flex:1;max-width:160px;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px dashed rgba(74,158,223,0.5);border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">🖼️ Galeria</button>
+      </div>
       <img class="preview-img" id="preview-img" src="" alt="">
     </div>
 
@@ -4399,6 +4408,7 @@ function autoRunAI() {
 // ═══════════════════════════════════════════════════════════════════
 function openAddModal() {
   document.getElementById('file-input').value = '';
+  document.getElementById('file-input-cam').value = '';
   document.getElementById('preview-img').style.display = 'none';
   document.getElementById('ai-status').classList.remove('show');
   document.getElementById('f-valor').value = '';
@@ -6023,7 +6033,7 @@ function openQuick(categoria) {
 
 function openScanDirect() {
   openAddModal();
-  setTimeout(() => document.getElementById('file-input').click(), 200);
+  setTimeout(() => document.getElementById('file-input-cam').click(), 200);
 }
 
 // ═══════════════════════════════════════════════════════════════════
