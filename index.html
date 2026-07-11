@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.5.2</title>
+<title>GastosIA - Smart Finance v4.5.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.5.2</span>
+    <span class="logo-version">v4.5.3</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1537,7 +1537,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.2</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.3</div>
       </div>
     </div>
   </div>
@@ -6629,6 +6629,8 @@ function calcularMetricasVeiculo(lista) {
 // Agrupa os abastecimentos por mês ou por semana (usa as métricas já calculadas)
 var resumoModoCombustivel = 'mes';
 function setResumoModo(modo) { resumoModoCombustivel = modo; renderCombustivel(); }
+var abaCombustivel = 'abastecimentos';
+function setAbaCombustivel(aba) { abaCombustivel = aba; renderCombustivel(); }
 
 function resumoAgrupadoCombustivel(ordenado, modo) {
   var MES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -6724,6 +6726,18 @@ function renderCombustivel() {
         });
       }
 
+      // Abas: Abastecimentos | Manutenção
+      var abaChip = function(aba, txt) {
+        var on = abaCombustivel === aba;
+        return '<div onclick="setAbaCombustivel(&apos;' + aba + '&apos;)" style="flex:1;text-align:center;cursor:pointer;padding:9px 10px;border-radius:10px;font-size:13px;font-weight:700;background:' + (on ? '#F5A623' : 'transparent') + ';color:' + (on ? '#111' : '#888') + ';">' + txt + '</div>';
+      };
+      html += '<div style="display:flex;gap:4px;background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:4px;margin-bottom:14px;">';
+      html += abaChip('abastecimentos', '⛽ Abastecimentos');
+      html += abaChip('manutencao', '🔧 Manutenção' + (manutencoes.length ? ' (' + manutencoes.length + ')' : ''));
+      html += '</div>';
+
+      if (abaCombustivel === 'abastecimentos') {
+
       // Resumo por mês/semana (evolução) + enviar por mensagem
       var resumo = resumoAgrupadoCombustivel(m.ordenado, resumoModoCombustivel);
       if (resumo.length) {
@@ -6732,6 +6746,7 @@ function renderCombustivel() {
         html += '<div style="display:flex;gap:6px;">' + chip('mes', 'Mês') + chip('semana', 'Semana') + '</div>';
         html += '<div style="display:flex;gap:6px;">';
         html += '<button onclick="compartilharResumoCombustivel()" style="background:rgba(76,175,80,0.12);color:#4CAF50;border:1px solid rgba(76,175,80,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">📤 Enviar</button>';
+        html += '<button onclick="enviarPdfRelatorioCombustivel()" style="background:rgba(244,67,54,0.10);color:#E57373;border:1px solid rgba(244,67,54,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">📄 PDF</button>';
         html += '<button onclick="imprimirRelatorioCombustivel()" style="background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px solid rgba(74,158,223,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">🖨️ Imprimir</button>';
         html += '</div>';
         html += '</div>';
@@ -6777,8 +6792,9 @@ function renderCombustivel() {
         });
       }
 
-      // Seção Manutenção
-      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin:22px 0 8px;">';
+      } else {
+      // Aba Manutenção
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin:2px 0 8px;">';
       html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;">🔧 Manutenção</div>';
       html += '<button onclick="abrirModalManutencao()" style="background:rgba(245,166,35,0.12);color:#F5A623;border:1px solid rgba(245,166,35,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">+ Registrar</button>';
       html += '</div>';
@@ -6810,6 +6826,7 @@ function renderCombustivel() {
           html += '</div>';
         });
       }
+      } // fim das abas
 
       el.innerHTML = html;
     });
@@ -6845,8 +6862,7 @@ function compartilharResumoCombustivel() {
 }
 
 // Gera um relatório de abastecimentos em tema claro (A4) e abre a janela de impressão / salvar PDF
-function imprimirRelatorioCombustivel() {
-  if (!abastecimentos.length && !manutencoes.length) { showToast('Nada para imprimir ainda.'); return; }
+function relatorioCombustivelDoc() {
   var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
   var m = calcularMetricasVeiculo(abastecimentos);
   var porMes = resumoAgrupadoCombustivel(m.ordenado, 'mes');
@@ -6943,10 +6959,60 @@ function imprimirRelatorioCombustivel() {
     + '.foot b{color:#F5A623;font-family:Barlow Condensed,sans-serif;letter-spacing:1px}'
     + '@media print{body{padding:0}@page{size:A4 portrait;margin:12mm}thead{display:table-header-group}tr{break-inside:avoid}}';
 
+  return { html: d, css: css, nome: vSel ? vSel.nome : '' };
+}
+
+function imprimirRelatorioCombustivel() {
+  if (!abastecimentos.length && !manutencoes.length) { showToast('Nada para imprimir ainda.'); return; }
+  var doc = relatorioCombustivelDoc();
   var win = window.open('', '_blank');
   if (!win) { showToast('⚠️ Permita pop-ups para imprimir.'); return; }
-  win.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório Abastecimentos' + (vSel ? ' - ' + esc(vSel.nome) : '') + '</title><style>' + css + '</style></head><body>' + d + '<script>window.onload=function(){window.print();}<\/script></body></html>');
+  win.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório Abastecimentos' + (doc.nome ? ' - ' + esc(doc.nome) : '') + '</title><style>' + doc.css + '</style></head><body>' + doc.html + '<script>window.onload=function(){window.print();}<\/script></body></html>');
   win.document.close();
+}
+
+// Gera o PDF no aparelho e abre o compartilhar (WhatsApp etc.); sem suporte, baixa o arquivo
+async function enviarPdfRelatorioCombustivel() {
+  if (!abastecimentos.length && !manutencoes.length) { showToast('Nada para enviar ainda.'); return; }
+  showToast('⏳ Gerando PDF...');
+  try {
+    await new Promise(function(resolve, reject) {
+      if (window.html2pdf) { resolve(); return; }
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+      s.onload = resolve;
+      s.onerror = function() { reject(new Error('Falha ao carregar gerador de PDF')); };
+      document.head.appendChild(s);
+    });
+    var doc = relatorioCombustivelDoc();
+    var holder = document.createElement('div');
+    holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff;';
+    holder.innerHTML = '<style>' + doc.css + '</style><div style="font-family:Barlow,Arial,sans-serif;color:#111;padding:8px;background:#fff;">' + doc.html + '</div>';
+    document.body.appendChild(holder);
+    var nomeArq = 'relatorio-veiculo' + (doc.nome ? '-' + doc.nome.toLowerCase().replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') : '') + '.pdf';
+    var blob = await html2pdf().set({
+      margin: [10, 8, 10, 8],
+      image: { type: 'jpeg', quality: 0.92 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] }
+    }).from(holder).outputPdf('blob');
+    holder.remove();
+    var file = new File([blob], nomeArq, { type: 'application/pdf' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Relatório do veículo' });
+    } else {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = nomeArq; a.click();
+      setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
+      showToast('📄 PDF baixado — anexe na mensagem.');
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return; // usuário cancelou o compartilhar
+    console.error('enviarPdfRelatorioCombustivel:', e);
+    showToast('⚠️ Não consegui gerar o PDF. Use Imprimir → Salvar como PDF.');
+  }
 }
 
 function statBox(label, valor, cor) {
