@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.4.3</title>
+<title>GastosIA - Smart Finance v4.4.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.4.3</span>
+    <span class="logo-version">v4.4.4</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1448,7 +1448,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.4.3</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.4.4</div>
       </div>
     </div>
   </div>
@@ -6789,7 +6789,19 @@ async function scanNotaAbastecimento(file) {
       document.getElementById('a-combustivel').value = String(json.combustivel).toLowerCase();
     if (json.posto)        document.getElementById('a-posto').value = json.posto;
     document.getElementById('a-data').value = new Date().toISOString().slice(0, 10);
-    mostra('✓ Preenchido! Confira e informe o odômetro (km do painel).', '#4CAF50');
+    // Confere coerência: numa nota de posto, valor = litros × preço. Se o OCR errou
+    // um dígito (ex.: 42,04 no lugar de 42,94), os três não fecham — avisa antes de salvar.
+    var _f = function(v, dec) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec }); };
+    var _l = parseFloat(document.getElementById('a-litros').value);
+    var _p = parseFloat(document.getElementById('a-preco').value);
+    var _v = parseFloat(document.getElementById('a-valor').value);
+    if (_l > 0 && _p > 0 && _v > 0 && Math.abs(_v - _l * _p) > Math.max(0.10, _v * 0.01)) {
+      mostra('⚠️ Confira: ' + _f(_l, 2) + 'L × R$ ' + _f(_p, 3) + ' = R$ ' + _f(_l * _p, 2)
+        + ', mas a nota diz R$ ' + _f(_v, 2) + '. Litros seriam ' + _f(_v / _p, 2)
+        + '. Ajuste antes de salvar.', '#F5A623');
+    } else {
+      mostra('✓ Preenchido! Confira e informe o odômetro (km do painel).', '#4CAF50');
+    }
   } catch (err) {
     console.error('scanNotaAbastecimento:', err);
     mostra('⚠️ Não consegui ler. Preencha manualmente.', '#F44336');
