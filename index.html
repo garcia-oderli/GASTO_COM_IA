@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.5.1</title>
+<title>GastosIA - Smart Finance v4.5.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.5.1</span>
+    <span class="logo-version">v4.5.2</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -757,6 +757,7 @@
 
   <!-- ALERTS CONTAINER -->
   <div id="alerts-container"></div>
+  <div id="manut-alerts-home"></div>
 
   <!-- MONTH TOTAL -->
   <div class="month-total">
@@ -1257,6 +1258,13 @@
       <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.08em;text-transform:uppercase;" id="modal-manut-title">Nova Manutenção</div>
       <button onclick="fecharModalManutencao()" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;">×</button>
     </div>
+    <input type="file" id="m-scan-input" accept="image/*" capture="environment" style="display:none;" onchange="if(event.target.files[0]) scanNotaManutencao(event.target.files[0])">
+    <input type="file" id="m-scan-input-gal" accept="image/*" style="display:none;" onchange="if(event.target.files[0]) scanNotaManutencao(event.target.files[0])">
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button type="button" onclick="document.getElementById('m-scan-input').click()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px dashed rgba(74,158,223,0.5);border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">📷 Tirar foto</button>
+      <button type="button" onclick="document.getElementById('m-scan-input-gal').click()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px dashed rgba(74,158,223,0.5);border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">🖼️ Galeria</button>
+    </div>
+    <div id="m-scan-status" style="display:none;font-size:12px;color:#4A9EDF;margin:-8px 0 12px;text-align:center;"></div>
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div>
         <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Veículo</label>
@@ -1301,6 +1309,11 @@
         <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Oficina (opcional)</label>
         <input id="m-oficina" placeholder="Ex: Oficina do Zé" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
       </div>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 0;">
+        <input id="m-lancar-gasto" type="checkbox" checked style="width:18px;height:18px;accent-color:#F5A623;" />
+        <span style="font-size:13px;color:#F5F5F5;">Lançar como gasto em Transporte</span>
+      </label>
+      <div style="font-size:11px;color:#666;margin-top:-4px;">Desmarque se for registro antigo — fica só o histórico e o lembrete, sem mexer nos gastos.</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div>
           <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Próxima em (km)</label>
@@ -1310,6 +1323,12 @@
           <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Próxima em (data)</label>
           <input id="m-proxima-data" type="date" lang="pt-BR" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
         </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:-2px;">
+        <button type="button" onclick="manutProximaKm(5000)" style="background:#111;color:#F5A623;border:1px solid #2A2A2A;border-radius:14px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">+5 mil km</button>
+        <button type="button" onclick="manutProximaKm(10000)" style="background:#111;color:#F5A623;border:1px solid #2A2A2A;border-radius:14px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">+10 mil km</button>
+        <button type="button" onclick="manutProximaMeses(6)" style="background:#111;color:#F5A623;border:1px solid #2A2A2A;border-radius:14px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">+6 meses</button>
+        <button type="button" onclick="manutProximaMeses(12)" style="background:#111;color:#F5A623;border:1px solid #2A2A2A;border-radius:14px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">+1 ano</button>
       </div>
       <div style="font-size:11px;color:#666;margin-top:-4px;">Preencha um dos dois (ou os dois) para receber o lembrete — vale o que vencer primeiro.</div>
     </div>
@@ -1518,7 +1537,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.1</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.2</div>
       </div>
     </div>
   </div>
@@ -3173,6 +3192,9 @@ function renderHome() {
 
   // Alertas automáticos
   renderAlerts(monthTotal);
+
+  // Alertas de manutenção de veículos (async, com cache)
+  renderAlertasManutencaoHome();
 
   // Recentes
   const recent = [...expenses].sort((a,b)=>new Date(b.criadoEm)-new Date(a.criadoEm)).slice(0,5);
@@ -6501,10 +6523,12 @@ function kmAtualVeiculo() {
 // Lembretes: considera só a manutenção MAIS RECENTE de cada tipo (a nova troca supera a anterior).
 // Retorna [{tipo, label, status:'vencida'|'proxima', texto}]
 function alertasManutencao() {
-  var kmAtual = kmAtualVeiculo();
+  return calcAlertasManutencao(manutencoes, kmAtualVeiculo());
+}
+function calcAlertasManutencao(lista, kmAtual) {
   var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
   var maisRecente = {};
-  manutencoes.forEach(function(r) {
+  lista.forEach(function(r) {
     var atual = maisRecente[r.tipo];
     if (!atual || Number(r.odometro) > Number(atual.odometro) || (Number(r.odometro) === Number(atual.odometro) && String(r.data) > String(atual.data))) {
       maisRecente[r.tipo] = r;
@@ -6532,6 +6556,39 @@ function alertasManutencao() {
   // Vencidas primeiro
   alertas.sort(function(a, b) { return (a.status === 'vencida' ? 0 : 1) - (b.status === 'vencida' ? 0 : 1); });
   return alertas;
+}
+
+// Alertas de manutenção na tela Início — todos os veículos, com cache de 5 min
+var manutAlertsHomeCache = { t: 0, html: '' };
+async function renderAlertasManutencaoHome() {
+  var el = document.getElementById('manut-alerts-home');
+  if (!el || !currentUser) return;
+  if (Date.now() - manutAlertsHomeCache.t < 5 * 60 * 1000) { el.innerHTML = manutAlertsHomeCache.html; return; }
+  try {
+    var rv = await supa.from('veiculos').select('id,nome,emoji').eq('user_id', currentUser.id).eq('ativo', true);
+    var veics = rv.data || [];
+    if (!veics.length) { manutAlertsHomeCache = { t: Date.now(), html: '' }; el.innerHTML = ''; return; }
+    var rm = await supa.from('manutencoes').select('veiculo_id,tipo,data,odometro,proxima_km,proxima_data').eq('user_id', currentUser.id);
+    var manuts = rm.data || [];
+    if (!manuts.length) { manutAlertsHomeCache = { t: Date.now(), html: '' }; el.innerHTML = ''; return; }
+    var ra = await supa.from('abastecimentos').select('veiculo_id,odometro').eq('user_id', currentUser.id);
+    var abasts = ra.data || [];
+    var html = '';
+    veics.forEach(function(v) {
+      var mv = manuts.filter(function(r) { return r.veiculo_id === v.id; });
+      if (!mv.length) return;
+      var km = 0;
+      abasts.forEach(function(r) { if (r.veiculo_id === v.id && Number(r.odometro) > km) km = Number(r.odometro); });
+      mv.forEach(function(r) { if (Number(r.odometro) > km) km = Number(r.odometro); });
+      calcAlertasManutencao(mv, km).forEach(function(a) {
+        var venc = a.status === 'vencida';
+        html += '<div class="alert-banner ' + (venc ? 'danger' : 'warning') + '" onclick="showPage(&apos;combustivel&apos;)" style="cursor:pointer;">'
+          + (venc ? '🚨' : '⚠️') + ' ' + esc(a.label) + (venc ? ' vencida' : '') + ' — ' + (v.emoji || '🚗') + ' ' + esc(v.nome) + ' (' + esc(a.texto) + ')</div>';
+      });
+    });
+    manutAlertsHomeCache = { t: Date.now(), html: html };
+    el.innerHTML = html;
+  } catch (e) { console.error('renderAlertasManutencaoHome:', e); }
 }
 
 // Calcula métricas por abastecimento (ordenado por odômetro) + médias
@@ -6662,7 +6719,7 @@ function renderCombustivel() {
           html += '<div style="font-size:20px;">' + (venc ? '🚨' : '⚠️') + '</div>';
           html += '<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:' + cor + ';">' + esc(a.label) + (venc ? ' vencida' : '') + '</div>';
           html += '<div style="font-size:12px;color:#888;margin-top:2px;">' + esc(a.texto) + '</div></div>';
-          html += '<button onclick="abrirModalManutencao()" style="background:' + cor + '22;color:' + cor + ';border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;">Registrar</button>';
+          html += '<button onclick="abrirModalManutencao(null, &apos;' + escJs(a.tipo) + '&apos;)" style="background:' + cor + '22;color:' + cor + ';border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;">Registrar</button>';
           html += '</div>';
         });
       }
@@ -7180,7 +7237,7 @@ async function excluirAbastecimento(id) {
 // ─── Manutenção ───
 var manutencaoEditandoId = null;
 
-function abrirModalManutencao(id) {
+function abrirModalManutencao(id, tipoPre) {
   if (veiculos.length === 0) { showToast('Cadastre um veículo primeiro.'); abrirModalVeiculo(); return; }
   var sel = document.getElementById('m-veiculo');
   sel.innerHTML = '';
@@ -7188,6 +7245,7 @@ function abrirModalManutencao(id) {
     sel.innerHTML += '<option value="' + esc(v.id) + '">' + (v.emoji || '🚗') + ' ' + esc(v.nome) + '</option>';
   });
   document.getElementById('modal-manut-err').textContent = '';
+  var mss = document.getElementById('m-scan-status'); if (mss) mss.style.display = 'none';
   if (id) {
     var r = manutencoes.find(function(x) { return x.id === id; });
     if (!r) return;
@@ -7200,6 +7258,7 @@ function abrirModalManutencao(id) {
     document.getElementById('m-valor').value = r.valor;
     document.getElementById('m-descricao').value = r.descricao || '';
     document.getElementById('m-oficina').value = r.oficina || '';
+    document.getElementById('m-lancar-gasto').checked = !!r.gasto_id;
     document.getElementById('m-proxima-km').value = r.proxima_km || '';
     document.getElementById('m-proxima-data').value = r.proxima_data || '';
   } else {
@@ -7209,10 +7268,11 @@ function abrirModalManutencao(id) {
     document.getElementById('m-data').value = new Date().toISOString().slice(0, 10);
     var km = kmAtualVeiculo();
     document.getElementById('m-odometro').value = km > 0 ? km : '';
-    document.getElementById('m-tipo').value = 'oleo';
+    document.getElementById('m-tipo').value = (tipoPre && MANUT_TIPOS[tipoPre]) ? tipoPre : 'oleo';
     document.getElementById('m-valor').value = '';
     document.getElementById('m-descricao').value = '';
     document.getElementById('m-oficina').value = '';
+    document.getElementById('m-lancar-gasto').checked = true;
     document.getElementById('m-proxima-km').value = '';
     document.getElementById('m-proxima-data').value = '';
   }
@@ -7221,6 +7281,72 @@ function abrirModalManutencao(id) {
 
 function fecharModalManutencao() {
   document.getElementById('modal-manutencao').style.display = 'none';
+}
+
+// Escaneia a nota da oficina/loja e preenche os campos (odômetro e "próxima" ficam manuais)
+async function scanNotaManutencao(file) {
+  var statusEl = document.getElementById('m-scan-status');
+  var mostra = function(txt, cor) { statusEl.style.display = 'block'; statusEl.style.color = cor || '#4A9EDF'; statusEl.textContent = txt; };
+  if (!getApiKey()) { showToast('⚠️ Configure a chave de IA em Config para escanear.'); return; }
+  mostra('🔎 Lendo a nota com IA...');
+  try {
+    var dataUrl = await new Promise(function(resolve, reject) {
+      var r = new FileReader(); r.onload = function(e) { resolve(e.target.result); }; r.onerror = reject; r.readAsDataURL(file);
+    });
+    var compressed = await compressImage(dataUrl, 1200, 0.75);
+    var base64 = compressed.split(',')[1];
+    var prompt = 'Você extrai dados de notas fiscais/recibos de OFICINA MECÂNICA, auto center ou loja de autopeças brasileiros. '
+      + 'Analise a imagem e devolva SOMENTE um JSON exato (sem markdown, sem texto):\n'
+      + '{\n'
+      + '  "valor_total": <número decimal, ex: 250.00>,\n'
+      + '  "tipo": "<uma de: oleo, filtro, pneu, alinhamento, freio, correia, suspensao, bateria, revisao, outro>",\n'
+      + '  "descricao": "<resumo curto das peças/serviços, ex: óleo 5W30 + filtro de óleo>",\n'
+      + '  "oficina": "<nome do estabelecimento>"\n'
+      + '}\n'
+      + 'Regras: use ponto decimal. tipo = serviço predominante (troca de óleo→oleo; '
+      + 'alinhamento/balanceamento→alinhamento; pastilha/disco→freio). Campo não identificado: null.';
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'x-api-key':getApiKey(), 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001', max_tokens: 512,
+        messages: [{ role:'user', content: [
+          { type:'image', source:{ type:'base64', media_type:'image/jpeg', data:base64 } },
+          { type:'text', text:prompt }
+        ] }]
+      })
+    });
+    if (!resp.ok) {
+      var eb = await resp.json().catch(function(){ return {}; });
+      throw new Error((eb.error && eb.error.message) || ('API ' + resp.status));
+    }
+    var data = await resp.json();
+    var text = data.content[0].text.trim().replace(/```json?/g, '').replace(/```/g, '').trim();
+    var json = JSON.parse(text);
+    if (json.valor_total) document.getElementById('m-valor').value = json.valor_total;
+    if (json.tipo && MANUT_TIPOS[String(json.tipo).toLowerCase()]) document.getElementById('m-tipo').value = String(json.tipo).toLowerCase();
+    if (json.descricao)   document.getElementById('m-descricao').value = json.descricao;
+    if (json.oficina)     document.getElementById('m-oficina').value = json.oficina;
+    document.getElementById('m-data').value = new Date().toISOString().slice(0, 10);
+    mostra('✓ Preenchido! Confira, ajuste o odômetro e informe a próxima (km ou data).', '#4CAF50');
+  } catch (err) {
+    console.error('scanNotaManutencao:', err);
+    mostra('⚠️ Não consegui ler. Preencha manualmente.', '#F44336');
+  }
+}
+
+// Chips de preenchimento rápido da "próxima" no modal de manutenção
+function manutProximaKm(delta) {
+  var odo = parseFloat(document.getElementById('m-odometro').value);
+  if (!odo || odo <= 0) { showToast('Informe o odômetro primeiro.'); return; }
+  document.getElementById('m-proxima-km').value = odo + delta;
+}
+function manutProximaMeses(meses) {
+  var base = document.getElementById('m-data').value;
+  var d = base ? parseExpenseDate(base) : new Date();
+  if (!d || isNaN(d)) d = new Date();
+  d.setMonth(d.getMonth() + meses);
+  document.getElementById('m-proxima-data').value = d.toISOString().slice(0, 10);
 }
 
 async function salvarManutencao() {
@@ -7250,41 +7376,54 @@ async function salvarManutencao() {
     user_id: currentUser.id
   };
 
+  var lancarGasto = document.getElementById('m-lancar-gasto').checked;
   var tipoLabel = manutTipoLabel(tipo).replace(/^\S+\s/, ''); // sem o emoji
   var descGasto = tipoLabel + (descricao ? ' — ' + descricao : '');
   var fornecedor = oficina || 'Manutenção veículo';
+  var criarGasto = function() {
+    try {
+      var novo = DataLayerManager.addExpense({
+        valor: valor, data: payload.data, categoria: 'Transporte',
+        fornecedor: fornecedor, pagamento: '', descricao: descGasto,
+        imagem: null, cartao_id: null, criadoEm: new Date().toISOString()
+      });
+      supaSaveExpense(novo);
+      return novo.id;
+    } catch (e) {
+      console.error('gasto vinculado à manutenção falhou:', e);
+      return null;
+    }
+  };
 
   if (manutencaoEditandoId) {
     var atual = manutencoes.find(function(x) { return x.id === manutencaoEditandoId; });
-    await supa.from('manutencoes').update(payload).eq('id', manutencaoEditandoId);
-    if (atual && atual.gasto_id) {
-      var g = expenses.find(function(e) { return e.id === atual.gasto_id; });
+    var gastoAtualId = atual && atual.gasto_id;
+    if (lancarGasto) {
+      var g = gastoAtualId ? expenses.find(function(e) { return e.id === gastoAtualId; }) : null;
       if (g) {
         g.valor = valor; g.data = payload.data; g.fornecedor = fornecedor; g.descricao = descGasto;
         supaSaveExpense(g);
+        payload.gasto_id = gastoAtualId;
+      } else if (valor > 0) {
+        payload.gasto_id = criarGasto();
       }
+    } else {
+      // Desmarcado: remove o gasto vinculado, se existir
+      if (gastoAtualId) {
+        supaDeleteExpense(gastoAtualId);
+        var gi = expenses.findIndex(function(e) { return e.id === gastoAtualId; });
+        if (gi >= 0) expenses.splice(gi, 1);
+      }
+      payload.gasto_id = null;
     }
+    await supa.from('manutencoes').update(payload).eq('id', manutencaoEditandoId);
   } else {
-    // Cria o gasto vinculado (categoria Transporte), igual ao abastecimento
-    var gastoId = null;
-    if (valor > 0) {
-      try {
-        var novo = DataLayerManager.addExpense({
-          valor: valor, data: payload.data, categoria: 'Transporte',
-          fornecedor: fornecedor, pagamento: '', descricao: descGasto,
-          imagem: null, cartao_id: null, criadoEm: new Date().toISOString()
-        });
-        gastoId = novo.id;
-        supaSaveExpense(novo);
-      } catch (e) {
-        console.error('gasto vinculado à manutenção falhou:', e);
-      }
-    }
-    payload.gasto_id = gastoId;
+    payload.gasto_id = (lancarGasto && valor > 0) ? criarGasto() : null;
     await supa.from('manutencoes').insert(payload);
   }
 
   fecharModalManutencao();
+  manutAlertsHomeCache.t = 0;
   renderCombustivel();
   if (typeof renderHome === 'function') renderHome();
   cachedInsights = null;
@@ -7302,6 +7441,7 @@ async function excluirManutencao(id) {
     var idx = expenses.findIndex(function(e) { return e.id === r.gasto_id; });
     if (idx >= 0) expenses.splice(idx, 1);
   }
+  manutAlertsHomeCache.t = 0;
   renderCombustivel();
   if (typeof renderHome === 'function') renderHome();
   showToast('🗑️ Manutenção removida');
