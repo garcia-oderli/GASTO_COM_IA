@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.5.0</title>
+<title>GastosIA - Smart Finance v4.5.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.5.0</span>
+    <span class="logo-version">v4.5.1</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1279,6 +1279,7 @@
             <option value="oleo">🛢️ Troca de óleo</option>
             <option value="filtro">🌀 Filtros</option>
             <option value="pneu">🛞 Pneus</option>
+            <option value="alinhamento">⚖️ Alinhamento/Balanceamento</option>
             <option value="freio">🛑 Freios</option>
             <option value="correia">⚙️ Correia</option>
             <option value="suspensao">🔩 Suspensão</option>
@@ -1517,7 +1518,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.0</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.1</div>
       </div>
     </div>
   </div>
@@ -6484,8 +6485,8 @@ async function carregarManutencoes(veiculoId) {
 }
 
 var MANUT_TIPOS = {
-  oleo: '🛢️ Troca de óleo', filtro: '🌀 Filtros', pneu: '🛞 Pneus', freio: '🛑 Freios',
-  correia: '⚙️ Correia', suspensao: '🔩 Suspensão', bateria: '🔋 Bateria', revisao: '🔍 Revisão', outro: '🔧 Outro'
+  oleo: '🛢️ Troca de óleo', filtro: '🌀 Filtros', pneu: '🛞 Pneus', alinhamento: '⚖️ Alinham./Balanceamento',
+  freio: '🛑 Freios', correia: '⚙️ Correia', suspensao: '🔩 Suspensão', bateria: '🔋 Bateria', revisao: '🔍 Revisão', outro: '🔧 Outro'
 };
 function manutTipoLabel(tipo) { return MANUT_TIPOS[tipo] || MANUT_TIPOS.outro; }
 
