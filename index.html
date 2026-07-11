@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.4.4</title>
+<title>GastosIA - Smart Finance v4.4.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.4.4</span>
+    <span class="logo-version">v4.4.5</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1448,7 +1448,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.4.4</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.4.5</div>
       </div>
     </div>
   </div>
@@ -6530,7 +6530,10 @@ function renderCombustivel() {
         var chip = function(modo, txt) { var on = resumoModoCombustivel === modo; return '<div onclick="setResumoModo(&apos;' + modo + '&apos;)" style="cursor:pointer;padding:5px 14px;border-radius:16px;font-size:12px;font-weight:600;background:' + (on ? '#F5A623' : '#1C1C1C') + ';color:' + (on ? '#111' : '#888') + ';border:1px solid ' + (on ? '#F5A623' : '#2A2A2A') + ';">' + txt + '</div>'; };
         html += '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 8px;">';
         html += '<div style="display:flex;gap:6px;">' + chip('mes', 'Mês') + chip('semana', 'Semana') + '</div>';
+        html += '<div style="display:flex;gap:6px;">';
         html += '<button onclick="compartilharResumoCombustivel()" style="background:rgba(76,175,80,0.12);color:#4CAF50;border:1px solid rgba(76,175,80,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">📤 Enviar</button>';
+        html += '<button onclick="imprimirRelatorioCombustivel()" style="background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px solid rgba(74,158,223,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">🖨️ Imprimir</button>';
+        html += '</div>';
         html += '</div>';
         html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;overflow:hidden;margin-bottom:16px;">';
         resumo.forEach(function(o, i) {
@@ -6605,6 +6608,88 @@ function compartilharResumoCombustivel() {
   } else {
     showToast('⚠️ Compartilhamento não suportado neste navegador.');
   }
+}
+
+// Gera um relatório de abastecimentos em tema claro (A4) e abre a janela de impressão / salvar PDF
+function imprimirRelatorioCombustivel() {
+  if (!abastecimentos.length) { showToast('Nada para imprimir ainda.'); return; }
+  var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
+  var m = calcularMetricasVeiculo(abastecimentos);
+  var porMes = resumoAgrupadoCombustivel(m.ordenado, 'mes');
+  var fmtNum = function(v, d) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }); };
+  var brl = function(v) { return 'R$ ' + fmtNum(v, 2); };
+  var card = function(l, v) { return '<div class="card"><div class="cl">' + l + '</div><div class="cv">' + v + '</div></div>'; };
+  var totalLitros = m.ordenado.reduce(function(s, r) { return s + Number(r.litros); }, 0);
+  var totalKm = m.ordenado.reduce(function(s, r) { return s + (r._kmRodados > 0 ? r._kmRodados : 0); }, 0);
+  var hoje = new Date().toLocaleDateString('pt-BR');
+  var veic = vSel ? ((vSel.emoji || '🚗') + ' ' + esc(vSel.nome)) : 'Veículo';
+
+  var d = '';
+  d += '<h1>Relatório de Abastecimentos</h1>';
+  d += '<div class="sub">' + veic + ' · gerado em ' + hoje + '</div>';
+
+  d += '<div class="cards">';
+  d += card('Consumo médio', m.consumoMedio != null ? fmtNum(m.consumoMedio, 1) + ' km/L' : '—');
+  d += card('Preço médio/L', m.precoMedio != null ? brl(m.precoMedio) : '—');
+  d += card('Gasto total', brl(m.totalGasto));
+  d += card('Gasto no mês', brl(m.gastoMes));
+  d += card('Abastecimentos', String(abastecimentos.length));
+  d += card('Litros (total)', fmtNum(totalLitros, 1) + ' L');
+  d += card('Km rodados', totalKm > 0 ? fmtNum(totalKm, 0) + ' km' : '—');
+  d += '</div>';
+
+  if (porMes.length) {
+    d += '<h2>Resumo por mês</h2>';
+    d += '<table><thead><tr><th>Mês</th><th class="r">Gasto</th><th class="r">Litros</th><th class="r">Rodou</th><th class="r">Consumo</th></tr></thead><tbody>';
+    porMes.forEach(function(o) {
+      d += '<tr><td>' + esc(o.label) + '</td><td class="r">' + brl(o.gasto) + '</td><td class="r">' + fmtNum(o.litros, 1) + ' L</td><td class="r">' + (o.km > 0 ? fmtNum(o.km, 0) + ' km' : '—') + '</td><td class="r">' + (o.consumo != null ? fmtNum(o.consumo, 1) + ' km/L' : '—') + '</td></tr>';
+    });
+    d += '</tbody></table>';
+  }
+
+  d += '<h2>Histórico completo</h2>';
+  d += '<table><thead><tr><th>Data</th><th class="r">Odômetro</th><th class="r">Litros</th><th class="r">R$/L</th><th class="r">Valor</th><th class="r">Rodou</th><th class="r">km/L</th><th class="r">Custo/km</th><th>Posto</th></tr></thead><tbody>';
+  m.ordenado.forEach(function(r) {
+    var dataFmt = String(r.data || '').split('-').reverse().join('/');
+    d += '<tr>';
+    d += '<td>' + dataFmt + '</td>';
+    d += '<td class="r">' + fmtNum(r.odometro, 0) + '</td>';
+    d += '<td class="r">' + fmtNum(r.litros, 2) + (r.tanque_cheio ? '' : ' *') + '</td>';
+    d += '<td class="r">' + brl(r.preco_litro) + '</td>';
+    d += '<td class="r">' + brl(r.valor_total) + '</td>';
+    d += '<td class="r">' + (r._kmRodados != null ? fmtNum(r._kmRodados, 0) : '—') + '</td>';
+    d += '<td class="r">' + (r._consumo != null ? fmtNum(r._consumo, 1) : '—') + '</td>';
+    d += '<td class="r">' + (r._custoKm != null ? brl(r._custoKm) : '—') + '</td>';
+    d += '<td>' + esc(r.posto || '—') + '</td>';
+    d += '</tr>';
+  });
+  d += '</tbody></table>';
+  d += '<div class="note">* abastecimento parcial (tanque não cheio) — não entra no cálculo de consumo.</div>';
+  d += '<div class="foot"><span>Oderli Garcia &copy; 2026</span><span>·</span><b>RitmoProd</b><span>·</span><span>GastosIA</span></div>';
+
+  var css = '@import url(https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Barlow:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap);'
+    + '*{margin:0;padding:0;box-sizing:border-box}'
+    + 'body{font-family:Barlow,Arial,sans-serif;color:#111;padding:24px}'
+    + 'h1{font-family:Barlow Condensed,sans-serif;font-size:26px;letter-spacing:.06em;text-transform:uppercase}'
+    + '.sub{font-size:13px;color:#666;margin:2px 0 18px}'
+    + '.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}'
+    + '.card{border:1px solid #ddd;border-radius:8px;padding:10px 12px}'
+    + '.cl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888}'
+    + '.cv{font-family:IBM Plex Mono,monospace;font-size:16px;font-weight:700;margin-top:4px}'
+    + 'h2{font-family:Barlow Condensed,sans-serif;font-size:16px;text-transform:uppercase;letter-spacing:.05em;margin:18px 0 8px;color:#333}'
+    + 'table{width:100%;border-collapse:collapse;font-size:12px}'
+    + 'th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #eee}'
+    + 'th{background:#f4f4f4;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#666}'
+    + 'td.r,th.r{text-align:right;font-family:IBM Plex Mono,monospace}'
+    + '.note{font-size:10px;color:#999;margin-top:6px}'
+    + '.foot{margin-top:24px;padding-top:10px;border-top:1px solid #ddd;font-size:11px;color:#888;display:flex;gap:8px;align-items:center}'
+    + '.foot b{color:#F5A623;font-family:Barlow Condensed,sans-serif;letter-spacing:1px}'
+    + '@media print{body{padding:0}@page{size:A4 portrait;margin:12mm}thead{display:table-header-group}tr{break-inside:avoid}}';
+
+  var win = window.open('', '_blank');
+  if (!win) { showToast('⚠️ Permita pop-ups para imprimir.'); return; }
+  win.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório Abastecimentos' + (vSel ? ' - ' + esc(vSel.nome) : '') + '</title><style>' + css + '</style></head><body>' + d + '<script>window.onload=function(){window.print();}<\/script></body></html>');
+  win.document.close();
 }
 
 function statBox(label, valor, cor) {
