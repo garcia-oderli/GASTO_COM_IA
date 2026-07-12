@@ -5497,13 +5497,11 @@ function generateAdvancedPDF(filterMonth = null, filterYear = null) {
       }
     }
     
-    const w = window.open('', '_blank');
-    if (!w) { showToast('⚠️ Bloqueador de pop-ups pode estar ativo'); return; }
-    
     let html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
   <title>GastosIA – Relatório Gerencial</title>
   <style>
     @page { size: A4 portrait; margin: 15mm; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     body { font-family: 'Inter', -apple-system, sans-serif; color: #1e293b; font-size: 11px; line-height: 1.4; }
     .page-break { page-break-before: always; margin-top: 20px; }
     .header { text-align: center; margin-bottom: 16px; border-bottom: 2px solid #F5A623; padding-bottom: 10px; }
@@ -5708,8 +5706,19 @@ function generateAdvancedPDF(filterMonth = null, filterYear = null) {
   </footer>
 </div><!-- /app-root -->
 </body></html>`;
-    w.document.write(html);
-    w.document.close();
+    // Entrega via Blob URL em vez de document.write: no Chrome Android o
+    // document.write numa janela '_blank' costuma render em branco (aba
+    // fica em about:blank), resultando em "PDF sem informações". A
+    // navegação para um Blob URL é determinística em todos os navegadores.
+    const blobUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+    const w = window.open(blobUrl, '_blank');
+    if (!w) {
+      URL.revokeObjectURL(blobUrl);
+      showToast('⚠️ Bloqueador de pop-ups pode estar ativo');
+      return;
+    }
+    // Revoga o URL depois que a aba já carregou (evita vazamento sem cortar o load).
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
     showToast('✅ Relatório PDF gerado com sucesso!');
   } catch (err) {
     console.error('Erro ao gerar PDF:', err);
@@ -6965,10 +6974,13 @@ function relatorioCombustivelDoc() {
 function imprimirRelatorioCombustivel() {
   if (!abastecimentos.length && !manutencoes.length) { showToast('Nada para imprimir ainda.'); return; }
   var doc = relatorioCombustivelDoc();
-  var win = window.open('', '_blank');
-  if (!win) { showToast('⚠️ Permita pop-ups para imprimir.'); return; }
-  win.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório Abastecimentos' + (doc.nome ? ' - ' + esc(doc.nome) : '') + '</title><style>' + doc.css + '</style></head><body>' + doc.html + '<script>window.onload=function(){window.print();}<\/script></body></html>');
-  win.document.close();
+  var pageHtml = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório Abastecimentos' + (doc.nome ? ' - ' + esc(doc.nome) : '') + '</title><style>' + doc.css + '</style></head><body>' + doc.html + '<script>window.onload=function(){window.print();}<\/script></body></html>';
+  // Blob URL em vez de document.write: no Chrome Android o document.write numa
+  // janela '_blank' abre em branco (a aba fica em about:blank).
+  var blobUrl = URL.createObjectURL(new Blob([pageHtml], { type: 'text/html' }));
+  var win = window.open(blobUrl, '_blank');
+  if (!win) { URL.revokeObjectURL(blobUrl); showToast('⚠️ Permita pop-ups para imprimir.'); return; }
+  setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 60000);
 }
 
 // Gera o PDF no aparelho e abre o compartilhar (WhatsApp etc.); sem suporte, baixa o arquivo
@@ -7676,9 +7688,14 @@ function renderRelatorio() {
 function imprimirRelatorio() {
   var label = MONTH_NAMES[relMes] + ' ' + relAno;
   var relHtml = document.getElementById('rel-content').innerHTML;
-  var win = window.open('', '_blank');
-  win.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatorio ' + label + '</title><style>@import url(https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Barlow:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap);*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;color:#111;font-family:Barlow,sans-serif;padding:24px}h1{font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px}.sub{font-size:13px;color:#888;margin-bottom:24px}@media print{body{padding:12mm}@page{size:A4 portrait;margin:12mm}}</style></head><body><h1>Relatorio Mensal</h1><div class="sub">' + label + '</div><style>[style*="background:#1C1C1C"],[style*="background:#222222"],[style*="background:#222"],[style*="background:#2A2A2A"]{background:#f8f8f8!important;border-color:#ddd!important}[style*="color:#F5F5F5"]{color:#111!important}[style*="color:#888"],[style*="color:#555"]{color:#666!important}</style>' + relHtml + '<script>window.onload=function(){window.print();}<\/script></body></html>');
-  win.document.close();
+  var doc = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatorio ' + label + '</title><style>@import url(https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Barlow:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap);*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;color:#111;font-family:Barlow,sans-serif;padding:24px}h1{font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px}.sub{font-size:13px;color:#888;margin-bottom:24px}@media print{body{padding:12mm}@page{size:A4 portrait;margin:12mm}}</style></head><body><h1>Relatorio Mensal</h1><div class="sub">' + label + '</div><style>[style*="background:#1C1C1C"],[style*="background:#222222"],[style*="background:#222"],[style*="background:#2A2A2A"]{background:#f8f8f8!important;border-color:#ddd!important}[style*="color:#F5F5F5"]{color:#111!important}[style*="color:#888"],[style*="color:#555"]{color:#666!important}</style>' + relHtml + '<script>window.onload=function(){window.print();}<\/script></body></html>';
+  // Blob URL em vez de document.write: no Chrome Android o document.write numa
+  // janela '_blank' abre em branco (a aba fica em about:blank). Navegar para um
+  // Blob URL carrega o documento de forma determinística em todos os navegadores.
+  var blobUrl = URL.createObjectURL(new Blob([doc], { type: 'text/html' }));
+  var win = window.open(blobUrl, '_blank');
+  if (!win) { URL.revokeObjectURL(blobUrl); showToast('⚠️ Permita pop-ups para imprimir.'); return; }
+  setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 60000);
 }
 
 </script>
