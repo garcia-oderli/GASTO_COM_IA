@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.5.7</title>
+<title>GastosIA - Smart Finance v4.6.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.5.7</span>
+    <span class="logo-version">v4.6.0</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1378,6 +1378,77 @@
   </div>
 </div>
 
+<!-- MODAL PLANO DE TROCA -->
+<div id="modal-plano-troca" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9100;align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
+  <div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:16px;padding:24px;width:100%;max-width:380px;margin:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.08em;text-transform:uppercase;" id="modal-plano-title">Plano de troca</div>
+      <button onclick="fecharModalPlanoTroca()" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Carro pretendido</label>
+        <input id="p-modelo" placeholder="Ex: Corolla 2022" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Valor do carro (R$)</label>
+          <input id="p-alvo" type="number" inputmode="decimal" step="0.01" placeholder="Ex: 80000" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Data alvo</label>
+          <input id="p-data" type="date" lang="pt-BR" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Carro atual vale (R$)</label>
+          <input id="p-atual" type="number" inputmode="decimal" step="0.01" placeholder="venda/troca" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Já guardei (R$)</label>
+          <input id="p-guardado" type="number" inputmode="decimal" step="0.01" placeholder="0,00" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Como pretende pagar</label>
+        <div style="display:flex;gap:8px;" id="p-modo-chips">
+          <div data-modo="avista" onclick="selecionarModoTroca(this)" style="flex:1;text-align:center;background:#111;border:1px solid #F5A623;border-radius:8px;padding:10px 6px;cursor:pointer;font-size:12px;color:#F5F5F5;">💰 À vista</div>
+          <div data-modo="financiamento" onclick="selecionarModoTroca(this)" style="flex:1;text-align:center;background:#111;border:1px solid #2A2A2A;border-radius:8px;padding:10px 6px;cursor:pointer;font-size:12px;color:#F5F5F5;">🏦 Financ.</div>
+          <div data-modo="consorcio" onclick="selecionarModoTroca(this)" style="flex:1;text-align:center;background:#111;border:1px solid #2A2A2A;border-radius:8px;padding:10px 6px;cursor:pointer;font-size:12px;color:#F5F5F5;">🧩 Consórcio</div>
+        </div>
+      </div>
+      <div id="p-fin-fields" style="display:none;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Parcelas</label>
+          <input id="p-fin-parcelas" type="number" inputmode="numeric" placeholder="Ex: 48" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Juros (% a.m.)</label>
+          <input id="p-fin-juros" type="number" inputmode="decimal" step="0.01" placeholder="Ex: 1,5" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div id="p-cons-fields" style="display:none;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Parcelas</label>
+          <input id="p-cons-parcelas" type="number" inputmode="numeric" placeholder="Ex: 80" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Taxa adm. (% total)</label>
+          <input id="p-cons-taxa" type="number" inputmode="decimal" step="0.01" placeholder="Ex: 18" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+    </div>
+    <div id="modal-plano-err" style="color:#F44336;font-size:12px;margin-top:8px;min-height:16px;"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button id="p-excluir-btn" onclick="excluirPlanoTroca()" style="display:none;background:rgba(244,67,54,0.12);color:#F44336;border:1px solid rgba(244,67,54,0.3);border-radius:8px;padding:14px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🗑️</button>
+      <button onclick="salvarPlanoTroca()" style="flex:1;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
+        SALVAR PLANO
+      </button>
+    </div>
+  </div>
+</div>
+
 
 <div class="page" id="page-relatorio">
   <div class="page-header">
@@ -1537,7 +1608,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.7</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.6.0</div>
       </div>
     </div>
   </div>
@@ -6515,6 +6586,13 @@ async function carregarManutencoes(veiculoId) {
   manutencoes = res.data || [];
 }
 
+var planoTroca = null;
+async function carregarPlanoTroca(veiculoId) {
+  if (!currentUser || !veiculoId) { planoTroca = null; return; }
+  var res = await supa.from('planos_troca').select('*').eq('user_id', currentUser.id).eq('veiculo_id', veiculoId).maybeSingle();
+  planoTroca = res.data || null;
+}
+
 var MANUT_TIPOS = {
   oleo: '🛢️ Troca de óleo', filtro: '🌀 Filtros', pneu: '🛞 Pneus', alinhamento: '⚖️ Alinham./Balanceamento',
   freio: '🛑 Freios', correia: '⚙️ Correia', suspensao: '🔩 Suspensão', bateria: '🔋 Bateria', revisao: '🔍 Revisão', outro: '🔧 Outro'
@@ -6691,7 +6769,7 @@ function renderCombustivel() {
     if (!veiculoSelecionadoId || !veiculos.find(function(v) { return v.id === veiculoSelecionadoId; })) {
       veiculoSelecionadoId = veiculos[0].id;
     }
-    Promise.all([carregarAbastecimentos(veiculoSelecionadoId), carregarManutencoes(veiculoSelecionadoId)]).then(function() {
+    Promise.all([carregarAbastecimentos(veiculoSelecionadoId), carregarManutencoes(veiculoSelecionadoId), carregarPlanoTroca(veiculoSelecionadoId)]).then(function() {
       var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
       var m = calcularMetricasVeiculo(abastecimentos);
       var html = '';
@@ -6741,8 +6819,9 @@ function renderCombustivel() {
         return '<div onclick="setAbaCombustivel(&apos;' + aba + '&apos;)" style="flex:1;text-align:center;cursor:pointer;padding:9px 10px;border-radius:10px;font-size:13px;font-weight:700;background:' + (on ? '#F5A623' : 'transparent') + ';color:' + (on ? '#111' : '#888') + ';">' + txt + '</div>';
       };
       html += '<div style="display:flex;gap:4px;background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:4px;margin-bottom:14px;">';
-      html += abaChip('abastecimentos', '⛽ Abastecimentos');
-      html += abaChip('manutencao', '🔧 Manutenção' + (manutencoes.length ? ' (' + manutencoes.length + ')' : ''));
+      html += abaChip('abastecimentos', '⛽ Abastecer');
+      html += abaChip('manutencao', '🔧 Manut.' + (manutencoes.length ? ' (' + manutencoes.length + ')' : ''));
+      html += abaChip('trocar', '🔄 Trocar');
       html += '</div>';
 
       if (abaCombustivel === 'abastecimentos') {
@@ -6806,7 +6885,7 @@ function renderCombustivel() {
         });
       }
 
-      } else {
+      } else if (abaCombustivel === 'manutencao') {
       // Aba Manutenção
       html += '<div style="display:flex;align-items:center;justify-content:space-between;margin:2px 0 8px;">';
       html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;">🔧 Manutenção</div>';
@@ -6840,6 +6919,8 @@ function renderCombustivel() {
           html += '</div>';
         });
       }
+      } else if (abaCombustivel === 'trocar') {
+        html += renderAbaTroca(m, vSel);
       } // fim das abas
 
       el.innerHTML = html;
@@ -7112,6 +7193,294 @@ async function excluirVeiculo() {
   fecharModalVeiculo();
   renderCombustivel();
   showToast('🗑️ Veículo removido');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PLANO DE TROCA — meta, diagnóstico, viabilidade e simulação
+// ═══════════════════════════════════════════════════════════════════
+var modoTrocaSel = 'avista';
+
+// Média mensal de gastos (janela de 90 dias, mesma lógica de predictSpending)
+function mediaMensalGastos() {
+  var now = new Date();
+  var cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 90);
+  var total = 0;
+  expenses.forEach(function(e) {
+    var d = parseExpenseDate(e.data);
+    if (d >= cutoff && d <= now) total += Number(e.valor);
+  });
+  return total / 3; // 90 dias ≈ 3 meses
+}
+
+// Meses entre hoje e uma data (mínimo 1)
+function mesesAte(dataStr) {
+  if (!dataStr) return 1;
+  var alvo = parseExpenseDate(dataStr);
+  var hoje = new Date();
+  var meses = (alvo.getFullYear() - hoje.getFullYear()) * 12 + (alvo.getMonth() - hoje.getMonth());
+  return Math.max(1, meses);
+}
+
+// Custo mensal médio de rodar (combustível + manutenção) sobre o histórico registrado
+function custoMensalVeiculo(metrics) {
+  var datas = [];
+  metrics.ordenado.forEach(function(r) { if (r.data) datas.push(r.data); });
+  manutencoes.forEach(function(r) { if (r.data) datas.push(r.data); });
+  if (!datas.length) return null;
+  datas.sort();
+  var d0 = parseExpenseDate(datas[0]);
+  var hoje = new Date();
+  var meses = Math.max(1, (hoje.getFullYear() - d0.getFullYear()) * 12 + (hoje.getMonth() - d0.getMonth()) + 1);
+  var totalManut = manutencoes.reduce(function(s, r) { return s + Number(r.valor); }, 0);
+  var combMensal = metrics.totalGasto / meses;
+  var manutMensal = totalManut / meses;
+  return { combMensal: combMensal, manutMensal: manutMensal, total: combMensal + manutMensal, meses: meses };
+}
+
+// Tendência de manutenção: soma dos últimos 6 meses vs 6 meses anteriores
+function tendenciaManutencao() {
+  var hoje = new Date();
+  var lim6 = new Date(hoje.getFullYear(), hoje.getMonth() - 6, hoje.getDate());
+  var lim12 = new Date(hoje.getFullYear(), hoje.getMonth() - 12, hoje.getDate());
+  var rec = 0, ant = 0;
+  manutencoes.forEach(function(r) {
+    if (!r.data) return;
+    var d = parseExpenseDate(r.data);
+    if (d >= lim6 && d <= hoje) rec += Number(r.valor);
+    else if (d >= lim12 && d < lim6) ant += Number(r.valor);
+  });
+  if (rec === 0 && ant === 0) return null;
+  if (rec > ant * 1.2) return { dir: 'up', rec: rec, ant: ant };
+  if (rec < ant * 0.8) return { dir: 'down', rec: rec, ant: ant };
+  return { dir: 'flat', rec: rec, ant: ant };
+}
+
+function renderAbaTroca(m, vSel) {
+  var fmtNum = function(v, d) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }); };
+  var brl = function(v) { return 'R$ ' + fmtNum(v, 2); };
+  var html = '';
+
+  if (!planoTroca) {
+    html += '<div style="text-align:center;padding:40px 20px;color:#555;">'
+      + '<div style="font-size:48px;margin-bottom:16px;">🔄</div>'
+      + '<div style="font-size:14px;">Nenhum plano de troca para ' + esc(vSel.nome) + '</div>'
+      + '<div style="font-size:12px;margin-top:8px;color:#444;">Diga o carro que você quer, quanto custa e até quando — o app calcula quanto guardar por mês, se cabe no orçamento e simula financiamento ou consórcio.</div>'
+      + '<button class="empty-cta" style="margin-top:16px;" onclick="abrirModalPlanoTroca()">+ Criar plano de troca</button></div>';
+    return html;
+  }
+
+  var p = planoTroca;
+  var atualVal = Number(p.valor_atual_estimado || 0);
+  var guardadoVal = Number(p.guardado || 0);
+  var entrada = atualVal + guardadoVal;
+  var alvo = Number(p.valor_alvo || 0);
+  var falta = Math.max(0, alvo - entrada);
+  var mesesRest = mesesAte(p.data_alvo);
+  var guardarMes = falta / mesesRest;
+  var progresso = alvo > 0 ? Math.min(100, entrada / alvo * 100) : 0;
+  var renda = getTotalIncome();
+  var sobra = renda - mediaMensalGastos();
+
+  // Cabeçalho + editar
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin:2px 0 12px;">';
+  html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;color:#F5F5F5;">🔄 ' + (p.modelo_desejado ? esc(p.modelo_desejado) : 'Novo veículo') + '</div>';
+  html += '<button onclick="abrirModalPlanoTroca(&apos;' + escJs(p.id) + '&apos;)" style="background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;">✏️ Editar</button>';
+  html += '</div>';
+
+  // (a) Meta de poupança
+  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:12px;">';
+  html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🎯 Meta de poupança</div>';
+  html += '<div style="height:10px;background:#111;border-radius:6px;overflow:hidden;margin-bottom:6px;"><div style="height:100%;width:' + progresso.toFixed(1) + '%;background:#F5A623;"></div></div>';
+  html += '<div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:12px;"><span>' + brl(entrada) + ' de entrada</span><span>' + progresso.toFixed(0) + '% de ' + brl(alvo) + '</span></div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+  html += statBox('Falta juntar', brl(falta), '#F44336');
+  html += statBox('Guardar por mês', brl(guardarMes), '#F5A623');
+  html += '</div>';
+  html += '<div style="font-size:11px;color:#666;margin-top:8px;">Entrada = carro atual (' + brl(atualVal) + ') + guardado (' + brl(guardadoVal) + '). Prazo: ' + mesesRest + ' ' + (mesesRest === 1 ? 'mês' : 'meses') + (p.data_alvo ? ' (até ' + String(p.data_alvo).split('-').reverse().join('/') + ')' : '') + '.</div>';
+  html += '</div>';
+
+  // (b) Diagnóstico do carro atual
+  var cm = custoMensalVeiculo(m);
+  var tend = tendenciaManutencao();
+  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:12px;">';
+  html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🩺 Diagnóstico do carro atual</div>';
+  if (!cm) {
+    html += '<div style="font-size:13px;color:#888;">Sem histórico suficiente. Registre abastecimentos e manutenções para ver o custo de manter o carro.</div>';
+  } else {
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">';
+    html += statBox('Custo/mês de rodar', brl(cm.total), '#F44336');
+    html += statBox('Km atual', fmtNum(kmAtualVeiculo(), 0) + ' km', '#4CAF50');
+    html += statBox('Combustível/mês', brl(cm.combMensal), '#4A9EDF');
+    html += statBox('Manutenção/mês', brl(cm.manutMensal), '#F5A623');
+    html += '</div>';
+    var tendTxt = '';
+    if (tend) {
+      if (tend.dir === 'up') tendTxt = '📈 Manutenção subindo (últimos 6m ' + brl(tend.rec) + ' vs ' + brl(tend.ant) + ' antes)';
+      else if (tend.dir === 'down') tendTxt = '📉 Manutenção caindo (últimos 6m ' + brl(tend.rec) + ' vs ' + brl(tend.ant) + ' antes)';
+      else tendTxt = '➡️ Manutenção estável (~' + brl(tend.rec) + ' nos últimos 6m)';
+    }
+    var manutAnual = cm.manutMensal * 12;
+    var compensa = tend && tend.dir === 'up' && atualVal > 0 && manutAnual > atualVal * 0.15;
+    var veredito = compensa
+      ? '🔔 Sinais de que compensa trocar: manutenção subindo e já pesa mais de 15% do valor do carro por ano.'
+      : '👍 Carro ainda relativamente barato de manter — dá pra segurar a troca se quiser.';
+    if (tendTxt) html += '<div style="font-size:12px;color:#AAA;margin-bottom:8px;">' + tendTxt + '</div>';
+    html += '<div style="font-size:12px;color:#F5F5F5;background:#111;border-radius:8px;padding:10px;">' + veredito + '</div>';
+  }
+  html += '</div>';
+
+  // (c) Cabe no orçamento?
+  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:12px;">';
+  html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">📊 Cabe no orçamento?</div>';
+  if (renda <= 0) {
+    html += '<div style="font-size:13px;color:#888;">Cadastre sua renda para ver se a meta cabe no orçamento.</div>';
+  } else {
+    html += '<div style="font-size:12px;color:#888;margin-bottom:8px;">Sobra mensal média (renda − gastos 90d): <span style="color:#F5F5F5;font-weight:600;">' + brl(sobra) + '</span></div>';
+    if (falta <= 0) {
+      html += '<div style="font-size:13px;color:#4CAF50;background:rgba(76,175,80,0.10);border-radius:8px;padding:10px;">✅ Sua entrada já cobre o valor do carro — é só efetivar a troca.</div>';
+    } else if (guardarMes <= sobra) {
+      html += '<div style="font-size:13px;color:#4CAF50;background:rgba(76,175,80,0.10);border-radius:8px;padding:10px;">✅ Cabe. Guardando ' + brl(guardarMes) + '/mês, ainda sobram ' + brl(sobra - guardarMes) + '.</div>';
+    } else {
+      var txt = '⚠️ Apertado: a meta pede ' + brl(guardarMes) + '/mês, mas só sobram ' + brl(sobra) + '.';
+      if (sobra > 0) {
+        var mesesReal = Math.ceil(falta / sobra);
+        var dReal = new Date(); dReal.setMonth(dReal.getMonth() + mesesReal);
+        txt += ' No seu ritmo, daria pra juntar em ~' + mesesReal + ' meses (por volta de ' + String(dReal.getMonth() + 1).padStart(2, '0') + '/' + dReal.getFullYear() + ').';
+      } else {
+        txt += ' Do jeito atual não sobra nada pra guardar — reveja gastos ou o alvo.';
+      }
+      html += '<div style="font-size:13px;color:#F5A623;background:rgba(245,166,35,0.10);border-radius:8px;padding:10px;">' + txt + '</div>';
+    }
+  }
+  html += '</div>';
+
+  // (d) Simulação (financiamento / consórcio)
+  if (p.modo === 'financiamento' || p.modo === 'consorcio') {
+    html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:12px;">';
+    var cabeMsg = function(parcela) {
+      if (renda <= 0) return '';
+      if (parcela <= sobra) return '<div style="font-size:13px;color:#4CAF50;background:rgba(76,175,80,0.10);border-radius:8px;padding:10px;">✅ A parcela cabe na sua sobra mensal (' + brl(sobra) + ').</div>';
+      return '<div style="font-size:13px;color:#F44336;background:rgba(244,67,54,0.10);border-radius:8px;padding:10px;">⚠️ A parcela (' + brl(parcela) + ') passa da sua sobra mensal (' + brl(sobra) + ').</div>';
+    };
+    if (p.modo === 'financiamento') {
+      html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🏦 Simulação — financiamento</div>';
+      var n = Number(p.parcelas || 0), i = Number(p.juros_am || 0) / 100, pv = falta;
+      if (n <= 0 || i <= 0) {
+        html += '<div style="font-size:13px;color:#888;">Preencha parcelas e juros (% a.m.) no editar para simular a parcela.</div>';
+      } else if (pv <= 0) {
+        html += '<div style="font-size:13px;color:#4CAF50;">Com a entrada, você já cobre o valor — não precisa financiar.</div>';
+      } else {
+        var parcela = pv * i / (1 - Math.pow(1 + i, -n));
+        var totalPago = parcela * n;
+        var juros = totalPago - pv;
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">';
+        html += statBox('Parcela (' + n + 'x)', brl(parcela), '#F5A623');
+        html += statBox('Financiado', brl(pv), '#4A9EDF');
+        html += statBox('Total pago', brl(totalPago), '#F44336');
+        html += statBox('Juros totais', brl(juros), '#F44336');
+        html += '</div>';
+        html += cabeMsg(parcela);
+        html += '<div style="font-size:11px;color:#666;margin-top:8px;">Tabela Price a ' + fmtNum(Number(p.juros_am), 2) + '% a.m. — simulação; a taxa real depende do banco.</div>';
+      }
+    } else {
+      html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🧩 Simulação — consórcio</div>';
+      var nc = Number(p.parcelas || 0), taxa = Number(p.taxa_admin || 0);
+      if (nc <= 0) {
+        html += '<div style="font-size:13px;color:#888;">Preencha parcelas e taxa de administração no editar para simular a parcela.</div>';
+      } else {
+        var totalC = alvo * (1 + taxa / 100);
+        var parcelaC = totalC / nc;
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">';
+        html += statBox('Parcela (' + nc + 'x)', brl(parcelaC), '#F5A623');
+        html += statBox('Carta de crédito', brl(alvo), '#4A9EDF');
+        html += statBox('Total c/ taxa', brl(totalC), '#F44336');
+        html += statBox('Taxa adm.', fmtNum(taxa, 1) + '%', '#F44336');
+        html += '</div>';
+        html += cabeMsg(parcelaC);
+        html += '<div style="font-size:11px;color:#666;margin-top:8px;">⚠️ Consórcio não entrega o carro na hora — depende de sorteio/lance (contemplação incerta). Sem juros, mas com taxa de administração.</div>';
+      }
+    }
+    html += '</div>';
+  }
+
+  return html;
+}
+
+function selecionarModoTroca(el) {
+  modoTrocaSel = el.getAttribute('data-modo');
+  var chips = document.querySelectorAll('#p-modo-chips > div');
+  chips.forEach(function(c) { c.style.borderColor = '#2A2A2A'; });
+  el.style.borderColor = '#F5A623';
+  document.getElementById('p-fin-fields').style.display = modoTrocaSel === 'financiamento' ? 'grid' : 'none';
+  document.getElementById('p-cons-fields').style.display = modoTrocaSel === 'consorcio' ? 'grid' : 'none';
+}
+
+function abrirModalPlanoTroca(id) {
+  if (!veiculoSelecionadoId) { showToast('Selecione um veículo primeiro.'); return; }
+  var err = document.getElementById('modal-plano-err'); err.textContent = '';
+  var p = (id && planoTroca && planoTroca.id === id) ? planoTroca : null;
+  document.getElementById('modal-plano-title').textContent = p ? 'Editar plano de troca' : 'Plano de troca';
+  document.getElementById('p-modelo').value = p ? (p.modelo_desejado || '') : '';
+  document.getElementById('p-alvo').value = p && p.valor_alvo ? p.valor_alvo : '';
+  document.getElementById('p-atual').value = p && p.valor_atual_estimado ? p.valor_atual_estimado : '';
+  document.getElementById('p-guardado').value = p && p.guardado ? p.guardado : '';
+  document.getElementById('p-data').value = p ? (p.data_alvo || '') : '';
+  document.getElementById('p-fin-parcelas').value = p && p.parcelas ? p.parcelas : '';
+  document.getElementById('p-fin-juros').value = p && p.juros_am ? p.juros_am : '';
+  document.getElementById('p-cons-parcelas').value = p && p.parcelas ? p.parcelas : '';
+  document.getElementById('p-cons-taxa').value = p && p.taxa_admin ? p.taxa_admin : '';
+  document.getElementById('p-excluir-btn').style.display = p ? '' : 'none';
+  var modo = p ? (p.modo || 'avista') : 'avista';
+  var chip = document.querySelector('#p-modo-chips > div[data-modo="' + modo + '"]');
+  if (chip) selecionarModoTroca(chip);
+  document.getElementById('modal-plano-troca').style.display = 'flex';
+}
+
+function fecharModalPlanoTroca() {
+  document.getElementById('modal-plano-troca').style.display = 'none';
+}
+
+async function salvarPlanoTroca() {
+  var err = document.getElementById('modal-plano-err');
+  var alvo = parseFloat(document.getElementById('p-alvo').value);
+  if (!(alvo > 0)) { err.textContent = 'Informe o valor do carro pretendido.'; return; }
+  var num = function(id) { var v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; };
+  var intOrNull = function(id) { var v = parseInt(document.getElementById(id).value, 10); return isNaN(v) ? null : v; };
+  var floatOrNull = function(id) { var v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
+  var parcelas = modoTrocaSel === 'financiamento' ? intOrNull('p-fin-parcelas')
+    : modoTrocaSel === 'consorcio' ? intOrNull('p-cons-parcelas') : null;
+  var payload = {
+    user_id: currentUser.id,
+    veiculo_id: veiculoSelecionadoId,
+    modelo_desejado: document.getElementById('p-modelo').value.trim() || null,
+    valor_alvo: alvo,
+    valor_atual_estimado: num('p-atual'),
+    guardado: num('p-guardado'),
+    data_alvo: document.getElementById('p-data').value || null,
+    modo: modoTrocaSel,
+    parcelas: parcelas,
+    juros_am: modoTrocaSel === 'financiamento' ? floatOrNull('p-fin-juros') : null,
+    taxa_admin: modoTrocaSel === 'consorcio' ? floatOrNull('p-cons-taxa') : null,
+    atualizado_em: new Date().toISOString()
+  };
+  if (planoTroca && planoTroca.id) {
+    await supa.from('planos_troca').update(payload).eq('id', planoTroca.id);
+  } else {
+    await supa.from('planos_troca').insert(payload);
+  }
+  fecharModalPlanoTroca();
+  renderCombustivel();
+  showToast('✓ Plano de troca salvo!');
+}
+
+async function excluirPlanoTroca() {
+  if (!planoTroca || !planoTroca.id) return;
+  if (!confirm('Excluir o plano de troca deste veículo?')) return;
+  await supa.from('planos_troca').delete().eq('id', planoTroca.id);
+  planoTroca = null;
+  fecharModalPlanoTroca();
+  renderCombustivel();
+  showToast('🗑️ Plano removido');
 }
 
 // ─── Modal Abastecimento ───
