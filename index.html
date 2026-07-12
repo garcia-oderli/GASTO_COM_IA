@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.6.0</title>
+<title>GastosIA - Smart Finance v4.6.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -642,6 +642,7 @@
     </div>
     <!-- Card -->
     <div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:16px;padding:28px 24px;">
+      <div id="auth-normal">
       <div style="display:flex;gap:8px;margin-bottom:24px;">
         <button id="tab-login" onclick="switchAuthTab('login')"
           style="flex:1;padding:10px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;background:#F5A623;color:#111;">
@@ -670,6 +671,25 @@
           style="width:100%;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:0.06em;cursor:pointer;">
           ENTRAR
         </button>
+        <div id="auth-forgot" style="text-align:center;margin-top:2px;">
+          <span onclick="authForgotPassword()" style="font-size:12px;color:#888;cursor:pointer;text-decoration:underline;">Esqueci minha senha</span>
+        </div>
+      </div>
+      </div>
+      <div id="auth-recovery" style="display:none;flex-direction:column;gap:12px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.06em;text-transform:uppercase;text-align:center;">Definir nova senha</div>
+        <div style="font-size:12px;color:#888;text-align:center;margin-top:-4px;">Escolha uma nova senha para sua conta.</div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Nova senha</label>
+          <input id="auth-newpass" type="password" placeholder="••••••"
+            style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:15px;padding:12px 14px;outline:none;box-sizing:border-box;"
+            onkeydown="if(event.key==='Enter')authSetNewPassword()" />
+        </div>
+        <div id="auth-recovery-err" style="color:#F44336;font-size:12px;min-height:16px;"></div>
+        <button onclick="authSetNewPassword()"
+          style="width:100%;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:0.06em;cursor:pointer;">
+          SALVAR NOVA SENHA
+        </button>
       </div>
     </div>
     <div style="text-align:center;margin-top:16px;font-size:11px;color:#555;">Seus dados ficam protegidos e sincronizados</div>
@@ -697,7 +717,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.6.0</span>
+    <span class="logo-version">v4.6.1</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1608,7 +1628,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.6.0</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.6.1</div>
       </div>
     </div>
   </div>
@@ -1996,6 +2016,12 @@ const SUPA_KEY = 'sb_publishable_zWIDdXlUEP3hGwih7bD8JA_eNB911je';
 const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 let currentUser = null;
 
+// Recuperação de senha: quando o usuário abre o link do email, o Supabase
+// dispara PASSWORD_RECOVERY — aí mostramos a tela de definir nova senha.
+supa.auth.onAuthStateChange(function (event) {
+  if (event === 'PASSWORD_RECOVERY') showRecoveryUI();
+});
+
 // Auth: verifica sessão atual
 async function supaLoadAll() {
   if (!currentUser) return;
@@ -2063,6 +2089,7 @@ function switchAuthTab(tab) {
   document.getElementById('tab-register').style.border = isLogin ? '1px solid #2A2A2A' : 'none';
   const btn = document.getElementById('auth-btn');
   btn.textContent = isLogin ? 'ENTRAR' : 'CADASTRAR';
+  document.getElementById('auth-forgot').style.display = isLogin ? '' : 'none';
   document.getElementById('auth-err').textContent = '';
 }
 
@@ -2113,7 +2140,48 @@ async function authLogout() {
   document.getElementById('app-root').style.display = 'none';
 }
 
+// Envia o email de recuperação de senha (usa o email já digitado no login)
+async function authForgotPassword() {
+  const email = document.getElementById('auth-email').value.trim();
+  const err = document.getElementById('auth-err');
+  if (!email) { err.textContent = 'Digite seu email acima e toque em "Esqueci minha senha".'; return; }
+  err.textContent = '';
+  const btn = document.getElementById('auth-btn'); btn.disabled = true;
+  const redirectTo = window.location.origin + window.location.pathname;
+  const { error } = await supa.auth.resetPasswordForEmail(email, { redirectTo });
+  btn.disabled = false;
+  if (error) { err.style.color = '#F44336'; err.textContent = error.message; return; }
+  err.style.color = '#4CAF50';
+  err.textContent = '✓ Enviamos um link para ' + email + '. Confira o email (e o spam).';
+  setTimeout(function () { err.style.color = '#F44336'; err.textContent = ''; }, 9000);
+}
 
+// Mostra o painel de "definir nova senha" (após clicar no link do email)
+function showRecoveryUI() {
+  document.getElementById('auth-screen').style.display = '';
+  document.getElementById('app-root').style.display = 'none';
+  document.getElementById('auth-normal').style.display = 'none';
+  document.getElementById('auth-recovery').style.display = 'flex';
+  document.getElementById('auth-recovery-err').textContent = '';
+}
+
+// Salva a nova senha durante a recuperação e entra no app
+async function authSetNewPassword() {
+  const pass = document.getElementById('auth-newpass').value;
+  const err = document.getElementById('auth-recovery-err');
+  if (!pass || pass.length < 6) { err.textContent = 'Senha mínima: 6 caracteres.'; return; }
+  err.textContent = '';
+  const { data, error } = await supa.auth.updateUser({ password: pass });
+  if (error) { err.textContent = error.message; return; }
+  currentUser = (data && data.user) || currentUser;
+  document.getElementById('auth-recovery').style.display = 'none';
+  document.getElementById('auth-normal').style.display = '';
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-root').style.display = '';
+  supaLoadAll();
+  supaLoadCategories();
+  showToast('✓ Senha atualizada!');
+}
 
 async function supaSaveExpense(exp) {
   if (!currentUser || !exp || !exp.id) return false;
