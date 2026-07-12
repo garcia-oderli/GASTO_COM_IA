@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.5.5</title>
+<title>GastosIA - Smart Finance v4.5.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.5.5</span>
+    <span class="logo-version">v4.5.6</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1537,7 +1537,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.5</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.6</div>
       </div>
     </div>
   </div>
@@ -6761,14 +6761,18 @@ function renderCombustivel() {
         html += '</div>';
         html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;overflow:hidden;margin-bottom:16px;">';
         resumo.forEach(function(o, i) {
-          html += '<div style="display:flex;align-items:center;gap:14px;padding:12px 14px;' + (i > 0 ? 'border-top:1px solid #2A2A2A;' : '') + '">';
-          html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:15px;color:#F5F5F5;min-width:46px;">' + esc(o.label) + '</div>';
-          // 2x2 ocupando a largura toda (antes ficava um buraco embaixo-esquerda com flex-wrap)
-          html += '<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:9px 16px;text-align:right;">';
-          html += legMetric('Gasto', 'R$ ' + fmtNum(o.gasto, 2));
-          html += legMetric('Litros', fmtNum(o.litros, 1) + 'L');
-          html += legMetric('Rodou', o.km > 0 ? fmtNum(o.km, 0) + ' km' : '—');
-          html += legMetric('Consumo', o.consumo != null ? fmtNum(o.consumo, 1) + ' km/L' : '—');
+          // Métrica em célula com alinhamento e valor grande (aproveita as laterais)
+          var metCel = function(label, valor, align) {
+            return '<div style="text-align:' + align + ';"><div style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:0.04em;">' + esc(label) + '</div><div style="font-size:16px;color:#F5F5F5;font-family:IBM Plex Mono,monospace;font-weight:600;">' + esc(valor) + '</div></div>';
+          };
+          html += '<div style="display:flex;align-items:center;gap:14px;padding:13px 14px;' + (i > 0 ? 'border-top:1px solid #2A2A2A;' : '') + '">';
+          html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;color:#F5F5F5;min-width:46px;">' + esc(o.label) + '</div>';
+          // Grade 2x2 esticada: coluna esquerda à esquerda, direita à direita — sem vão lateral
+          html += '<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:11px 16px;">';
+          html += metCel('Gasto', 'R$ ' + fmtNum(o.gasto, 2), 'left');
+          html += metCel('Litros', fmtNum(o.litros, 1) + 'L', 'right');
+          html += metCel('Rodou', o.km > 0 ? fmtNum(o.km, 0) + ' km' : '—', 'left');
+          html += metCel('Consumo', o.consumo != null ? fmtNum(o.consumo, 1) + ' km/L' : '—', 'right');
           html += '</div></div>';
         });
         html += '</div>';
