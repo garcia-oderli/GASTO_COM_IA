@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.5.6</title>
+<title>GastosIA - Smart Finance v4.5.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.5.6</span>
+    <span class="logo-version">v4.5.7</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1537,7 +1537,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.6</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.7</div>
       </div>
     </div>
   </div>
@@ -6889,7 +6889,7 @@ function relatorioCombustivelDoc() {
   var veic = vSel ? ((vSel.emoji || '🚗') + ' ' + esc(vSel.nome)) : 'Veículo';
 
   var d = '';
-  d += '<h1>Relatório de Abastecimentos</h1>';
+  d += '<h1>Relatório de Abastecimentos' + (manutencoes.length ? ' e Manutenções' : '') + '</h1>';
   d += '<div class="sub">' + veic + ' · gerado em ' + hoje + '</div>';
 
   d += '<div class="cards">';
@@ -6979,7 +6979,7 @@ function relatorioCombustivelDoc() {
 function imprimirRelatorioCombustivel() {
   if (!abastecimentos.length && !manutencoes.length) { showToast('Nada para imprimir ainda.'); return; }
   var doc = relatorioCombustivelDoc();
-  var pageHtml = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório Abastecimentos' + (doc.nome ? ' - ' + esc(doc.nome) : '') + '</title><style>' + doc.css + '</style></head><body>' + doc.html + '<script>window.onload=function(){window.print();}<\/script></body></html>';
+  var pageHtml = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório do Veículo' + (doc.nome ? ' - ' + esc(doc.nome) : '') + '</title><style>' + doc.css + '</style></head><body>' + doc.html + '<script>window.onload=function(){window.print();}<\/script></body></html>';
   // Blob URL em vez de document.write: no Chrome Android o document.write numa
   // janela '_blank' abre em branco (a aba fica em about:blank).
   var blobUrl = URL.createObjectURL(new Blob([pageHtml], { type: 'text/html' }));
