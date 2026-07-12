@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.5.3</title>
+<title>GastosIA - Smart Finance v4.5.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -697,7 +697,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.5.3</span>
+    <span class="logo-version">v4.5.4</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1537,7 +1537,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.3</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.5.4</div>
       </div>
     </div>
   </div>
@@ -6985,19 +6985,26 @@ async function enviarPdfRelatorioCombustivel() {
       document.head.appendChild(s);
     });
     var doc = relatorioCombustivelDoc();
-    var holder = document.createElement('div');
-    holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff;';
-    holder.innerHTML = '<style>' + doc.css + '</style><div style="font-family:Barlow,Arial,sans-serif;color:#111;padding:8px;background:#fff;">' + doc.html + '</div>';
-    document.body.appendChild(holder);
+    // O wrapper fica absoluto (invisível atrás do app), mas o elemento passado ao html2pdf
+    // precisa ser ESTÁTICO: elemento position:absolute colapsa a altura no container interno
+    // do html2pdf e o PDF sai em branco (canvas de altura 0).
+    var wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:absolute;left:0;top:0;width:794px;background:#fff;z-index:-9999;';
+    // Escopa a regra de body do CSS do relatório para não afetar o app durante a geração.
+    // Sem largura fixa no alvo: o html2pdf redimensiona o clone para a largura útil da página.
+    var cssPdf = doc.css.replace(/body\{/g, '.pdfdoc{');
+    wrapper.innerHTML = '<style>' + cssPdf + '</style><div class="pdfdoc" style="font-family:Barlow,Arial,sans-serif;color:#111;padding:8px;background:#fff;">' + doc.html + '</div>';
+    document.body.appendChild(wrapper);
+    var alvo = wrapper.lastElementChild;
     var nomeArq = 'relatorio-veiculo' + (doc.nome ? '-' + doc.nome.toLowerCase().replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') : '') + '.pdf';
     var blob = await html2pdf().set({
       margin: [10, 8, 10, 8],
       image: { type: 'jpeg', quality: 0.92 },
-      html2canvas: { scale: 2, useCORS: true },
+      html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['css', 'legacy'] }
-    }).from(holder).outputPdf('blob');
-    holder.remove();
+    }).from(alvo).outputPdf('blob');
+    wrapper.remove();
     var file = new File([blob], nomeArq, { type: 'application/pdf' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], title: 'Relatório do veículo' });
