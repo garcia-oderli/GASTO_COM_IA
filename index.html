@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.6.1</title>
+<title>GastosIA - Smart Finance v4.6.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -717,7 +717,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.6.1</span>
+    <span class="logo-version">v4.6.2</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1628,7 +1628,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.6.1</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.6.2</div>
       </div>
     </div>
   </div>
@@ -6275,6 +6275,54 @@ function openScanDirect() {
   openAddModal();
 }
 
+// Preenche valor/descrição/categoria a partir de uma frase livre
+// (usado pela voz e pelo compartilhamento de texto do WhatsApp/sistema).
+function fillExpenseFromText(t) {
+  t = (t || '').toLowerCase();
+  const num = t.match(/(\d+[.,]?\d*)/);
+  if (num) document.getElementById('f-valor').value = parseFloat(num[1].replace(',','.')).toFixed(2);
+  const desc = t.replace(/(\d+[.,]?\d*)\s*(reais|real|conto|contos)?\s*/i,'').trim();
+  if (desc) document.getElementById('f-descricao').value = desc;
+  const cats = {'aliment|comida|almoço|jantar|lanche|café|pizza|ifood':'Alimentação','combustível|gasolina|etanol|uber|ônibus':'Transporte','mercado|supermercado|feira':'Compras','farmácia|remédio|médico':'Saúde','aluguel|condomínio':'Moradia','netflix|spotify|assinatura':'Assinaturas'};
+  for (const [k,v] of Object.entries(cats)) { if (new RegExp(k,'i').test(t)) { document.getElementById('f-categoria').value=v; break; } }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// WEB SHARE TARGET — recebe foto/texto compartilhado do sistema
+// ═══════════════════════════════════════════════════════════════════
+// O SW guardou o payload no cache 'gastosIA-share' e redirecionou para
+// /?shared=1. Aqui abrimos o modal de gasto e injetamos a foto no fluxo de
+// scan existente (ou o texto nos campos), depois limpamos o cache.
+async function consumeSharedPayload() {
+  try {
+    if (new URLSearchParams(location.search).get('shared') !== '1') return;
+    // Limpa o ?shared=1 da URL para não reprocessar em reload
+    history.replaceState(null, '', location.pathname);
+    if (!('caches' in window)) return;
+    const cache = await caches.open('gastosIA-share');
+    const imgResp = await cache.match('shared-image');
+    const txtResp = await cache.match('shared-text');
+    const hasImg = imgResp && imgResp.ok;
+    const text = txtResp ? await txtResp.text() : '';
+    if (!hasImg && !text) return;
+    openAddModal();
+    if (hasImg) {
+      const blob = await imgResp.blob();
+      const file = new File([blob], 'compartilhada.jpg', { type: blob.type || 'image/jpeg' });
+      handleFileSelect({ target: { files: [file] } });
+      if (!getApiKey()) showToast('📷 Foto recebida. Configure a chave de IA em Config para leitura automática.');
+    }
+    if (text) fillExpenseFromText(text);
+    await cache.delete('shared-image');
+    await cache.delete('shared-text');
+  } catch (err) { console.error('consumeSharedPayload:', err); }
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', consumeSharedPayload);
+} else {
+  consumeSharedPayload();
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // VOZ
 // ═══════════════════════════════════════════════════════════════════
@@ -6291,12 +6339,7 @@ function startVoice() {
   recognition.onstart = () => { btn.classList.add('listening'); btn.textContent = '🔴'; };
   recognition.onresult = (e) => {
     const t = e.results[0][0].transcript.toLowerCase();
-    const num = t.match(/(\d+[.,]?\d*)/);
-    if (num) document.getElementById('f-valor').value = parseFloat(num[1].replace(',','.')).toFixed(2);
-    const desc = t.replace(/(\d+[.,]?\d*)\s*(reais|real|conto|contos)?\s*/i,'').trim();
-    if (desc) document.getElementById('f-descricao').value = desc;
-    const cats = {'aliment|comida|almoço|jantar|lanche|café|pizza|ifood':'Alimentação','combustível|gasolina|etanol|uber|ônibus':'Transporte','mercado|supermercado|feira':'Compras','farmácia|remédio|médico':'Saúde','aluguel|condomínio':'Moradia','netflix|spotify|assinatura':'Assinaturas'};
-    for (const [k,v] of Object.entries(cats)) { if (new RegExp(k,'i').test(t)) { document.getElementById('f-categoria').value=v; break; } }
+    fillExpenseFromText(t);
     showToast('🎙️ ' + t);
   };
   recognition.onerror = () => showToast('Erro no microfone');
