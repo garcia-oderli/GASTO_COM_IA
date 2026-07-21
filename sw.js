@@ -1,4 +1,4 @@
-const CACHE = 'gastosIA-v4.6.3';
+const CACHE = 'gastosIA-v4.6.4';
 // Cache separado (sem versão) para o payload do Web Share Target — não é
 // apagado no activate para sobreviver ao redirect que entrega a foto ao app.
 const SHARE_CACHE = 'gastosIA-share';
