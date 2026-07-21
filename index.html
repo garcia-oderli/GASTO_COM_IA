@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.6.3</title>
+<title>GastosIA - Smart Finance v4.6.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -717,7 +717,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.6.3</span>
+    <span class="logo-version">v4.6.4</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1628,7 +1628,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.6.3</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.6.4</div>
       </div>
     </div>
   </div>
@@ -7098,7 +7098,11 @@ function relatorioCombustivelDoc() {
   if (totalKm > 0) {
     var totalManutTudo = manutencoes.reduce(function(s, r) { return s + Number(r.valor); }, 0);
     var temManut = manutencoes.length > 0 && totalManutTudo > 0;
-    var custoKmComb = m.totalGasto / totalKm;
+    // Numerador só do combustível dos abastecimentos COM km medido (mesma base do
+    // denominador). Usar m.totalGasto aqui incluiria o 1º abastecimento (sem km) e
+    // inflaria o custo/km — bate com o Custo/km por abastecimento (weighted average).
+    var gastoComKm = m.ordenado.reduce(function(s, r) { return s + (r._kmRodados > 0 ? Number(r.valor_total) : 0); }, 0);
+    var custoKmComb = gastoComKm / totalKm;
     var custoKmManut = temManut ? totalManutTudo / totalKm : 0;
     d += '<h2>Custo por km' + (temManut ? '' : ' (combustível)') + '</h2>';
     d += '<div class="cards">';
