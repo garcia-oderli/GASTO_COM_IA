@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.6.4</title>
+<title>GastosIA - Smart Finance v4.6.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -717,7 +717,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.6.4</span>
+    <span class="logo-version">v4.6.5</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1477,9 +1477,14 @@
         <div class="page-title">Relatório Mensal</div>
         <div class="page-subtitle" id="rel-subtitle">Carregando...</div>
       </div>
-      <button onclick="imprimirRelatorio()" style="display:flex;align-items:center;gap:6px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;">
-        🖨️ PDF
-      </button>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="enviarRelatorioWhatsapp()" style="display:flex;align-items:center;gap:6px;background:#25D366;color:#0B3D26;border:none;border-radius:8px;padding:10px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;">
+          💬 Enviar
+        </button>
+        <button onclick="imprimirRelatorio()" style="display:flex;align-items:center;gap:6px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;">
+          🖨️ PDF
+        </button>
+      </div>
     </div>
     <!-- Seletor de mês -->
     <div style="display:flex;align-items:center;gap:8px;margin-top:16px;">
@@ -1628,7 +1633,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.6.4</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.6.5</div>
       </div>
     </div>
   </div>
@@ -8202,6 +8207,62 @@ function imprimirRelatorio() {
   var win = window.open(blobUrl, '_blank');
   if (!win) { URL.revokeObjectURL(blobUrl); showToast('⚠️ Permita pop-ups para imprimir.'); return; }
   setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 60000);
+}
+
+// Monta o resumo do mês em texto puro (legível direto no chat do WhatsApp).
+function textoRelatorioMensal() {
+  var label = MONTH_NAMES[relMes] + ' ' + relAno;
+  var mesKey = relAno + '-' + String(relMes+1).padStart(2,'0');
+  var gastosMes = expenses.filter(function(e) {
+    var d = parseExpenseDate(e.data);
+    return d.getFullYear() === relAno && d.getMonth() === relMes;
+  });
+  var rendaMes = incomes.filter(function(i) { return i.mes === mesKey; }).reduce(function(s,i){ return s + Number(i.valor); }, 0);
+  var totalGastos = gastosMes.reduce(function(s,e){ return s + Number(e.valor); }, 0);
+  var saldo = rendaMes - totalGastos;
+  var pct = rendaMes > 0 ? (totalGastos/rendaMes*100) : 0;
+  var brl = function(v) { return 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); };
+
+  var porCat = {};
+  gastosMes.forEach(function(e){ var c = e.categoria || 'Outros'; porCat[c] = (porCat[c]||0) + Number(e.valor); });
+  var cats = Object.entries(porCat).sort(function(a,b){ return b[1]-a[1]; });
+
+  var linhas = [];
+  linhas.push('📊 Relatório — ' + label);
+  linhas.push('');
+  linhas.push('💰 Renda: ' + brl(rendaMes));
+  linhas.push('💸 Gastos: ' + brl(totalGastos));
+  linhas.push((saldo >= 0 ? '🟢' : '🔴') + ' Saldo: ' + brl(saldo));
+  if (rendaMes > 0) linhas.push('📈 Comprometido: ' + pct.toFixed(0) + '%');
+  if (cats.length) {
+    linhas.push('');
+    linhas.push('Por categoria:');
+    cats.forEach(function(entry) {
+      var icon = CAT_ICONS[entry[0]] || '📦';
+      var p = totalGastos > 0 ? (entry[1]/totalGastos*100) : 0;
+      linhas.push(icon + ' ' + entry[0] + ': ' + brl(entry[1]) + ' (' + p.toFixed(0) + '%)');
+    });
+  }
+  linhas.push('');
+  linhas.push('— GastosIA');
+  return linhas.join('\n');
+}
+
+// Atalho: manda o resumo do mês pelo WhatsApp (share nativo escolhe app+contato;
+// fallback abre o WhatsApp direto via wa.me).
+async function enviarRelatorioWhatsapp() {
+  var mesKey = relAno + '-' + String(relMes+1).padStart(2,'0');
+  var temGasto = expenses.some(function(e) { var d = parseExpenseDate(e.data); return d.getFullYear() === relAno && d.getMonth() === relMes; });
+  var temRenda = incomes.some(function(i) { return i.mes === mesKey; });
+  if (!temGasto && !temRenda) { showToast('Nada para enviar neste mês.'); return; }
+  var texto = textoRelatorioMensal();
+  if (navigator.share) {
+    try { await navigator.share({ text: texto }); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; /* segue pro fallback */ }
+  }
+  var url = 'https://wa.me/?text=' + encodeURIComponent(texto);
+  var win = window.open(url, '_blank');
+  if (!win) showToast('⚠️ Permita pop-ups para abrir o WhatsApp.');
 }
 
 </script>
