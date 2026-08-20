@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.6.5</title>
+<title>GastosIA - Smart Finance v4.7.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -312,6 +312,14 @@
   .filter-chip { flex-shrink: 0; padding: 7px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; background: var(--surface); border: 1px solid var(--glass-border); color: var(--text3); transition: all var(--animation-smooth); white-space: nowrap; }
   .filter-chip.active { background: var(--accent); border-color: var(--accent-solid); color: #ffffff; box-shadow: var(--shadow-sm); }
   .filter-chip:hover:not(.active) { background: var(--surface2); color: var(--text2); }
+  /* Controles do Relatório: escopo (mês/todos) + filtro de categoria */
+  .rel-seg { flex: 1; padding: 9px 12px; border-radius: var(--radius-xs); font-family: var(--font-display); font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; background: var(--surface); border: 1px solid var(--glass-border); color: var(--text3); transition: all var(--animation-smooth); }
+  .rel-seg.active { background: var(--accent); border-color: var(--accent-solid); color: #ffffff; box-shadow: var(--shadow-sm); }
+  .rel-chip-bar { display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
+  .rel-chip-bar::-webkit-scrollbar { display: none; }
+  .rel-chip { flex-shrink: 0; padding: 7px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; background: var(--surface); border: 1px solid var(--glass-border); color: var(--text3); transition: all var(--animation-smooth); white-space: nowrap; }
+  .rel-chip.active { background: var(--accent); border-color: var(--accent-solid); color: #ffffff; box-shadow: var(--shadow-sm); }
+  .rel-chip:hover:not(.active) { background: var(--surface2); color: var(--text2); }
 
   /* ═══ MONTH TOTAL ═══ */
   .month-total { text-align: center; padding: 32px 0 20px; }
@@ -717,7 +725,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.6.5</span>
+    <span class="logo-version">v4.7.0</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1474,7 +1482,7 @@
   <div class="page-header">
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div class="page-title">Relatório Mensal</div>
+        <div class="page-title">Relatório</div>
         <div class="page-subtitle" id="rel-subtitle">Carregando...</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
@@ -1486,12 +1494,20 @@
         </button>
       </div>
     </div>
-    <!-- Seletor de mês -->
-    <div style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+    <!-- Escopo do período -->
+    <div style="display:flex;gap:6px;margin-top:16px;">
+      <button id="rel-seg-mes" class="rel-seg active" onclick="relSetEscopo('mes')">Mês</button>
+      <button id="rel-seg-todos" class="rel-seg" onclick="relSetEscopo('todos')">Todos os meses</button>
+    </div>
+    <!-- Seletor de mês (só no escopo mensal) -->
+    <div id="rel-nav-mes" style="display:flex;align-items:center;gap:8px;margin-top:10px;">
       <button onclick="relMesAnterior()" style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;padding:8px 14px;cursor:pointer;font-size:18px;">‹</button>
       <div id="rel-mes-label" style="flex:1;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.06em;"></div>
       <button onclick="relMesProximo()" style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;padding:8px 14px;cursor:pointer;font-size:18px;">›</button>
     </div>
+    <div id="rel-todos-label" style="display:none;text-align:center;margin-top:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.06em;"></div>
+    <!-- Filtro por categoria -->
+    <div class="rel-chip-bar" id="rel-cat-filter"></div>
   </div>
   <div id="rel-content" style="padding:0 16px 100px;"></div>
 </div>
@@ -1633,7 +1649,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.6.5</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.7.0</div>
       </div>
     </div>
   </div>
@@ -8066,140 +8082,400 @@ function toggleCampoCartao() {
 
 var relAno = new Date().getFullYear();
 var relMes = new Date().getMonth();
+// Escopo do relatório: 'mes' (um mês por vez) ou 'todos' (todo o histórico).
+var relEscopo = 'mes';
+// Filtro de categoria: '' = todas.
+var relCategoria = '';
+// Lista de lançamentos longa é truncada; este flag libera o restante.
+var relVerTudo = false;
+var REL_LIMITE_LANC = 200;
 
 var MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var MONTH_ABBR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
 function relMesAnterior() {
   relMes--;
   if (relMes < 0) { relMes = 11; relAno--; }
+  relVerTudo = false;
   renderRelatorio();
 }
 function relMesProximo() {
   relMes++;
   if (relMes > 11) { relMes = 0; relAno++; }
+  relVerTudo = false;
   renderRelatorio();
 }
 
-function renderRelatorio() {
-  const label = MONTH_NAMES[relMes] + ' ' + relAno;
-  const elLabel = document.getElementById('rel-mes-label');
-  const elSub = document.getElementById('rel-subtitle');
-  const elContent = document.getElementById('rel-content');
-  if (!elLabel || !elContent) return;
+function relSetEscopo(escopo) {
+  if (relEscopo === escopo) return;
+  relEscopo = escopo;
+  relVerTudo = false;
+  renderRelatorio();
+}
 
-  elLabel.textContent = label;
-  if (elSub) elSub.textContent = label;
+// Clicar na categoria já ativa limpa o filtro (volta para "Todas").
+function relSetCategoria(cat) {
+  relCategoria = (relCategoria === cat) ? '' : cat;
+  relVerTudo = false;
+  renderRelatorio();
+}
 
-  const gastosMes = expenses.filter(function(e) {
-    const d = parseExpenseDate(e.data);
-    return d.getFullYear() === relAno && d.getMonth() === relMes;
+function relVerTodosLancamentos() {
+  relVerTudo = true;
+  renderRelatorio();
+}
+
+// 'YYYY-MM' do gasto (usa parseExpenseDate para aceitar qualquer formato salvo).
+function relMesKeyGasto(e) {
+  var d = parseExpenseDate(e.data);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+// Renda antiga pode não ter .mes — cai para o mês de criação (igual getTotalIncome).
+function relMesKeyRenda(i) {
+  if (i.mes) return i.mes;
+  try { return new Date(i.criadoEm).toISOString().slice(0, 7); } catch (err) { return ''; }
+}
+function relMesKeyLabel(key) {
+  var p = String(key).split('-');
+  var idx = parseInt(p[1], 10) - 1;
+  return (MONTH_NAMES[idx] || '?') + ' ' + p[0];
+}
+function relMesKeyAbbr(key) {
+  var p = String(key).split('-');
+  var idx = parseInt(p[1], 10) - 1;
+  return (MONTH_ABBR[idx] || '?') + '/' + String(p[0]).slice(2);
+}
+
+// Recorte atual do relatório: escopo (mês ou histórico completo) + filtro de categoria.
+function relDados() {
+  var mesKey = relAno + '-' + String(relMes + 1).padStart(2, '0');
+  var todos = relEscopo === 'todos'
+    ? expenses.slice()
+    : expenses.filter(function(e) { return relMesKeyGasto(e) === mesKey; });
+  var rendas = relEscopo === 'todos'
+    ? incomes.slice()
+    : incomes.filter(function(i) { return relMesKeyRenda(i) === mesKey; });
+
+  var gastos = relCategoria
+    ? todos.filter(function(e) { return (e.categoria || 'Outros') === relCategoria; })
+    : todos;
+
+  // Meses com movimento (gasto ou renda) — base da média mensal e da evolução.
+  var mesesSet = {};
+  todos.forEach(function(e) { mesesSet[relMesKeyGasto(e)] = true; });
+  rendas.forEach(function(i) { var k = relMesKeyRenda(i); if (k) mesesSet[k] = true; });
+  var meses = Object.keys(mesesSet).sort();
+
+  return {
+    gastos: gastos,
+    todos: todos,
+    meses: meses,
+    renda: rendas.reduce(function(s, i) { return s + Number(i.valor || 0); }, 0),
+    total: gastos.reduce(function(s, e) { return s + Number(e.valor || 0); }, 0),
+    totalEscopo: todos.reduce(function(s, e) { return s + Number(e.valor || 0); }, 0),
+    mesKey: mesKey
+  };
+}
+
+// Título do período, para cabeçalho, PDF e WhatsApp.
+function relLabelPeriodo(d) {
+  if (relEscopo !== 'todos') return MONTH_NAMES[relMes] + ' ' + relAno;
+  if (!d.meses.length) return 'Todos os meses';
+  if (d.meses.length === 1) return relMesKeyLabel(d.meses[0]);
+  return relMesKeyAbbr(d.meses[0]) + ' – ' + relMesKeyAbbr(d.meses[d.meses.length - 1]) + ' · ' + d.meses.length + ' meses';
+}
+
+// Monta os chips de categoria com o que existe no escopo (inclui categorias customizadas).
+function relRenderChips(d) {
+  var bar = document.getElementById('rel-cat-filter');
+  if (!bar) return;
+  var porCat = {};
+  d.todos.forEach(function(e) {
+    var c = e.categoria || 'Outros';
+    porCat[c] = (porCat[c] || 0) + Number(e.valor || 0);
   });
+  var cats = Object.keys(porCat).sort(function(a, b) { return porCat[b] - porCat[a]; });
+  // Mantém o filtro visível mesmo quando o mês selecionado não tem essa categoria.
+  if (relCategoria && cats.indexOf(relCategoria) === -1) cats.unshift(relCategoria);
 
-  const mesKey = relAno + '-' + String(relMes+1).padStart(2,'0');
-  const rendaMes = incomes.filter(function(i){ return i.mes === mesKey; }).reduce(function(s,i){ return s + Number(i.valor); }, 0);
+  var html = '<div class="rel-chip' + (relCategoria ? '' : ' active') + '" onclick="relSetCategoria(\'\')">Todas</div>';
+  cats.forEach(function(cat) {
+    var icon = CAT_ICONS[cat] || '📦';
+    html += '<div class="rel-chip' + (relCategoria === cat ? ' active' : '') + '" onclick="relSetCategoria(\'' + escJs(cat) + '\')">' + icon + ' ' + esc(cat) + '</div>';
+  });
+  bar.innerHTML = html;
+}
 
-  const totalGastos = gastosMes.reduce(function(s,e){ return s + Number(e.valor); }, 0);
-  const saldo = rendaMes - totalGastos;
-  const pctGasto = rendaMes > 0 ? Math.min((totalGastos/rendaMes)*100, 100) : 0;
-  const saldoColor = saldo >= 0 ? '#4CAF50' : '#F44336';
+function renderRelatorio() {
+  var elLabel = document.getElementById('rel-mes-label');
+  var elSub = document.getElementById('rel-subtitle');
+  var elContent = document.getElementById('rel-content');
+  if (!elContent) return;
+
+  var d = relDados();
+  var periodo = relLabelPeriodo(d);
+  var filtrado = !!relCategoria;
+
+  // Cabeçalho: navegação de mês só faz sentido no escopo mensal.
+  var navMes = document.getElementById('rel-nav-mes');
+  var lblTodos = document.getElementById('rel-todos-label');
+  if (navMes) navMes.style.display = relEscopo === 'todos' ? 'none' : 'flex';
+  if (lblTodos) {
+    lblTodos.style.display = relEscopo === 'todos' ? 'block' : 'none';
+    lblTodos.textContent = periodo;
+  }
+  var btnMes = document.getElementById('rel-seg-mes');
+  var btnTodos = document.getElementById('rel-seg-todos');
+  if (btnMes) btnMes.className = 'rel-seg' + (relEscopo === 'mes' ? ' active' : '');
+  if (btnTodos) btnTodos.className = 'rel-seg' + (relEscopo === 'todos' ? ' active' : '');
+  if (elLabel) elLabel.textContent = MONTH_NAMES[relMes] + ' ' + relAno;
+  // Subtítulo curto (o intervalo detalhado já aparece no rótulo grande abaixo).
+  if (elSub) elSub.textContent = (relEscopo === 'todos' ? 'Todos os meses' : periodo) + (filtrado ? ' · ' + relCategoria : '');
+
+  relRenderChips(d);
+
+  var gastosSel = d.gastos;
+  var total = d.total;
+  var rendaMes = d.renda;
+  var saldo = rendaMes - d.totalEscopo;
+  var pctGasto = rendaMes > 0 ? Math.min((d.totalEscopo / rendaMes) * 100, 100) : 0;
+  var saldoColor = saldo >= 0 ? '#4CAF50' : '#F44336';
+  var nMeses = Math.max(d.meses.length, 1);
 
   function fmt(v) { return 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
   function fmtN(v) { return Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function kpi(rotulo, valor, cor) {
+    return '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;">'
+      + '<div style="font-size:10px;color:#888;font-family:Barlow Condensed,sans-serif;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">' + esc(rotulo) + '</div>'
+      + '<div style="font-size:22px;font-weight:700;color:' + cor + ';font-family:IBM Plex Mono,monospace;">' + valor + '</div></div>';
+  }
+  function bloco(titulo, corpo) {
+    return '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:20px;">'
+      + '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#F5A623;margin-bottom:14px;">' + esc(titulo) + '</div>'
+      + corpo + '</div>';
+  }
 
-  // Por categoria
+  // Por categoria (dentro do escopo, sem o filtro aplicado — é o menu de filtragem).
   var porCat = {};
-  gastosMes.forEach(function(e) {
+  d.todos.forEach(function(e) {
     var c = e.categoria || 'Outros';
-    porCat[c] = (porCat[c] || 0) + Number(e.valor);
+    porCat[c] = (porCat[c] || 0) + Number(e.valor || 0);
   });
-  var cats = Object.entries(porCat).sort(function(a,b){ return b[1]-a[1]; });
-
-  // Por dia
-  var porDia = {};
-  gastosMes.forEach(function(e) {
-    if (!porDia[e.data]) porDia[e.data] = [];
-    porDia[e.data].push(e);
-  });
-  var diasOrdenados = Object.keys(porDia).sort(function(a,b){ return b.localeCompare(a); });
+  var cats = Object.entries(porCat).sort(function(a, b) { return b[1] - a[1]; });
 
   var html = '';
 
+  // Faixa do filtro ativo
+  if (filtrado) {
+    var corFiltro = CAT_COLORS[relCategoria] || '#F5A623';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.3);border-radius:12px;padding:10px 14px;margin-bottom:16px;">';
+    html += '<span style="font-size:13px;color:#F5F5F5;">Filtrando por <b style="color:' + corFiltro + ';">' + (CAT_ICONS[relCategoria] || '📦') + ' ' + esc(relCategoria) + '</b></span>';
+    html += '<button onclick="relSetCategoria(\'\')" style="background:transparent;border:1px solid #2A2A2A;border-radius:16px;color:#888;padding:4px 12px;font-size:11px;cursor:pointer;">✕ limpar</button>';
+    html += '</div>';
+  }
+
   // KPIs
   html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">';
-  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;"><div style="font-size:10px;color:#888;font-family:Barlow Condensed,sans-serif;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Renda</div><div style="font-size:22px;font-weight:700;color:#4CAF50;font-family:IBM Plex Mono,monospace;">' + fmtN(rendaMes) + '</div></div>';
-  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;"><div style="font-size:10px;color:#888;font-family:Barlow Condensed,sans-serif;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Gastos</div><div style="font-size:22px;font-weight:700;color:#F44336;font-family:IBM Plex Mono,monospace;">' + fmtN(totalGastos) + '</div></div>';
-  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;"><div style="font-size:10px;color:#888;font-family:Barlow Condensed,sans-serif;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Saldo</div><div style="font-size:22px;font-weight:700;color:' + saldoColor + ';font-family:IBM Plex Mono,monospace;">' + fmtN(saldo) + '</div></div>';
-  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;"><div style="font-size:10px;color:#888;font-family:Barlow Condensed,sans-serif;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Comprometido</div><div style="font-size:22px;font-weight:700;color:#F5A623;font-family:IBM Plex Mono,monospace;">' + pctGasto.toFixed(0) + '%</div></div>';
+  if (filtrado) {
+    var pctDoTotal = d.totalEscopo > 0 ? (total / d.totalEscopo * 100) : 0;
+    html += kpi('Gastos ' + relCategoria, fmtN(total), CAT_COLORS[relCategoria] || '#F44336');
+    html += kpi('Lançamentos', String(gastosSel.length), '#F5F5F5');
+    html += kpi('% dos gastos', pctDoTotal.toFixed(0) + '%', '#F5A623');
+    html += relEscopo === 'todos'
+      ? kpi('Média/mês', fmtN(total / nMeses), '#4A9EDF')
+      : kpi('Ticket médio', fmtN(gastosSel.length ? total / gastosSel.length : 0), '#4A9EDF');
+  } else {
+    html += kpi('Renda', fmtN(rendaMes), '#4CAF50');
+    html += kpi('Gastos', fmtN(d.totalEscopo), '#F44336');
+    html += kpi('Saldo', fmtN(saldo), saldoColor);
+    html += relEscopo === 'todos'
+      ? kpi('Média/mês', fmtN(d.totalEscopo / nMeses), '#F5A623')
+      : kpi('Comprometido', pctGasto.toFixed(0) + '%', '#F5A623');
+  }
   html += '</div>';
 
   // Barra de comprometimento
-  if (rendaMes > 0) {
+  if (rendaMes > 0 && !filtrado) {
     var barColor = pctGasto > 90 ? '#F44336' : pctGasto > 70 ? '#FF9800' : '#4CAF50';
     html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:20px;">';
-    html += '<div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-size:12px;color:#888;">Orçamento utilizado</span><span style="font-size:12px;color:#F5A623;font-weight:700;">' + pctGasto.toFixed(1) + '%</span></div>';
+    html += '<div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-size:12px;color:#888;">' + (relEscopo === 'todos' ? 'Renda consumida no período' : 'Orçamento utilizado') + '</span><span style="font-size:12px;color:#F5A623;font-weight:700;">' + pctGasto.toFixed(1) + '%</span></div>';
     html += '<div style="height:8px;background:#2A2A2A;border-radius:4px;overflow:hidden;"><div style="height:100%;width:' + pctGasto + '%;background:' + barColor + ';border-radius:4px;"></div></div>';
-    html += '<div style="display:flex;justify-content:space-between;margin-top:6px;"><span style="font-size:10px;color:#555;">' + fmt(totalGastos) + ' gastos</span><span style="font-size:10px;color:#555;">' + fmt(rendaMes) + ' renda</span></div>';
+    html += '<div style="display:flex;justify-content:space-between;margin-top:6px;"><span style="font-size:10px;color:#555;">' + fmt(d.totalEscopo) + ' gastos</span><span style="font-size:10px;color:#555;">' + fmt(rendaMes) + ' renda</span></div>';
     html += '</div>';
   }
 
-  // Categorias
-  if (cats.length > 0) {
-    html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:20px;">';
-    html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#F5A623;margin-bottom:14px;">Por Categoria</div>';
+  // Evolução mensal (só no escopo "todos os meses")
+  if (relEscopo === 'todos' && d.meses.length) {
+    var porMes = {};
+    d.meses.forEach(function(k) { porMes[k] = { gasto: 0, escopo: 0, renda: 0, qtd: 0 }; });
+    d.todos.forEach(function(e) {
+      var k = relMesKeyGasto(e);
+      if (!porMes[k]) porMes[k] = { gasto: 0, escopo: 0, renda: 0, qtd: 0 };
+      porMes[k].escopo += Number(e.valor || 0);
+    });
+    gastosSel.forEach(function(e) {
+      var k = relMesKeyGasto(e);
+      if (!porMes[k]) porMes[k] = { gasto: 0, escopo: 0, renda: 0, qtd: 0 };
+      porMes[k].gasto += Number(e.valor || 0);
+      porMes[k].qtd++;
+    });
+    incomes.forEach(function(i) {
+      var k = relMesKeyRenda(i);
+      if (porMes[k]) porMes[k].renda += Number(i.valor || 0);
+    });
+    var maxMes = 0;
+    d.meses.forEach(function(k) { if (porMes[k].gasto > maxMes) maxMes = porMes[k].gasto; });
+
+    var corEvo = filtrado ? (CAT_COLORS[relCategoria] || '#F5A623') : '#F5A623';
+    var corpo = '';
+    d.meses.slice().reverse().forEach(function(k) {
+      var m = porMes[k];
+      if (filtrado && m.qtd === 0) return; // sem essa categoria no mês: não polui a lista
+      var w = maxMes > 0 ? (m.gasto / maxMes * 100) : 0;
+      var saldoMes = m.renda - m.escopo;
+      corpo += '<div style="margin-bottom:12px;">';
+      corpo += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">';
+      corpo += '<span style="font-size:13px;color:#F5F5F5;">' + esc(relMesKeyLabel(k)) + (filtrado ? '<span style="font-size:10px;color:#555;margin-left:6px;">' + m.qtd + ' lanç.</span>' : '') + '</span>';
+      corpo += '<div style="text-align:right;"><span style="font-size:13px;color:' + corEvo + ';font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(m.gasto) + '</span>';
+      corpo += filtrado
+        ? '<span style="font-size:10px;color:#555;margin-left:6px;">' + (m.escopo > 0 ? (m.gasto / m.escopo * 100).toFixed(0) : '0') + '% do mês</span>'
+        : '<span style="font-size:10px;color:' + (saldoMes >= 0 ? '#4CAF50' : '#F44336') + ';margin-left:6px;">saldo ' + fmt(saldoMes) + '</span>';
+      corpo += '</div></div>';
+      corpo += '<div style="height:5px;background:#2A2A2A;border-radius:3px;overflow:hidden;"><div style="height:100%;width:' + w + '%;background:' + corEvo + ';border-radius:3px;"></div></div>';
+      corpo += '</div>';
+    });
+    html += bloco('Evolução mensal', corpo);
+  }
+
+  if (!filtrado && cats.length > 0) {
+    // Por categoria — cada linha filtra o relatório ao ser clicada.
+    var corpoCat = '';
     cats.forEach(function(entry) {
       var cat = entry[0], val = entry[1];
-      var pct = totalGastos > 0 ? (val/totalGastos*100) : 0;
+      var pct = d.totalEscopo > 0 ? (val / d.totalEscopo * 100) : 0;
       var cor = CAT_COLORS[cat] || '#888888';
       var icon = CAT_ICONS[cat] || '📦';
-      var qtd = gastosMes.filter(function(e){ return e.categoria === cat; }).length;
-      html += '<div style="margin-bottom:12px;">';
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
-      html += '<span style="font-size:14px;color:#F5F5F5;">' + icon + ' ' + esc(cat) + '<span style="font-size:10px;color:#555;margin-left:6px;">' + qtd + ' lançamento' + (qtd>1?'s':'') + '</span></span>';
-      html += '<div style="text-align:right;"><span style="font-size:13px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(val) + '</span><span style="font-size:10px;color:#555;margin-left:6px;">' + pct.toFixed(0) + '%</span></div>';
-      html += '</div>';
-      html += '<div style="height:5px;background:#2A2A2A;border-radius:3px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + cor + ';border-radius:3px;"></div></div>';
-      html += '</div>';
+      var qtd = d.todos.filter(function(e) { return (e.categoria || 'Outros') === cat; }).length;
+      corpoCat += '<div style="margin-bottom:12px;cursor:pointer;" onclick="relSetCategoria(\'' + escJs(cat) + '\')">';
+      corpoCat += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+      corpoCat += '<span style="font-size:14px;color:#F5F5F5;">' + icon + ' ' + esc(cat) + '<span style="font-size:10px;color:#555;margin-left:6px;">' + qtd + ' lançamento' + (qtd > 1 ? 's' : '') + '</span></span>';
+      corpoCat += '<div style="text-align:right;"><span style="font-size:13px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(val) + '</span><span style="font-size:10px;color:#555;margin-left:6px;">' + pct.toFixed(0) + '%</span></div>';
+      corpoCat += '</div>';
+      corpoCat += '<div style="height:5px;background:#2A2A2A;border-radius:3px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + cor + ';border-radius:3px;"></div></div>';
+      corpoCat += '</div>';
     });
-    html += '</div>';
+    html += bloco('Por Categoria', corpoCat);
+  } else if (filtrado && gastosSel.length) {
+    // Com categoria filtrada, o corte útil é por estabelecimento.
+    var porForn = {};
+    gastosSel.forEach(function(e) {
+      var f = (e.fornecedor || '').trim() || 'Sem estabelecimento';
+      if (!porForn[f]) porForn[f] = { valor: 0, qtd: 0 };
+      porForn[f].valor += Number(e.valor || 0);
+      porForn[f].qtd++;
+    });
+    var forns = Object.entries(porForn).sort(function(a, b) { return b[1].valor - a[1].valor; });
+    var totalForns = forns.length;
+    var corFor = CAT_COLORS[relCategoria] || '#F5A623';
+    var corpoF = '';
+    forns.slice(0, 15).forEach(function(entry) {
+      var nome = entry[0], info = entry[1];
+      var pct = total > 0 ? (info.valor / total * 100) : 0;
+      corpoF += '<div style="margin-bottom:12px;">';
+      corpoF += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+      corpoF += '<span style="font-size:14px;color:#F5F5F5;">' + esc(nome) + '<span style="font-size:10px;color:#555;margin-left:6px;">' + info.qtd + 'x</span></span>';
+      corpoF += '<div style="text-align:right;"><span style="font-size:13px;color:' + corFor + ';font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(info.valor) + '</span><span style="font-size:10px;color:#555;margin-left:6px;">' + pct.toFixed(0) + '%</span></div>';
+      corpoF += '</div>';
+      corpoF += '<div style="height:5px;background:#2A2A2A;border-radius:3px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + corFor + ';border-radius:3px;"></div></div>';
+      corpoF += '</div>';
+    });
+    if (totalForns > 15) corpoF += '<div style="font-size:11px;color:#555;text-align:center;">+ ' + (totalForns - 15) + ' outros estabelecimentos</div>';
+    html += bloco('Onde você gastou', corpoF);
   }
 
-  // Lançamentos agrupados por categoria
-  if (gastosMes.length > 0) {
+  // Lançamentos
+  if (gastosSel.length > 0) {
+    var lista = gastosSel.slice().sort(function(a, b) { return String(b.data).localeCompare(String(a.data)); });
+    var truncado = 0;
+    if (!relVerTudo && lista.length > REL_LIMITE_LANC) {
+      truncado = lista.length - REL_LIMITE_LANC;
+      lista = lista.slice(0, REL_LIMITE_LANC);
+    }
+    var totalLista = lista.reduce(function(s, e) { return s + Number(e.valor || 0); }, 0);
+
+    function linhaLanc(e, mostrarCat) {
+      var dt = parseExpenseDate(e.data);
+      var dataFmt = String(dt.getDate()).padStart(2, '0') + '/' + String(dt.getMonth() + 1).padStart(2, '0');
+      var meta = dataFmt + (mostrarCat ? ' · ' + (CAT_ICONS[e.categoria] || '📦') + ' ' + esc(e.categoria || 'Outros') : '') + (e.pagamento ? ' · ' + esc(e.pagamento) : '');
+      var s = '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-top:1px solid #1A1A1A;">';
+      s += '<div><div style="font-size:13px;color:#F5F5F5;">' + esc(e.fornecedor || e.categoria || '—') + '</div><div style="font-size:11px;color:#666;">' + meta + '</div></div>';
+      s += '<span style="font-size:14px;color:#F44336;font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(e.valor) + '</span>';
+      s += '</div>';
+      return s;
+    }
+    function cabecalhoGrupo(rotulo, valor, cor) {
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#222;">'
+        + '<span style="font-size:12px;font-weight:700;color:' + cor + ';">' + rotulo + '</span>'
+        + '<span style="font-size:12px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:700;">' + fmt(valor) + '</span></div>';
+    }
+
+    var tituloLista = relEscopo === 'todos' ? 'Lançamentos por Mês' : (filtrado ? 'Lançamentos' : 'Lançamentos por Categoria');
     html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;overflow:hidden;margin-bottom:20px;">';
-    html += '<div style="padding:14px 16px;border-bottom:1px solid #2A2A2A;"><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#F5A623;">Lançamentos por Categoria (' + gastosMes.length + ')</div></div>';
-    cats.forEach(function(entry) {
-      var cat = entry[0];
-      var icon = CAT_ICONS[cat] || '📦';
-      var cor = CAT_COLORS[cat] || '#888';
-      var itenscat = gastosMes.filter(function(e){ return e.categoria === cat; }).sort(function(a,b){ return b.data.localeCompare(a.data); });
-      var totalCat = itenscat.reduce(function(s,e){ return s+Number(e.valor); }, 0);
-      html += '<div style="border-bottom:1px solid #1A1A1A;">';
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#222;">';
-      html += '<span style="font-size:12px;font-weight:700;color:' + cor + ';">' + icon + ' ' + esc(cat) + '</span>';
-      html += '<span style="font-size:12px;color:' + cor + ';font-family:IBM Plex Mono,monospace;font-weight:700;">' + fmt(totalCat) + '</span>';
-      html += '</div>';
-      itenscat.forEach(function(e) {
-        var parts = e.data.split('-');
-        var dataFmt = parts[2]+'/'+parts[1];
-        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-top:1px solid #1A1A1A;">';
-        html += '<div><div style="font-size:13px;color:#F5F5F5;">' + esc(e.fornecedor||e.categoria||'—') + '</div><div style="font-size:11px;color:#666;">' + dataFmt + (e.pagamento?' · '+esc(e.pagamento):'') + '</div></div>';
-        html += '<span style="font-size:14px;color:#F44336;font-family:IBM Plex Mono,monospace;font-weight:600;">' + fmt(e.valor) + '</span>';
+    html += '<div style="padding:14px 16px;border-bottom:1px solid #2A2A2A;"><div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#F5A623;">' + tituloLista + ' (' + gastosSel.length + ')</div></div>';
+
+    if (relEscopo === 'todos') {
+      // Agrupado por mês (decrescente)
+      var grupos = {};
+      lista.forEach(function(e) {
+        var k = relMesKeyGasto(e);
+        (grupos[k] = grupos[k] || []).push(e);
+      });
+      Object.keys(grupos).sort(function(a, b) { return b.localeCompare(a); }).forEach(function(k) {
+        var itens = grupos[k];
+        var soma = itens.reduce(function(s, e) { return s + Number(e.valor || 0); }, 0);
+        html += '<div style="border-bottom:1px solid #1A1A1A;">';
+        html += cabecalhoGrupo(esc(relMesKeyLabel(k)) + ' <span style="color:#555;font-weight:400;">' + itens.length + '</span>', soma, '#F5A623');
+        itens.forEach(function(e) { html += linhaLanc(e, !filtrado); });
         html += '</div>';
       });
+    } else if (filtrado) {
+      lista.forEach(function(e) { html += linhaLanc(e, false); });
+    } else {
+      cats.forEach(function(entry) {
+        var cat = entry[0];
+        var icon = CAT_ICONS[cat] || '📦';
+        var cor = CAT_COLORS[cat] || '#888';
+        var itensCat = lista.filter(function(e) { return (e.categoria || 'Outros') === cat; });
+        if (!itensCat.length) return;
+        var totalCat = itensCat.reduce(function(s, e) { return s + Number(e.valor || 0); }, 0);
+        html += '<div style="border-bottom:1px solid #1A1A1A;">';
+        html += cabecalhoGrupo(icon + ' ' + esc(cat), totalCat, cor);
+        itensCat.forEach(function(e) { html += linhaLanc(e, false); });
+        html += '</div>';
+      });
+    }
+
+    if (truncado > 0) {
+      html += '<div style="padding:14px 16px;text-align:center;border-top:1px solid #2A2A2A;">';
+      html += '<div style="font-size:11px;color:#666;margin-bottom:8px;">Mostrando os ' + REL_LIMITE_LANC + ' mais recentes de ' + gastosSel.length + '.</div>';
+      html += '<button onclick="relVerTodosLancamentos()" style="background:#2A2A2A;border:1px solid #3A3A3A;border-radius:16px;color:#F5A623;padding:6px 16px;font-size:12px;font-weight:600;cursor:pointer;">Ver todos os ' + gastosSel.length + '</button>';
       html += '</div>';
-    });
-    html += '<div style="display:flex;justify-content:space-between;padding:14px 16px;background:#222222;"><span style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;color:#F5F5F5;letter-spacing:0.06em;text-transform:uppercase;">TOTAL</span><span style="font-family:IBM Plex Mono,monospace;font-weight:700;font-size:16px;color:#F44336;">' + fmt(totalGastos) + '</span></div>';
+    }
+    html += '<div style="display:flex;justify-content:space-between;padding:14px 16px;background:#222222;"><span style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:14px;color:#F5F5F5;letter-spacing:0.06em;text-transform:uppercase;">TOTAL' + (truncado > 0 ? ' EXIBIDO' : '') + '</span><span style="font-family:IBM Plex Mono,monospace;font-weight:700;font-size:16px;color:#F44336;">' + fmt(truncado > 0 ? totalLista : total) + '</span></div>';
     html += '</div>';
   } else {
-    html += '<div style="text-align:center;padding:40px;color:#555;font-size:14px;">Nenhum gasto em ' + label + '</div>';
+    html += '<div style="text-align:center;padding:40px;color:#555;font-size:14px;">Nenhum gasto' + (filtrado ? ' de ' + esc(relCategoria) : '') + ' em ' + esc(relEscopo === 'todos' ? 'todo o período' : periodo) + '</div>';
   }
 
   elContent.innerHTML = html;
 }
 
 function imprimirRelatorio() {
-  var label = MONTH_NAMES[relMes] + ' ' + relAno;
+  var d = relDados();
+  var label = relLabelPeriodo(d) + (relCategoria ? ' · ' + relCategoria : '');
+  var titulo = relEscopo === 'todos' ? 'Relatorio Geral' : 'Relatorio Mensal';
   var relHtml = document.getElementById('rel-content').innerHTML;
-  var doc = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatorio ' + label + '</title><style>@import url(https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Barlow:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap);*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;color:#111;font-family:Barlow,sans-serif;padding:24px}h1{font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px}.sub{font-size:13px;color:#888;margin-bottom:24px}@media print{body{padding:12mm}@page{size:A4 portrait;margin:12mm}}</style></head><body><h1>Relatorio Mensal</h1><div class="sub">' + label + '</div><style>[style*="background:#1C1C1C"],[style*="background:#222222"],[style*="background:#222"],[style*="background:#2A2A2A"]{background:#f8f8f8!important;border-color:#ddd!important}[style*="color:#F5F5F5"]{color:#111!important}[style*="color:#888"],[style*="color:#555"]{color:#666!important}</style>' + relHtml + '<script>window.onload=function(){window.print();}<\/script></body></html>';
+  var doc = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>' + esc(titulo + ' ' + label) + '</title><style>@import url(https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Barlow:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap);*{margin:0;padding:0;box-sizing:border-box}body{background:#fff;color:#111;font-family:Barlow,sans-serif;padding:24px}h1{font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px}.sub{font-size:13px;color:#888;margin-bottom:24px}button{display:none!important}@media print{body{padding:12mm}@page{size:A4 portrait;margin:12mm}}</style></head><body><h1>' + esc(titulo) + '</h1><div class="sub">' + esc(label) + '</div><style>[style*="background:#1C1C1C"],[style*="background:#222222"],[style*="background:#222"],[style*="background:#2A2A2A"]{background:#f8f8f8!important;border-color:#ddd!important}[style*="color:#F5F5F5"]{color:#111!important}[style*="color:#888"],[style*="color:#555"]{color:#666!important}</style>' + relHtml + '<script>window.onload=function(){window.print();}<\/script></body></html>';
   // Blob URL em vez de document.write: no Chrome Android o document.write numa
   // janela '_blank' abre em branco (a aba fica em about:blank). Navegar para um
   // Blob URL carrega o documento de forma determinística em todos os navegadores.
@@ -8209,40 +8485,64 @@ function imprimirRelatorio() {
   setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 60000);
 }
 
-// Monta o resumo do mês em texto puro (legível direto no chat do WhatsApp).
+// Monta o resumo do período em texto puro (legível direto no chat do WhatsApp).
 function textoRelatorioMensal() {
-  var label = MONTH_NAMES[relMes] + ' ' + relAno;
-  var mesKey = relAno + '-' + String(relMes+1).padStart(2,'0');
-  var gastosMes = expenses.filter(function(e) {
-    var d = parseExpenseDate(e.data);
-    return d.getFullYear() === relAno && d.getMonth() === relMes;
-  });
-  var rendaMes = incomes.filter(function(i) { return i.mes === mesKey; }).reduce(function(s,i){ return s + Number(i.valor); }, 0);
-  var totalGastos = gastosMes.reduce(function(s,e){ return s + Number(e.valor); }, 0);
-  var saldo = rendaMes - totalGastos;
-  var pct = rendaMes > 0 ? (totalGastos/rendaMes*100) : 0;
+  var d = relDados();
+  var label = relLabelPeriodo(d);
+  var filtrado = !!relCategoria;
+  var saldo = d.renda - d.totalEscopo;
+  var pct = d.renda > 0 ? (d.totalEscopo / d.renda * 100) : 0;
+  var nMeses = Math.max(d.meses.length, 1);
   var brl = function(v) { return 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); };
-
-  var porCat = {};
-  gastosMes.forEach(function(e){ var c = e.categoria || 'Outros'; porCat[c] = (porCat[c]||0) + Number(e.valor); });
-  var cats = Object.entries(porCat).sort(function(a,b){ return b[1]-a[1]; });
 
   var linhas = [];
   linhas.push('📊 Relatório — ' + label);
+  if (filtrado) linhas.push('🔎 Categoria: ' + (CAT_ICONS[relCategoria] || '📦') + ' ' + relCategoria);
   linhas.push('');
-  linhas.push('💰 Renda: ' + brl(rendaMes));
-  linhas.push('💸 Gastos: ' + brl(totalGastos));
-  linhas.push((saldo >= 0 ? '🟢' : '🔴') + ' Saldo: ' + brl(saldo));
-  if (rendaMes > 0) linhas.push('📈 Comprometido: ' + pct.toFixed(0) + '%');
-  if (cats.length) {
-    linhas.push('');
-    linhas.push('Por categoria:');
-    cats.forEach(function(entry) {
-      var icon = CAT_ICONS[entry[0]] || '📦';
-      var p = totalGastos > 0 ? (entry[1]/totalGastos*100) : 0;
-      linhas.push(icon + ' ' + entry[0] + ': ' + brl(entry[1]) + ' (' + p.toFixed(0) + '%)');
-    });
+
+  if (filtrado) {
+    linhas.push('💸 Gastos: ' + brl(d.total) + ' (' + d.gastos.length + ' lançamentos)');
+    if (d.totalEscopo > 0) linhas.push('📊 Peso no período: ' + (d.total / d.totalEscopo * 100).toFixed(0) + '% dos gastos');
+    if (relEscopo === 'todos') linhas.push('📅 Média/mês: ' + brl(d.total / nMeses));
+    if (d.renda > 0) linhas.push('💰 Renda do período: ' + brl(d.renda));
+  } else {
+    linhas.push('💰 Renda: ' + brl(d.renda));
+    linhas.push('💸 Gastos: ' + brl(d.totalEscopo));
+    linhas.push((saldo >= 0 ? '🟢' : '🔴') + ' Saldo: ' + brl(saldo));
+    if (d.renda > 0) linhas.push('📈 Comprometido: ' + pct.toFixed(0) + '%');
+    if (relEscopo === 'todos') linhas.push('📅 Média/mês: ' + brl(d.totalEscopo / nMeses));
   }
+
+  if (relEscopo === 'todos' && d.meses.length > 1) {
+    var porMes = {};
+    d.gastos.forEach(function(e) {
+      var k = relMesKeyGasto(e);
+      porMes[k] = (porMes[k] || 0) + Number(e.valor || 0);
+    });
+    var chavesTodas = Object.keys(porMes).sort().reverse();
+    var chaves = chavesTodas.slice(0, 12);
+    if (chaves.length) {
+      linhas.push('');
+      linhas.push('Por mês' + (chavesTodas.length > chaves.length ? ' (últimos ' + chaves.length + ')' : '') + ':');
+      chaves.forEach(function(k) { linhas.push('• ' + relMesKeyLabel(k) + ': ' + brl(porMes[k])); });
+    }
+  }
+
+  if (!filtrado) {
+    var porCat = {};
+    d.todos.forEach(function(e) { var c = e.categoria || 'Outros'; porCat[c] = (porCat[c] || 0) + Number(e.valor || 0); });
+    var cats = Object.entries(porCat).sort(function(a, b) { return b[1] - a[1]; });
+    if (cats.length) {
+      linhas.push('');
+      linhas.push('Por categoria:');
+      cats.forEach(function(entry) {
+        var icon = CAT_ICONS[entry[0]] || '📦';
+        var p = d.totalEscopo > 0 ? (entry[1] / d.totalEscopo * 100) : 0;
+        linhas.push(icon + ' ' + entry[0] + ': ' + brl(entry[1]) + ' (' + p.toFixed(0) + '%)');
+      });
+    }
+  }
+
   linhas.push('');
   linhas.push('— GastosIA');
   return linhas.join('\n');
@@ -8251,10 +8551,11 @@ function textoRelatorioMensal() {
 // Atalho: manda o resumo do mês pelo WhatsApp (share nativo escolhe app+contato;
 // fallback abre o WhatsApp direto via wa.me).
 async function enviarRelatorioWhatsapp() {
-  var mesKey = relAno + '-' + String(relMes+1).padStart(2,'0');
-  var temGasto = expenses.some(function(e) { var d = parseExpenseDate(e.data); return d.getFullYear() === relAno && d.getMonth() === relMes; });
-  var temRenda = incomes.some(function(i) { return i.mes === mesKey; });
-  if (!temGasto && !temRenda) { showToast('Nada para enviar neste mês.'); return; }
+  var d = relDados();
+  if (!d.gastos.length && !d.renda) {
+    showToast(relCategoria ? 'Nada de ' + relCategoria + ' neste período.' : (relEscopo === 'todos' ? 'Nada para enviar.' : 'Nada para enviar neste mês.'));
+    return;
+  }
   var texto = textoRelatorioMensal();
   if (navigator.share) {
     try { await navigator.share({ text: texto }); return; }
