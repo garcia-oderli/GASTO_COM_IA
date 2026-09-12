@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.7.0</title>
+<title>GastosIA - Smart Finance v4.7.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -72,6 +72,20 @@
     overflow-x: hidden;
     padding-bottom: 120px;
     letter-spacing: -0.01em;
+    /* O app é uma UI, não um documento: texto solto não é selecionável.
+       Sem isso, um toque no Chrome Android cai no "Touch to Search" — seleciona
+       a palavra e abre a barra Traduzir/Copiar/Compartilhar + dicionário do
+       Google por cima da tela. Vale para toda a interface; ver exceção abaixo. */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Exceção: onde o usuário digita, selecionar/copiar/colar tem que funcionar. */
+  input, textarea, [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
   }
 
 
@@ -215,16 +229,13 @@
   .modal { background: var(--bg-solid); border: 1px solid var(--glass-border); border-radius: 28px 28px 0 0; width: 100%; max-width: 500px; padding: 28px 24px max(28px, env(safe-area-inset-bottom)); max-height: 90dvh; overflow-y: auto; transform: translateY(100%); transition: transform var(--animation-bounce); box-shadow: var(--shadow-xl); }
   .modal-overlay.open .modal { transform: translateY(0); }
   .modal-handle { width: 48px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 24px; }
-  .modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; margin-bottom: 24px; letter-spacing: -0.02em; user-select: none; -webkit-user-select: none; }
-  .modal-handle { user-select: none; -webkit-user-select: none; }
-  .modal-overlay .modal { -webkit-touch-callout: none; }
+  .modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; margin-bottom: 24px; letter-spacing: -0.02em; }
   .modal-overlay .modal label,
   .modal-overlay .modal-title,
   .modal-overlay .modal-handle,
   .modal-overlay .detail-row,
   .modal-overlay .detail-key,
   .modal-overlay .detail-val,
-  .modal-overlay .detail-amount { user-select: none; -webkit-user-select: none; }
 
   /* ═══ IMAGE DROP ZONE ═══ */
   .drop-zone { border: 2px dashed var(--border2); border-radius: var(--radius-md); padding: 40px 24px; text-align: center; cursor: pointer; transition: all var(--animation-smooth); position: relative; overflow: hidden; background: var(--glass); }
@@ -252,7 +263,7 @@
   .ai-text { font-size: 14px; color: var(--accent3); font-weight: 500; }
 
   /* ═══ BUTTONS ═══ */
-  .btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 16px 24px; border-radius: var(--radius-sm); font-family: var(--font-display); font-size: 16px; font-weight: 700; cursor: pointer; border: none; transition: all var(--animation-smooth); text-align: center; min-height: 52px; letter-spacing: -0.01em; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 16px 24px; border-radius: var(--radius-sm); font-family: var(--font-display); font-size: 16px; font-weight: 700; cursor: pointer; border: none; transition: all var(--animation-smooth); text-align: center; min-height: 52px; letter-spacing: -0.01em; touch-action: manipulation; }
   .emoji-pick-btn { background: var(--surface); border: 1px solid var(--glass-border); border-radius: 8px; padding: 8px; font-size: 22px; cursor: pointer; touch-action: manipulation; line-height: 1; transition: transform 0.1s; }
   .emoji-pick-btn:active { transform: scale(0.9); background: var(--surface2); }
   .btn-primary { background: var(--accent); color: #ffffff; box-shadow: var(--shadow-md); }
@@ -725,7 +736,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.7.0</span>
+    <span class="logo-version">v4.7.1</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1649,7 +1660,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.7.0</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.7.1</div>
       </div>
     </div>
   </div>
