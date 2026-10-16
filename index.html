@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.8.3</title>
+<title>GastosIA - Smart Finance v4.8.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -736,7 +736,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.8.3</span>
+    <span class="logo-version">v4.8.4</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1685,11 +1685,25 @@
   </div>
 
   <div class="settings-section">
+    <div class="settings-title">GastosIA Auto</div>
+    <div class="settings-card">
+      <div class="settings-row" style="flex-direction:column; align-items:flex-start; gap:10px; cursor:default;">
+        <div class="settings-row-desc">App separado de combustível e manutenção. Para instalar, abra este endereço no Chrome e toque em ⋮ → Instalar app.</div>
+        <div id="auto-endereco" style="font-family:var(--font-mono); font-size:13px; color:var(--accent2); word-break:break-all;"></div>
+        <div style="display:flex; gap:8px; width:100%;">
+          <button type="button" onclick="copiarEnderecoAuto()" style="flex:1; padding:12px; background:rgba(245,166,35,0.15); color:var(--accent2); border:1px solid var(--accent2); border-radius:var(--radius-sm); font-weight:600; cursor:pointer;">📋 Copiar endereço</button>
+          <a href="/gastosia-auto/" target="_blank" rel="noopener" style="flex:1; padding:12px; text-align:center; text-decoration:none; background:rgba(16,185,129,0.15); color:var(--green2); border:1px solid var(--green2); border-radius:var(--radius-sm); font-weight:600;">⛽ Abrir</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
     <div class="settings-title">Sobre</div>
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.8.3</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.8.4</div>
       </div>
     </div>
   </div>
@@ -3408,6 +3422,22 @@ function showPage(name, tabEl, navId) {
   if (name === 'cartoes')    renderCartoes();
   if (name === 'combustivel') renderCombustivel();
   if (name === 'manutencao')  renderManutencao();
+  if (name === 'config')      document.getElementById('auto-endereco').textContent = enderecoAuto();
+}
+
+// Endereço do GastosIA Auto no domínio em que este app está aberto (o Auto mora
+// na subpasta /gastosia-auto/ do mesmo site).
+function enderecoAuto() { return location.origin + '/gastosia-auto/'; }
+function copiarEnderecoAuto() {
+  var url = enderecoAuto();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(
+      function() { showToast('📋 Endereço copiado! Cole no Chrome.'); },
+      function() { showToast('⚠️ Não foi possível copiar. Endereço: ' + url); }
+    );
+  } else {
+    showToast('Endereço: ' + url);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
