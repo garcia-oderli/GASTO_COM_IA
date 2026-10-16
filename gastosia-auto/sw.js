@@ -1,4 +1,4 @@
-const CACHE = 'gastosAuto-v1.0.1';
+const CACHE = 'gastosAuto-v1.0.2';
 // Cache separado (sem versão) para o payload do Web Share Target — não é
 // apagado no activate para sobreviver ao redirect que entrega a foto ao app.
 const SHARE_CACHE = 'gastosAuto-share';

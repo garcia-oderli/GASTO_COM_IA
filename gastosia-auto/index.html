@@ -16,7 +16,7 @@ if (location.pathname !== '/' && !location.pathname.endsWith('/') && !/\.[a-z0-9
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>GastosIA Auto v1.0.1</title>
+<title>GastosIA Auto v1.0.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -168,21 +168,29 @@ if (location.pathname !== '/' && !location.pathname.endsWith('/') && !/\.[a-z0-9
           <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Email</label>
           <input id="auth-email" type="email" placeholder="seu@email.com"
             style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:15px;padding:12px 14px;outline:none;box-sizing:border-box;"
-            onkeydown="if(event.key==='Enter')document.getElementById('auth-pass').focus()" />
+            onkeydown="if(event.key==='Enter'){ if(authTab==='login'&&!authComSenha) authEnviarLink(); else document.getElementById('auth-pass').focus(); }" />
         </div>
-        <div>
+        <div id="auth-pass-wrap" style="display:none;">
           <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Senha</label>
           <input id="auth-pass" type="password" placeholder="••••••"
             style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:15px;padding:12px 14px;outline:none;box-sizing:border-box;"
             onkeydown="if(event.key==='Enter')document.getElementById('auth-btn').click()" />
         </div>
         <div id="auth-err" style="color:#F44336;font-size:12px;line-height:1.45;min-height:16px;"></div>
-        <button id="auth-btn" onclick="handleAuthBtn()"
+        <button id="auth-link-btn" onclick="authEnviarLink()"
           style="width:100%;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:0.06em;cursor:pointer;">
+          RECEBER LINK DE ACESSO
+        </button>
+        <div id="auth-link-dica" style="font-size:12px;color:#888;text-align:center;margin-top:-4px;line-height:1.45;">Sem senha: chega um link no seu email. Abra neste celular e toque nele — o app fica entrado até você sair.</div>
+        <button id="auth-btn" onclick="handleAuthBtn()"
+          style="display:none;width:100%;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:0.06em;cursor:pointer;">
           ENTRAR
         </button>
-        <div id="auth-forgot" style="text-align:center;margin-top:2px;">
+        <div id="auth-forgot" style="display:none;text-align:center;margin-top:2px;">
           <span onclick="authForgotPassword()" style="font-size:12px;color:#888;cursor:pointer;text-decoration:underline;">Esqueci minha senha</span>
+        </div>
+        <div style="text-align:center;">
+          <span id="auth-modo-senha" onclick="alternarModoSenha()" style="font-size:12px;color:#888;cursor:pointer;text-decoration:underline;">Prefiro entrar com senha</span>
         </div>
       </div>
       </div>
@@ -210,7 +218,7 @@ if (location.pathname !== '/' && !location.pathname.endsWith('/') && !/\.[a-z0-9
 
 <div class="topbar">
   <span class="logo">GASTOSIA<small>AUTO</small></span>
-  <span class="logo-version">v1.0.1</span>
+  <span class="logo-version">v1.0.2</span>
 </div>
 
 <div class="page" id="page-home">
@@ -266,7 +274,7 @@ if (location.pathname !== '/' && !location.pathname.endsWith('/') && !/\.[a-z0-9
 <div class="page" id="page-config">
   <div class="page-header">
     <div class="page-title">⚙️ Config</div>
-    <div class="page-subtitle">Conta, leitura de nota e versão v1.0.1</div>
+    <div class="page-subtitle">Conta, leitura de nota e versão v1.0.2</div>
   </div>
   <div id="config-content" style="margin-top:12px;"></div>
 </div>
@@ -551,7 +559,7 @@ if (location.pathname !== '/' && !location.pathname.endsWith('/') && !/\.[a-z0-9
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-var APP_VERSAO = '1.0.1';
+var APP_VERSAO = '1.0.2';
 const SUPA_URL = 'https://vfrgmjhguzukraqsmduo.supabase.co';
 const SUPA_KEY = 'sb_publishable_zWIDdXlUEP3hGwih7bD8JA_eNB911je';
 const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -677,10 +685,53 @@ function switchAuthTab(tab) {
   document.getElementById('tab-register').style.background = isLogin ? 'transparent' : '#F5A623';
   document.getElementById('tab-register').style.color = isLogin ? '#888' : '#111';
   document.getElementById('tab-register').style.border = isLogin ? '1px solid #2A2A2A' : 'none';
-  const btn = document.getElementById('auth-btn');
-  btn.textContent = isLogin ? 'ENTRAR' : 'CADASTRAR';
-  document.getElementById('auth-forgot').style.display = isLogin ? '' : 'none';
-  document.getElementById('auth-err').textContent = '';
+  document.getElementById('auth-btn').textContent = isLogin ? 'ENTRAR' : 'CADASTRAR';
+  atualizarTelaEntrada();
+}
+
+// Entrada padrão é pelo link no email (sem senha). A senha fica como reserva
+// para quando o email demorar; o cadastro continua pedindo senha.
+var authComSenha = false;
+function atualizarTelaEntrada() {
+  var porLink = authTab === 'login' && !authComSenha;
+  var mostra = function(id, sim) { document.getElementById(id).style.display = sim ? '' : 'none'; };
+  mostra('auth-link-btn', porLink);
+  mostra('auth-link-dica', porLink);
+  mostra('auth-pass-wrap', !porLink);
+  mostra('auth-btn', !porLink);
+  mostra('auth-forgot', authTab === 'login' && authComSenha);
+  mostra('auth-modo-senha', authTab === 'login');
+  document.getElementById('auth-modo-senha').textContent = authComSenha ? 'Entrar sem senha (link no email)' : 'Prefiro entrar com senha';
+  var err = document.getElementById('auth-err');
+  err.textContent = ''; err.style.color = '#F44336';
+}
+function alternarModoSenha() { authComSenha = !authComSenha; atualizarTelaEntrada(); }
+
+var _enviandoLink = false;
+async function authEnviarLink() {
+  if (_enviandoLink) return;
+  var email = document.getElementById('auth-email').value.trim();
+  var err = document.getElementById('auth-err');
+  err.style.color = '#F44336';
+  if (!email) { err.textContent = 'Digite seu email.'; return; }
+  _enviandoLink = true;
+  var btn = document.getElementById('auth-link-btn');
+  btn.disabled = true; btn.textContent = 'ENVIANDO...';
+  var error;
+  try {
+    // shouldCreateUser:false — email digitado errado não vira conta nova.
+    ({ error } = await supa.auth.signInWithOtp({
+      email: email,
+      options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: false }
+    }));
+  } catch (e) {
+    error = e;
+  } finally {
+    _enviandoLink = false; btn.disabled = false; btn.textContent = 'RECEBER LINK DE ACESSO';
+  }
+  if (error) { err.textContent = mensagemErroAuth(error); return; }
+  err.style.color = '#4CAF50';
+  err.textContent = '✓ Link enviado para ' + email + '. Abra o email neste celular e toque no link (confira também o spam).';
 }
 
 // Traduz o erro do Supabase para algo acionável. O caso que mais dói é o de rede:
@@ -694,6 +745,8 @@ function mensagemErroAuth(e) {
   if (falhaDeRede.some(function(t) { return m.indexOf(t) >= 0; })) {
     return '🔌 Não consegui falar com o servidor. Sua internet parece ok, então o banco pode estar hibernando — abra o painel do Supabase e use "Restore project". Costuma voltar em 1 a 3 minutos.';
   }
+  if (m.indexOf('signups not allowed') >= 0 || m.indexOf('user not found') >= 0) return 'Esse email não tem conta. Confira o endereço ou use Cadastrar.';
+  if (m.indexOf('email logins are disabled') >= 0 || m.indexOf('otp_disabled') >= 0 || m.indexOf('otp disabled') >= 0) return 'Entrada por link está desligada no servidor. Use "Prefiro entrar com senha".';
   if (m.indexOf('invalid login credentials') >= 0) return 'Email ou senha incorretos.';
   if (m.indexOf('email not confirmed') >= 0) return 'Confirme seu email pelo link que enviamos antes de entrar.';
   if (m.indexOf('user already registered') >= 0 || m.indexOf('already been registered') >= 0) return 'Esse email já tem conta. Toque em ENTRAR.';

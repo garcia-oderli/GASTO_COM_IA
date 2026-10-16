@@ -68,6 +68,10 @@
 - **Sem manual de usuário extenso** (ROI baixo, desatualiza rápido). Preferir **dicas
   contextuais curtas nas telas vazias / no momento de uso**. Manual longo só se o
   objetivo for distribuir o app para terceiros.
-- **Login fica:** o dono pediu para tirar a senha e decidiu manter o login depois de ver o
-  risco (a chave do Supabase é pública no código; RLS + login é o que protege os dados).
-  O incômodo se resolve com sessão persistente — entra uma vez por aparelho.
+- **Sem senha, mas com login:** o dono pediu para tirar a senha. Tirar o login não é
+  opção (a chave do Supabase é pública no código; RLS + login é o que protege os dados).
+  No Auto a entrada padrão é por **link no email** (`signInWithOtp`, `shouldCreateUser:
+  false`); a senha fica como reserva em "Prefiro entrar com senha". O GastosIA segue com
+  senha, mas no mesmo domínio a sessão é compartilhada. O link volta para
+  `/gastosia-auto/`; se esse endereço não estiver em Supabase → Auth → Redirect URLs,
+  o Supabase manda para a Site URL (o GastosIA) — ainda entra, só cai no outro app.
