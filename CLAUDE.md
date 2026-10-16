@@ -15,9 +15,11 @@
   + `sw.js` (service worker) + `manifest.json`, deploy na Vercel.
 - Pasta `ritmorec/` é um app separado (gravador de reunião) — não mexer salvo pedido.
 - Pasta `gastosia-auto/` é o **GastosIA Auto**, app separado só de carro (combustível,
-  manutenção, plano de troca), com projeto e endereço próprios na Vercel. Mesmo Supabase
-  e mesmo login do GastosIA; usa só `veiculos`, `abastecimentos`, `manutencoes` e
-  `planos_troca`. Versão própria (começou em 1.0.0): bumpar o cache em
+  manutenção, plano de troca). Publicado junto com o GastosIA, em `/gastosia-auto/` no
+  mesmo domínio (um projeto próprio na Vercel, como o `meetrec`, é opcional). No mesmo
+  domínio ele compartilha a sessão do Supabase e a chave de IA, porque localStorage é por
+  origem: quem entrou no GastosIA abre o Auto já logado. Usa só `veiculos`,
+  `abastecimentos`, `manutencoes` e `planos_troca`. Versão própria (começou em 1.0.0): bumpar o cache em
   `gastosia-auto/sw.js` e os 4 pontos do `gastosia-auto/index.html` (`<title>`,
   `.logo-version`, subtítulo da página Config, `var APP_VERSAO`). Caminhos são relativos
   ao escopo (manifest, SW, ícones) — não trocar por `/...`, senão numa subpasta ele pega
@@ -63,3 +65,6 @@
 - **Sem manual de usuário extenso** (ROI baixo, desatualiza rápido). Preferir **dicas
   contextuais curtas nas telas vazias / no momento de uso**. Manual longo só se o
   objetivo for distribuir o app para terceiros.
+- **Login fica:** o dono pediu para tirar a senha e decidiu manter o login depois de ver o
+  risco (a chave do Supabase é pública no código; RLS + login é o que protege os dados).
+  O incômodo se resolve com sessão persistente — entra uma vez por aparelho.
