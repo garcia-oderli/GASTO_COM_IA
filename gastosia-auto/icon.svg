@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#111111"/>
+  <!-- bomba de combustível -->
+  <rect x="128" y="104" width="180" height="300" rx="24" fill="#F5A623"/>
+  <rect x="160" y="140" width="116" height="84" rx="12" fill="#111111"/>
+  <rect x="160" y="250" width="116" height="16" rx="8" fill="#111111" opacity="0.35"/>
+  <rect x="104" y="392" width="228" height="36" rx="10" fill="#F5A623"/>
+  <!-- mangueira e bico -->
+  <path d="M308 176 h36 a30 30 0 0 1 30 30 v128 a24 24 0 0 0 48 0 V196 l-38 -46" fill="none" stroke="#F5A623" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

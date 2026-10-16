@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GastosIA">
 <link rel="manifest" href="/manifest.json">
-<title>GastosIA - Smart Finance v4.8.0</title>
+<title>GastosIA - Smart Finance v4.8.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -685,7 +685,7 @@
             style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:15px;padding:12px 14px;outline:none;box-sizing:border-box;"
             onkeydown="if(event.key==='Enter')document.getElementById('auth-btn').click()" />
         </div>
-        <div id="auth-err" style="color:#F44336;font-size:12px;min-height:16px;"></div>
+        <div id="auth-err" style="color:#F44336;font-size:12px;line-height:1.45;min-height:16px;"></div>
         <button id="auth-btn" onclick="handleAuthBtn()"
           style="width:100%;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:0.06em;cursor:pointer;">
           ENTRAR
@@ -736,7 +736,7 @@
       <text x="42" y="30" font-family="'Barlow Condensed',Arial Narrow,sans-serif" font-size="20" font-weight="700" fill="#F5F5F5" letter-spacing="2">RITMOPROD</text>
       <text x="43" y="40" font-family="'IBM Plex Mono','Courier New',monospace" font-size="6" fill="#888888" letter-spacing="2">GASTOS · IA · FINANÇAS</text>
     </svg>
-    <span class="logo-version">v4.8.0</span>
+    <span class="logo-version">v4.8.3</span>
   </div>
   <div class="header-actions">
     <button class="header-btn" onclick="exportExcel()">📊 Excel</button>
@@ -1313,7 +1313,7 @@
       <div style="font-size:11px;color:#666;margin-top:-4px;">O consumo (km/L) é calculado entre tanques cheios.</div>
     </div>
     <div id="modal-abast-err" style="color:#F44336;font-size:12px;margin-top:8px;min-height:16px;"></div>
-    <button onclick="salvarAbastecimento()" style="width:100%;margin-top:12px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
+    <button id="btn-salvar-abast" onclick="salvarAbastecimento()" style="width:100%;margin-top:12px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
       SALVAR ABASTECIMENTO
     </button>
   </div>
@@ -1401,7 +1401,7 @@
       <div style="font-size:11px;color:#666;margin-top:-4px;">Preencha um dos dois (ou os dois) para receber o lembrete — vale o que vencer primeiro.</div>
     </div>
     <div id="modal-manut-err" style="color:#F44336;font-size:12px;margin-top:8px;min-height:16px;"></div>
-    <button onclick="salvarManutencao()" style="width:100%;margin-top:12px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
+    <button id="btn-salvar-manut" onclick="salvarManutencao()" style="width:100%;margin-top:12px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
       SALVAR MANUTENÇÃO
     </button>
   </div>
@@ -1439,7 +1439,7 @@
     <div id="modal-veiculo-err" style="color:#F44336;font-size:12px;margin-top:8px;min-height:16px;"></div>
     <div style="display:flex;gap:8px;margin-top:16px;">
       <button id="v-excluir-btn" onclick="excluirVeiculo()" style="display:none;background:rgba(244,67,54,0.12);color:#F44336;border:1px solid rgba(244,67,54,0.3);border-radius:8px;padding:14px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🗑️</button>
-      <button onclick="salvarVeiculo()" style="flex:1;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
+      <button id="btn-salvar-veiculo" onclick="salvarVeiculo()" style="flex:1;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
         SALVAR VEÍCULO
       </button>
     </div>
@@ -1510,7 +1510,7 @@
     <div id="modal-plano-err" style="color:#F44336;font-size:12px;margin-top:8px;min-height:16px;"></div>
     <div style="display:flex;gap:8px;margin-top:16px;">
       <button id="p-excluir-btn" onclick="excluirPlanoTroca()" style="display:none;background:rgba(244,67,54,0.12);color:#F44336;border:1px solid rgba(244,67,54,0.3);border-radius:8px;padding:14px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🗑️</button>
-      <button onclick="salvarPlanoTroca()" style="flex:1;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
+      <button id="btn-salvar-plano" onclick="salvarPlanoTroca()" style="flex:1;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
         SALVAR PLANO
       </button>
     </div>
@@ -1689,7 +1689,7 @@
     <div class="settings-card">
       <div class="settings-row" style="cursor:default;">
         <div class="settings-row-label">GastosIA Smart Finance</div>
-        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.8.0</div>
+        <div style="font-size:13px; color:var(--text4); font-family:var(--font-mono);">v4.8.3</div>
       </div>
     </div>
   </div>
@@ -2157,16 +2157,51 @@ function switchAuthTab(tab) {
   document.getElementById('auth-err').textContent = '';
 }
 
+// Traduz o erro do Supabase para algo acionável. O caso que mais dói é o de rede:
+// "Failed to fetch" não diz nada e costuma ser o projeto pausado por inatividade
+// (plano free do Supabase hiberna depois de ~1 semana sem requisição).
+function mensagemErroAuth(e) {
+  if (!navigator.onLine) return '📡 Você está sem internet. Conecte e tente de novo.';
+  var msg = String((e && e.message) || e || '');
+  var m = msg.toLowerCase();
+  var falhaDeRede = ['failed to fetch', 'networkerror', 'network request failed', 'load failed', 'fetch failed'];
+  if (falhaDeRede.some(function(t) { return m.indexOf(t) >= 0; })) {
+    return '🔌 Não consegui falar com o servidor. Sua internet parece ok, então o banco pode estar hibernando — abra o painel do Supabase e use "Restore project". Costuma voltar em 1 a 3 minutos.';
+  }
+  if (m.indexOf('invalid login credentials') >= 0) return 'Email ou senha incorretos.';
+  if (m.indexOf('email not confirmed') >= 0) return 'Confirme seu email pelo link que enviamos antes de entrar.';
+  if (m.indexOf('user already registered') >= 0 || m.indexOf('already been registered') >= 0) return 'Esse email já tem conta. Toque em ENTRAR.';
+  if (m.indexOf('password should be at least') >= 0) return 'Senha mínima: 6 caracteres.';
+  if (m.indexOf('unable to validate email') >= 0 || m.indexOf('invalid email') >= 0) return 'Email inválido — confira se não falta algo.';
+  if (m.indexOf('for security purposes') >= 0 || m.indexOf('rate limit') >= 0 || m.indexOf('too many requests') >= 0) {
+    return 'Muitas tentativas seguidas. Espere alguns instantes e tente de novo.';
+  }
+  if (m.indexOf('timeout') >= 0 || m.indexOf('timed out') >= 0) return '⏱️ O servidor demorou demais para responder. Tente de novo.';
+  if (/^5\d\d/.test(msg) || m.indexOf('service unavailable') >= 0 || m.indexOf('bad gateway') >= 0) {
+    return '🔧 O servidor respondeu com erro. Tente de novo em instantes.';
+  }
+  return msg || 'Não consegui completar. Tente de novo.';
+}
+
 async function authLogin() {
   const email = document.getElementById('auth-email').value.trim();
   const pass  = document.getElementById('auth-pass').value;
   const err   = document.getElementById('auth-err');
   if (!email || !pass) { err.textContent = 'Preencha email e senha.'; return; }
   err.textContent = '';
-  document.getElementById('auth-btn').disabled = true;
-  const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
-  document.getElementById('auth-btn').disabled = false;
-  if (error) { err.textContent = error.message; return; }
+  const btn = document.getElementById('auth-btn');
+  btn.disabled = true;
+  let data, error;
+  // Falha de rede pode lançar em vez de voltar em `error`; sem o finally o botão
+  // ficava desabilitado e a tela travava sem explicação.
+  try {
+    ({ data, error } = await supa.auth.signInWithPassword({ email, password: pass }));
+  } catch (e) {
+    error = e;
+  } finally {
+    btn.disabled = false;
+  }
+  if (error) { err.textContent = mensagemErroAuth(error); return; }
   currentUser = data.user;
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-root').style.display = '';
@@ -2181,10 +2216,17 @@ async function authRegister() {
   if (!email || !pass) { err.textContent = 'Preencha email e senha.'; return; }
   if (pass.length < 6) { err.textContent = 'Senha mínima: 6 caracteres.'; return; }
   err.textContent = '';
-  document.getElementById('auth-btn').disabled = true;
-  const { data, error } = await supa.auth.signUp({ email, password: pass });
-  document.getElementById('auth-btn').disabled = false;
-  if (error) { err.textContent = error.message; return; }
+  const btn = document.getElementById('auth-btn');
+  btn.disabled = true;
+  let data, error;
+  try {
+    ({ data, error } = await supa.auth.signUp({ email, password: pass }));
+  } catch (e) {
+    error = e;
+  } finally {
+    btn.disabled = false;
+  }
+  if (error) { err.textContent = mensagemErroAuth(error); return; }
   currentUser = data.user;
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-root').style.display = '';
@@ -2212,9 +2254,15 @@ async function authForgotPassword() {
   err.textContent = '';
   const btn = document.getElementById('auth-btn'); btn.disabled = true;
   const redirectTo = window.location.origin + window.location.pathname;
-  const { error } = await supa.auth.resetPasswordForEmail(email, { redirectTo });
-  btn.disabled = false;
-  if (error) { err.style.color = '#F44336'; err.textContent = error.message; return; }
+  let error;
+  try {
+    ({ error } = await supa.auth.resetPasswordForEmail(email, { redirectTo }));
+  } catch (e) {
+    error = e;
+  } finally {
+    btn.disabled = false;
+  }
+  if (error) { err.style.color = '#F44336'; err.textContent = mensagemErroAuth(error); return; }
   err.style.color = '#4CAF50';
   err.textContent = '✓ Enviamos um link para ' + email + '. Confira o email (e o spam).';
   setTimeout(function () { err.style.color = '#F44336'; err.textContent = ''; }, 9000);
@@ -2235,8 +2283,13 @@ async function authSetNewPassword() {
   const err = document.getElementById('auth-recovery-err');
   if (!pass || pass.length < 6) { err.textContent = 'Senha mínima: 6 caracteres.'; return; }
   err.textContent = '';
-  const { data, error } = await supa.auth.updateUser({ password: pass });
-  if (error) { err.textContent = error.message; return; }
+  let data, error;
+  try {
+    ({ data, error } = await supa.auth.updateUser({ password: pass }));
+  } catch (e) {
+    error = e;
+  }
+  if (error) { err.textContent = mensagemErroAuth(error); return; }
   currentUser = (data && data.user) || currentUser;
   document.getElementById('auth-recovery').style.display = 'none';
   document.getElementById('auth-normal').style.display = '';
@@ -7586,6 +7639,10 @@ function editarVeiculo(id) {
 }
 
 async function salvarVeiculo() {
+  return semDuploToque('veiculo', 'btn-salvar-veiculo', _salvarVeiculo);
+}
+
+async function _salvarVeiculo() {
   var nome = document.getElementById('v-nome').value.trim();
   var err = document.getElementById('modal-veiculo-err');
   if (!nome) { err.textContent = 'Informe o nome do veículo.'; return; }
@@ -7861,6 +7918,10 @@ function fecharModalPlanoTroca() {
 }
 
 async function salvarPlanoTroca() {
+  return semDuploToque('planoTroca', 'btn-salvar-plano', _salvarPlanoTroca);
+}
+
+async function _salvarPlanoTroca() {
   var err = document.getElementById('modal-plano-err');
   var alvo = parseFloat(document.getElementById('p-alvo').value);
   if (!(alvo > 0)) { err.textContent = 'Informe o valor do carro pretendido.'; return; }
@@ -8029,7 +8090,30 @@ async function scanNotaAbastecimento(file) {
   }
 }
 
+// Trava de duplo-toque para ação async que grava no banco. Sem isso, cada toque
+// repetido enquanto a rede responde vira um registro NOVO: foi assim que 5 cópias
+// da mesma troca de óleo e 2 do mesmo abastecimento entraram nas tabelas.
+// O botão também fica desabilitado, para o usuário ver que está em andamento.
+var _gravacoesEmVoo = {};
+async function semDuploToque(chave, botaoId, acao) {
+  if (_gravacoesEmVoo[chave]) return;
+  _gravacoesEmVoo[chave] = true;
+  var btn = botaoId ? document.getElementById(botaoId) : null;
+  var textoOriginal = btn ? btn.textContent : null;
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.textContent = 'SALVANDO...'; }
+  try {
+    return await acao();
+  } finally {
+    _gravacoesEmVoo[chave] = false;
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.textContent = textoOriginal; }
+  }
+}
+
 async function salvarAbastecimento() {
+  return semDuploToque('abastecimento', 'btn-salvar-abast', _salvarAbastecimento);
+}
+
+async function _salvarAbastecimento() {
   var err = document.getElementById('modal-abast-err');
   var veiculoId = document.getElementById('a-veiculo').value;
   var data = document.getElementById('a-data').value;
@@ -8063,7 +8147,8 @@ async function salvarAbastecimento() {
 
   if (abastecimentoEditandoId) {
     var atual = abastecimentos.find(function(x) { return x.id === abastecimentoEditandoId; });
-    await supa.from('abastecimentos').update(payload).eq('id', abastecimentoEditandoId);
+    var updAbast = await supa.from('abastecimentos').update(payload).eq('id', abastecimentoEditandoId);
+    if (updAbast && updAbast.error) { err.textContent = 'Não consegui salvar: ' + updAbast.error.message; return; }
     // Sincroniza o gasto vinculado
     if (atual && atual.gasto_id) {
       var g = expenses.find(function(e) { return e.id === atual.gasto_id; });
@@ -8087,7 +8172,14 @@ async function salvarAbastecimento() {
       console.error('gasto vinculado ao abastecimento falhou:', e);
     }
     payload.gasto_id = gastoId;
-    await supa.from('abastecimentos').insert(payload);
+    var insAbast = await supa.from('abastecimentos').insert(payload);
+    // Sem checar o erro, uma falha de rede terminava em "✓ salvo" e o usuário
+    // tentava de novo — segundo caminho para o registro duplicado.
+    if (insAbast && insAbast.error) {
+      if (gastoId) { supaDeleteExpense(gastoId); var gi = expenses.findIndex(function(e) { return e.id === gastoId; }); if (gi >= 0) expenses.splice(gi, 1); }
+      err.textContent = 'Não consegui salvar: ' + insAbast.error.message;
+      return;
+    }
   }
 
   fecharModalAbastecimento();
@@ -8229,6 +8321,10 @@ function manutProximaMeses(meses) {
 }
 
 async function salvarManutencao() {
+  return semDuploToque('manutencao', 'btn-salvar-manut', _salvarManutencao);
+}
+
+async function _salvarManutencao() {
   var err = document.getElementById('modal-manut-err');
   var veiculoId = document.getElementById('m-veiculo').value;
   var data = document.getElementById('m-data').value;
@@ -8295,10 +8391,16 @@ async function salvarManutencao() {
       }
       payload.gasto_id = null;
     }
-    await supa.from('manutencoes').update(payload).eq('id', manutencaoEditandoId);
+    var updManut = await supa.from('manutencoes').update(payload).eq('id', manutencaoEditandoId);
+    if (updManut && updManut.error) { err.textContent = 'Não consegui salvar: ' + updManut.error.message; return; }
   } else {
     payload.gasto_id = (lancarGasto && valor > 0) ? criarGasto() : null;
-    await supa.from('manutencoes').insert(payload);
+    var insManut = await supa.from('manutencoes').insert(payload);
+    if (insManut && insManut.error) {
+      if (payload.gasto_id) { supaDeleteExpense(payload.gasto_id); var gj = expenses.findIndex(function(e) { return e.id === payload.gasto_id; }); if (gj >= 0) expenses.splice(gj, 1); }
+      err.textContent = 'Não consegui salvar: ' + insManut.error.message;
+      return;
+    }
   }
 
   fecharModalManutencao();

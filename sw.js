@@ -1,4 +1,4 @@
-const CACHE = 'gastosIA-v4.8.0';
+const CACHE = 'gastosIA-v4.8.3';
 // Cache separado (sem versão) para o payload do Web Share Target — não é
 // apagado no activate para sobreviver ao redirect que entrega a foto ao app.
 const SHARE_CACHE = 'gastosIA-share';
@@ -15,6 +15,10 @@ self.addEventListener('activate', e => {
 });
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
+  // Só intercepta o que é da própria origem. Chamada ao Supabase, à API da IA e a
+  // CDN seguem direto para a rede: não há nada ali para cachear, e passar pelo
+  // service worker só acrescenta um ponto a mais onde o login pode morrer.
+  if (url.origin !== self.location.origin) return;
   // Web Share Target: recebe o POST do "Compartilhar" do sistema, guarda a
   // foto/texto no cache e redireciona para a home, que consome o payload.
   if (e.request.method === 'POST' && url.pathname === '/share-target') {

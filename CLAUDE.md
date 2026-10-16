@@ -14,6 +14,19 @@
 - App de finanças pessoais **GastosIA**, PWA num único `index.html` (HTML+CSS+JS inline)
   + `sw.js` (service worker) + `manifest.json`, deploy na Vercel.
 - Pasta `ritmorec/` é um app separado (gravador de reunião) — não mexer salvo pedido.
+- Pasta `gastosia-auto/` é o **GastosIA Auto**, app separado só de carro (combustível,
+  manutenção, plano de troca). Publicado junto com o GastosIA, em `/gastosia-auto/` no
+  mesmo domínio (um projeto próprio na Vercel, como o `meetrec`, é opcional). No mesmo
+  domínio ele compartilha a sessão do Supabase e a chave de IA, porque localStorage é por
+  origem: quem entrou no GastosIA abre o Auto já logado. Usa só `veiculos`,
+  `abastecimentos`, `manutencoes` e `planos_troca`. Versão própria (começou em 1.0.0): bumpar o cache em
+  `gastosia-auto/sw.js` e os 4 pontos do `gastosia-auto/index.html` (`<title>`,
+  `.logo-version`, subtítulo da página Config, `var APP_VERSAO`). Caminhos são relativos
+  ao escopo (manifest, SW, ícones) — não trocar por `/...`, senão numa subpasta ele pega
+  o SW e o manifest do GastosIA.
+- **Os dois apps escrevem nas tabelas de carro, mas só o GastosIA espelha em `gastos`.**
+  O que é lançado no Auto não aparece nos gastos/relatório do GastosIA. Foi escolha
+  (o Auto nasceu sem o espelho); religar é decisão do dono.
 - **Backend:** Supabase (projeto `vfrgmjhguzukraqsmduo`). Auth email/senha; tabelas
   `gastos`, `rendas`, `cartoes`, `faturas`. RLS já endurecido: toda tabela exige
   `auth.uid() = user_id`. Supabase é a **fonte única** dos dados (não usar localStorage
@@ -34,6 +47,13 @@
   (`getMonthExpenses`). Manter consistente entre telas.
 - **Scan de nota:** a data é sempre forçada para hoje (OCR de data era ruim); usuário
   ajusta manual. A IA não extrai mais data.
+- **Gravações:** botão que faz `insert` passa por `semDuploToque(chave, botaoId, fn)` e
+  confere o `error` do Supabase antes de dizer "salvo". Sem isso o toque repetido com rede
+  lenta duplicava registros (aconteceu: 5 cópias da mesma troca de óleo).
+- **SQL destrutivo:** `delete`/`restore` pelo MCP do Supabase é bloqueado neste ambiente.
+  Preparar o SQL (com backup antes) e o dono roda no SQL Editor.
+- **Não apagar `gastos`/`rendas`/`cartoes`:** chegou a ser decidido quando o plano era
+  transformar o GastosIA no app de carro; com dois apps, o GastosIA continua usando.
 
 ## Fluxo de trabalho
 - Branch de dev: `claude/fervent-babbage-nl2veu`. Commitar, push, abrir PR (não-draft),
@@ -45,3 +65,6 @@
 - **Sem manual de usuário extenso** (ROI baixo, desatualiza rápido). Preferir **dicas
   contextuais curtas nas telas vazias / no momento de uso**. Manual longo só se o
   objetivo for distribuir o app para terceiros.
+- **Login fica:** o dono pediu para tirar a senha e decidiu manter o login depois de ver o
+  risco (a chave do Supabase é pública no código; RLS + login é o que protege os dados).
+  O incômodo se resolve com sessão persistente — entra uma vez por aparelho.

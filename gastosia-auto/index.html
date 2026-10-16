@@ -1,0 +1,2588 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0f1c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GastosIA Auto">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>GastosIA Auto v1.0.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #111111;
+    --bg-solid: #111111;
+    --bg2: #1C1C1C;
+    --bg3: #222222;
+    --surface: #1C1C1C;
+    --surface2: #222222;
+    --surface3: #282828;
+    --glass: rgba(255,255,255,0.02);
+    --glass-border: #2A2A2A;
+    --border: #2A2A2A;
+    --border2: #333333;
+    --text: #F5F5F5;
+    --text2: #CCCCCC;
+    --text3: #888888;
+    --text4: #555555;
+    --accent: #F5A623;
+    --accent-solid: #F5A623;
+    --accent2: #F5A623;
+    --accent3: #FFD080;
+    --green: #4CAF50;
+    --green-solid: #4CAF50;
+    --green2: #66BB6A;
+    --amber: #FF9800;
+    --amber-solid: #FF9800;
+    --red: #F44336;
+    --red-solid: #F44336;
+    --pink: #F5A623;
+    --teal: #4CAF50;
+    --purple: #F5A623;
+    --radius: 8px;
+    --radius-md: 8px;
+    --radius-sm: 6px;
+    --radius-xs: 4px;
+    --font-display: 'Barlow Condensed', sans-serif;
+    --font-body: 'Barlow', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --shadow-xs: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.25);
+    --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.3);
+    --backdrop: blur(24px) saturate(1.8);
+    --animation-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --animation-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --animation-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.5;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    padding-bottom: 96px;
+    letter-spacing: -0.01em;
+    /* O app é uma UI, não um documento: texto solto não é selecionável.
+       Sem isso, um toque no Chrome Android cai no "Touch to Search" — seleciona
+       a palavra e abre a barra Traduzir/Copiar/Compartilhar por cima da tela. */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Exceção: onde o usuário digita, selecionar/copiar/colar tem que funcionar. */
+  input, textarea, [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+  button { touch-action: manipulation; font-family: inherit; }
+
+  .topbar { display: flex; align-items: center; gap: 8px; padding: 14px 16px 6px; }
+  .logo { font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: 0.08em; color: var(--accent); }
+  .logo small { color: var(--text3); font-size: 13px; letter-spacing: 0.12em; margin-left: 4px; }
+  .logo-version { font-size: 10px; background: rgba(245,166,35,0.15); border: 1px solid rgba(245,166,35,0.3); color: var(--accent); padding: 2px 7px; border-radius: 3px; font-weight: 600; margin-left: 4px; font-family: var(--font-mono); letter-spacing: 1px; }
+
+  .page { display: none; padding: 0 16px; animation: fadeIn 0.25s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .page-header { padding: 10px 0 4px; }
+  .page-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: 0.04em; color: var(--text); }
+  .page-subtitle { font-size: 12px; color: var(--text3); }
+  #combustivel-content, #manutencao-content { padding: 0 !important; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 15, 28, 0.92); backdrop-filter: var(--backdrop); -webkit-backdrop-filter: var(--backdrop); border-top: 1px solid var(--glass-border); padding: 8px 0 max(8px, env(safe-area-inset-bottom)); display: flex; z-index: 100; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; padding: 6px 2px; color: var(--text4); transition: color var(--animation-fast); font-size: 10px; font-weight: 600; min-height: 48px; justify-content: center; min-width: 0; }
+  .nav-item .ico { font-size: 20px; line-height: 1; filter: grayscale(1); opacity: 0.6; transition: all var(--animation-fast); }
+  .nav-item.active { color: var(--accent2); }
+  .nav-item.active .ico { filter: none; opacity: 1; }
+
+  .empty-cta { display:inline-flex; align-items:center; gap:7px; margin-top:18px; padding:11px 18px; background:var(--accent); color:#111; border:none; border-radius:10px; font-family:var(--font-body); font-size:14px; font-weight:700; cursor:pointer; }
+  .empty-cta:active { transform:scale(0.96); }
+
+  .alert-banner {
+    border-radius: var(--radius-sm);
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+  .alert-banner.danger { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; }
+  .alert-banner.warning { background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+  .toast { position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface); border: 1px solid var(--glass-border); border-radius: 28px; padding: 12px 22px; font-size: 14px; font-weight: 600; color: var(--text); z-index: 9500; opacity: 0; pointer-events: none; transition: all var(--animation-smooth); max-width: calc(100vw - 32px); text-align: center; box-shadow: var(--shadow-lg); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .footer { display:flex; align-items:center; justify-content:center; gap:8px; padding:20px 16px 8px; }
+  .footer span { font-size:12px; color:#555; }
+  .footer b { font-family:var(--font-display); font-size:13px; font-weight:700; color:var(--accent); letter-spacing:1.5px; }
+</style>
+</head>
+<body>
+
+<!-- TELA DE AUTH -->
+<div id="auth-screen" style="display:none;position:fixed;inset:0;background:#111111;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;font-family:'Barlow',sans-serif;">
+  <div style="width:100%;max-width:380px;">
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;letter-spacing:0.1em;color:#F5A623;">GASTOSΙΑ</div>
+      <div style="font-size:13px;color:#888;margin-top:4px;">Combustível e manutenção do seu carro</div>
+    </div>
+    <!-- Card -->
+    <div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:16px;padding:28px 24px;">
+      <div id="auth-normal">
+      <div style="display:flex;gap:8px;margin-bottom:24px;">
+        <button id="tab-login" onclick="switchAuthTab('login')"
+          style="flex:1;padding:10px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;background:#F5A623;color:#111;">
+          ENTRAR
+        </button>
+        <button id="tab-register" onclick="switchAuthTab('register')"
+          style="flex:1;padding:10px;border:1px solid #2A2A2A;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;background:transparent;color:#888;">
+          CADASTRAR
+        </button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Email</label>
+          <input id="auth-email" type="email" placeholder="seu@email.com"
+            style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:15px;padding:12px 14px;outline:none;box-sizing:border-box;"
+            onkeydown="if(event.key==='Enter')document.getElementById('auth-pass').focus()" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Senha</label>
+          <input id="auth-pass" type="password" placeholder="••••••"
+            style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:15px;padding:12px 14px;outline:none;box-sizing:border-box;"
+            onkeydown="if(event.key==='Enter')document.getElementById('auth-btn').click()" />
+        </div>
+        <div id="auth-err" style="color:#F44336;font-size:12px;line-height:1.45;min-height:16px;"></div>
+        <button id="auth-btn" onclick="handleAuthBtn()"
+          style="width:100%;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:0.06em;cursor:pointer;">
+          ENTRAR
+        </button>
+        <div id="auth-forgot" style="text-align:center;margin-top:2px;">
+          <span onclick="authForgotPassword()" style="font-size:12px;color:#888;cursor:pointer;text-decoration:underline;">Esqueci minha senha</span>
+        </div>
+      </div>
+      </div>
+      <div id="auth-recovery" style="display:none;flex-direction:column;gap:12px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.06em;text-transform:uppercase;text-align:center;">Definir nova senha</div>
+        <div style="font-size:12px;color:#888;text-align:center;margin-top:-4px;">Escolha uma nova senha para sua conta.</div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Nova senha</label>
+          <input id="auth-newpass" type="password" placeholder="••••••"
+            style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:15px;padding:12px 14px;outline:none;box-sizing:border-box;"
+            onkeydown="if(event.key==='Enter')authSetNewPassword()" />
+        </div>
+        <div id="auth-recovery-err" style="color:#F44336;font-size:12px;min-height:16px;"></div>
+        <button onclick="authSetNewPassword()"
+          style="width:100%;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:0.06em;cursor:pointer;">
+          SALVAR NOVA SENHA
+        </button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:#555;">Seus dados ficam protegidos e sincronizados</div>
+  </div>
+</div>
+
+<div id="app-root" style="display:none;">
+
+<div class="topbar">
+  <span class="logo">GASTOSIA<small>AUTO</small></span>
+  <span class="logo-version">v1.0.0</span>
+</div>
+
+<div class="page" id="page-home">
+  <div id="manut-alerts-home" style="margin-top:6px;"></div>
+  <div id="home-content"></div>
+</div>
+
+<div class="page" id="page-combustivel">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="showPage('home')" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;line-height:1;">‹</button>
+        <div>
+          <div class="page-title">⛽ Combustível</div>
+          <div class="page-subtitle">Consumo e custo por km</div>
+        </div>
+      </div>
+      <button onclick="abrirModalAbastecimento()" style="display:flex;align-items:center;gap:6px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;">
+        + Abastecer
+      </button>
+    </div>
+  </div>
+  <div id="combustivel-content" style="padding:0 16px 100px;"></div>
+</div>
+
+<div class="page" id="page-manutencao">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="showPage('home')" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;line-height:1;">‹</button>
+        <div>
+          <div class="page-title">🔧 Manutenção</div>
+          <div class="page-subtitle">Revisões, peças e custo de manter</div>
+        </div>
+      </div>
+      <button onclick="abrirModalManutencao()" style="display:flex;align-items:center;gap:6px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;cursor:pointer;">
+        + Registrar
+      </button>
+    </div>
+  </div>
+  <div id="manutencao-content" style="padding:0 16px 100px;"></div>
+</div>
+
+
+<div class="page" id="page-troca">
+  <div class="page-header">
+    <div class="page-title">🔄 Trocar de carro</div>
+    <div class="page-subtitle">Meta, custo do carro atual e simulação</div>
+  </div>
+  <div id="troca-content"></div>
+</div>
+
+<div class="page" id="page-config">
+  <div class="page-header">
+    <div class="page-title">⚙️ Config</div>
+    <div class="page-subtitle">Conta, leitura de nota e versão v1.0.0</div>
+  </div>
+  <div id="config-content" style="margin-top:12px;"></div>
+</div>
+
+<div class="footer"><span>Oderli Garcia &copy; 2026</span><span>·</span><b>RitmoProd</b></div>
+
+<nav class="bottom-nav">
+  <div class="nav-item active" id="nav-home" onclick="showPage('home')"><span class="ico">🏠</span><span>Início</span></div>
+  <div class="nav-item" id="nav-combustivel" onclick="showPage('combustivel')"><span class="ico">⛽</span><span>Combustível</span></div>
+  <div class="nav-item" id="nav-manutencao" onclick="showPage('manutencao')"><span class="ico">🔧</span><span>Manutenção</span></div>
+  <div class="nav-item" id="nav-troca" onclick="showPage('troca')"><span class="ico">🔄</span><span>Troca</span></div>
+  <div class="nav-item" id="nav-config" onclick="showPage('config')"><span class="ico">⚙️</span><span>Config</span></div>
+</nav>
+
+</div><!-- /app-root -->
+
+<!-- MODAL ABASTECIMENTO -->
+<div id="modal-abastecimento" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9000;align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
+  <div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:16px;padding:24px;width:100%;max-width:380px;margin:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.08em;text-transform:uppercase;" id="modal-abast-title">Novo Abastecimento</div>
+      <button onclick="fecharModalAbastecimento()" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <input type="file" id="a-scan-input" accept="image/*" capture="environment" style="display:none;" onchange="if(event.target.files[0]) scanNotaAbastecimento(event.target.files[0])">
+    <input type="file" id="a-scan-input-gal" accept="image/*" style="display:none;" onchange="if(event.target.files[0]) scanNotaAbastecimento(event.target.files[0])">
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button type="button" onclick="document.getElementById('a-scan-input').click()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px dashed rgba(74,158,223,0.5);border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">📷 Tirar foto</button>
+      <button type="button" onclick="document.getElementById('a-scan-input-gal').click()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px dashed rgba(74,158,223,0.5);border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">🖼️ Galeria</button>
+    </div>
+    <div id="a-scan-status" style="display:none;font-size:12px;color:#4A9EDF;margin:-8px 0 12px;text-align:center;"></div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Veículo</label>
+        <select id="a-veiculo" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;"></select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Data</label>
+          <input id="a-data" type="date" lang="pt-BR" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Odômetro (km)</label>
+          <input id="a-odometro" type="number" inputmode="decimal" placeholder="Ex: 45230" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Litros</label>
+          <input id="a-litros" type="number" inputmode="decimal" step="0.01" placeholder="Ex: 38,5" autocomplete="off" oninput="recalcValorAbast()" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Preço/Litro</label>
+          <input id="a-preco" type="number" inputmode="decimal" step="0.001" placeholder="Ex: 5,89" autocomplete="off" oninput="recalcValorAbast()" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Valor total (R$)</label>
+        <input id="a-valor" type="number" inputmode="decimal" step="0.01" placeholder="0,00" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Combustível</label>
+          <select id="a-combustivel" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;">
+            <option value="gasolina">Gasolina</option>
+            <option value="etanol">Etanol</option>
+            <option value="diesel">Diesel</option>
+            <option value="gnv">GNV</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Posto (opcional)</label>
+          <input id="a-posto" placeholder="Ex: Shell" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 0;">
+        <input id="a-tanque-cheio" type="checkbox" checked style="width:18px;height:18px;accent-color:#F5A623;" />
+        <span style="font-size:13px;color:#F5F5F5;">Enchi o tanque (tanque cheio)</span>
+      </label>
+      <div style="font-size:11px;color:#666;margin-top:-4px;">O consumo (km/L) é calculado entre tanques cheios.</div>
+    </div>
+    <div id="modal-abast-err" style="color:#F44336;font-size:12px;margin-top:8px;min-height:16px;"></div>
+    <button id="btn-salvar-abast" onclick="salvarAbastecimento()" style="width:100%;margin-top:12px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
+      SALVAR ABASTECIMENTO
+    </button>
+  </div>
+</div>
+
+<!-- MODAL MANUTENÇÃO -->
+<div id="modal-manutencao" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9000;align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
+  <div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:16px;padding:24px;width:100%;max-width:380px;margin:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.08em;text-transform:uppercase;" id="modal-manut-title">Nova Manutenção</div>
+      <button onclick="fecharModalManutencao()" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <input type="file" id="m-scan-input" accept="image/*" capture="environment" style="display:none;" onchange="if(event.target.files[0]) scanNotaManutencao(event.target.files[0])">
+    <input type="file" id="m-scan-input-gal" accept="image/*" style="display:none;" onchange="if(event.target.files[0]) scanNotaManutencao(event.target.files[0])">
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button type="button" onclick="document.getElementById('m-scan-input').click()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px dashed rgba(74,158,223,0.5);border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">📷 Tirar foto</button>
+      <button type="button" onclick="document.getElementById('m-scan-input-gal').click()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px dashed rgba(74,158,223,0.5);border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">🖼️ Galeria</button>
+    </div>
+    <div id="m-scan-status" style="display:none;font-size:12px;color:#4A9EDF;margin:-8px 0 12px;text-align:center;"></div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Veículo</label>
+        <select id="m-veiculo" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;"></select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Data</label>
+          <input id="m-data" type="date" lang="pt-BR" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Odômetro (km)</label>
+          <input id="m-odometro" type="number" inputmode="decimal" placeholder="Ex: 156358" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Tipo</label>
+          <select id="m-tipo" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;">
+            <option value="oleo">🛢️ Troca de óleo</option>
+            <option value="filtro">🌀 Filtros</option>
+            <option value="pneu">🛞 Pneus</option>
+            <option value="alinhamento">⚖️ Alinhamento/Balanceamento</option>
+            <option value="freio">🛑 Freios</option>
+            <option value="correia">⚙️ Correia</option>
+            <option value="suspensao">🔩 Suspensão</option>
+            <option value="bateria">🔋 Bateria</option>
+            <option value="revisao">🔍 Revisão</option>
+            <option value="outro">🔧 Outro</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Valor (R$)</label>
+          <input id="m-valor" type="number" inputmode="decimal" step="0.01" placeholder="0,00" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Descrição / peça (opcional)</label>
+        <input id="m-descricao" placeholder="Ex: óleo 5W30 sintético + filtro" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Oficina (opcional)</label>
+        <input id="m-oficina" placeholder="Ex: Oficina do Zé" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Próxima em (km)</label>
+          <input id="m-proxima-km" type="number" inputmode="decimal" placeholder="Ex: 161358" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Próxima em (data)</label>
+          <input id="m-proxima-data" type="date" lang="pt-BR" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:-2px;">
+        <button type="button" onclick="manutProximaKm(5000)" style="background:#111;color:#F5A623;border:1px solid #2A2A2A;border-radius:14px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">+5 mil km</button>
+        <button type="button" onclick="manutProximaKm(10000)" style="background:#111;color:#F5A623;border:1px solid #2A2A2A;border-radius:14px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">+10 mil km</button>
+        <button type="button" onclick="manutProximaMeses(6)" style="background:#111;color:#F5A623;border:1px solid #2A2A2A;border-radius:14px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">+6 meses</button>
+        <button type="button" onclick="manutProximaMeses(12)" style="background:#111;color:#F5A623;border:1px solid #2A2A2A;border-radius:14px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">+1 ano</button>
+      </div>
+      <div style="font-size:11px;color:#666;margin-top:-4px;">Preencha um dos dois (ou os dois) para receber o lembrete — vale o que vencer primeiro.</div>
+    </div>
+    <div id="modal-manut-err" style="color:#F44336;font-size:12px;margin-top:8px;min-height:16px;"></div>
+    <button id="btn-salvar-manut" onclick="salvarManutencao()" style="width:100%;margin-top:12px;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
+      SALVAR MANUTENÇÃO
+    </button>
+  </div>
+</div>
+
+<!-- MODAL VEÍCULO -->
+<div id="modal-veiculo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9100;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:16px;padding:24px;width:100%;max-width:360px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.08em;text-transform:uppercase;" id="modal-veiculo-title">Novo Veículo</div>
+      <button onclick="fecharModalVeiculo()" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Nome</label>
+        <input id="v-nome" placeholder="Ex: Gol, Moto CG" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Tipo</label>
+        <div style="display:flex;gap:8px;" id="v-tipo-chips">
+          <div data-tipo="carro" data-emoji="🚗" onclick="selecionarTipoVeiculo(this)" style="flex:1;text-align:center;background:#111;border:1px solid #F5A623;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;color:#F5F5F5;">🚗 Carro</div>
+          <div data-tipo="moto" data-emoji="🏍️" onclick="selecionarTipoVeiculo(this)" style="flex:1;text-align:center;background:#111;border:1px solid #2A2A2A;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;color:#F5F5F5;">🏍️ Moto</div>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Combustível padrão</label>
+        <select id="v-combustivel" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;">
+          <option value="gasolina">Gasolina</option>
+          <option value="etanol">Etanol</option>
+          <option value="diesel">Diesel</option>
+          <option value="gnv">GNV</option>
+        </select>
+      </div>
+    </div>
+    <div id="modal-veiculo-err" style="color:#F44336;font-size:12px;margin-top:8px;min-height:16px;"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button id="v-excluir-btn" onclick="excluirVeiculo()" style="display:none;background:rgba(244,67,54,0.12);color:#F44336;border:1px solid rgba(244,67,54,0.3);border-radius:8px;padding:14px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🗑️</button>
+      <button id="btn-salvar-veiculo" onclick="salvarVeiculo()" style="flex:1;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
+        SALVAR VEÍCULO
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PLANO DE TROCA -->
+<div id="modal-plano-troca" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9100;align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
+  <div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:16px;padding:24px;width:100%;max-width:380px;margin:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:#F5A623;letter-spacing:0.08em;text-transform:uppercase;" id="modal-plano-title">Plano de troca</div>
+      <button onclick="fecharModalPlanoTroca()" style="background:none;border:none;color:#888;font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Carro pretendido</label>
+        <input id="p-modelo" placeholder="Ex: Corolla 2022" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Valor do carro (R$)</label>
+          <input id="p-alvo" type="number" inputmode="decimal" step="0.01" placeholder="Ex: 80000" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Data alvo</label>
+          <input id="p-data" type="date" lang="pt-BR" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Carro atual vale (R$)</label>
+          <input id="p-atual" type="number" inputmode="decimal" step="0.01" placeholder="venda/troca" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Já guardei (R$)</label>
+          <input id="p-guardado" type="number" inputmode="decimal" step="0.01" placeholder="0,00" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Como pretende pagar</label>
+        <div style="display:flex;gap:8px;" id="p-modo-chips">
+          <div data-modo="avista" onclick="selecionarModoTroca(this)" style="flex:1;text-align:center;background:#111;border:1px solid #F5A623;border-radius:8px;padding:10px 6px;cursor:pointer;font-size:12px;color:#F5F5F5;">💰 À vista</div>
+          <div data-modo="financiamento" onclick="selecionarModoTroca(this)" style="flex:1;text-align:center;background:#111;border:1px solid #2A2A2A;border-radius:8px;padding:10px 6px;cursor:pointer;font-size:12px;color:#F5F5F5;">🏦 Financ.</div>
+          <div data-modo="consorcio" onclick="selecionarModoTroca(this)" style="flex:1;text-align:center;background:#111;border:1px solid #2A2A2A;border-radius:8px;padding:10px 6px;cursor:pointer;font-size:12px;color:#F5F5F5;">🧩 Consórcio</div>
+        </div>
+      </div>
+      <div id="p-fin-fields" style="display:none;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Parcelas</label>
+          <input id="p-fin-parcelas" type="number" inputmode="numeric" placeholder="Ex: 48" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Juros (% a.m.)</label>
+          <input id="p-fin-juros" type="number" inputmode="decimal" step="0.01" placeholder="Ex: 1,5" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+      <div id="p-cons-fields" style="display:none;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Parcelas</label>
+          <input id="p-cons-parcelas" type="number" inputmode="numeric" placeholder="Ex: 80" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Taxa adm. (% total)</label>
+          <input id="p-cons-taxa" type="number" inputmode="decimal" step="0.01" placeholder="Ex: 18" autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;box-sizing:border-box;" />
+        </div>
+      </div>
+    </div>
+    <div id="modal-plano-err" style="color:#F44336;font-size:12px;margin-top:8px;min-height:16px;"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button id="p-excluir-btn" onclick="excluirPlanoTroca()" style="display:none;background:rgba(244,67,54,0.12);color:#F44336;border:1px solid rgba(244,67,54,0.3);border-radius:8px;padding:14px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🗑️</button>
+      <button id="btn-salvar-plano" onclick="salvarPlanoTroca()" style="flex:1;background:#F5A623;color:#111;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.06em;cursor:pointer;">
+        SALVAR PLANO
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+var APP_VERSAO = '1.0.0';
+const SUPA_URL = 'https://vfrgmjhguzukraqsmduo.supabase.co';
+const SUPA_KEY = 'sb_publishable_zWIDdXlUEP3hGwih7bD8JA_eNB911je';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+let currentUser = null;
+
+// Recuperação de senha: quando o usuário abre o link do email, o Supabase
+// dispara PASSWORD_RECOVERY — aí mostramos a tela de definir nova senha.
+supa.auth.onAuthStateChange(function (event) {
+  if (event === 'PASSWORD_RECOVERY') showRecoveryUI();
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// UTILITÁRIOS
+// ═══════════════════════════════════════════════════════════════════
+function getApiKey()   { return localStorage.getItem('gastosIa_apiKey') || ''; }
+
+function esc(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function escJs(v) {
+  return esc(String(v ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'"));
+}
+
+function normalizeDateString(rawDate) {
+  if (!rawDate) return '';
+  let value = String(rawDate).trim().replace(/"/g, '');
+
+  const guessYear = (yearPart) => {
+    const num = parseInt(yearPart, 10);
+    if (isNaN(num)) return yearPart;
+    if (yearPart.length === 2) {
+      return num <= 50 ? 2000 + num : 1900 + num;
+    }
+    return num;
+  };
+
+  if (value.includes('/')) {
+    const parts = value.split('/').map(p => p.trim());
+    if (parts.length === 3) {
+      const day = parts[0].padStart(2, '0');
+      const month = parts[1].padStart(2, '0');
+      const year = guessYear(parts[2]);
+      return `${year}-${month}-${day}`;
+    }
+  }
+
+  if (value.includes('-')) {
+    const parts = value.split('-').map(p => p.trim());
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+      }
+      if (parts[2].length === 4) {
+        return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      }
+      const year = guessYear(parts[2]);
+      return `${year}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    }
+  }
+
+  const digits = value.replace(/\D/g, '');
+  if (digits.length === 8) {
+    const asYmd = `${digits.slice(0,4)}-${digits.slice(4,6)}-${digits.slice(6,8)}`;
+    const tryDate = new Date(asYmd + 'T12:00:00');
+    if (!isNaN(tryDate)) return asYmd;
+    const asDmy = `${digits.slice(4,8)}-${digits.slice(2,4)}-${digits.slice(0,2)}`;
+    if (!isNaN(new Date(asDmy + 'T12:00:00'))) return asDmy;
+  }
+
+  return value.slice(0, 10);
+}
+
+function parseExpenseDate(rawDate) {
+  const normalized = normalizeDateString(rawDate);
+  const date = new Date(normalized + 'T12:00:00');
+  if (!isNaN(date)) return date;
+  const fallback = new Date(rawDate);
+  return isNaN(fallback) ? new Date() : fallback;
+}
+
+function compressImage(dataUrl, maxWidth, quality) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = dataUrl;
+  });
+}
+
+let toastTimer;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AUTENTICAÇÃO
+// ═══════════════════════════════════════════════════════════════════
+let authTab = 'login';
+
+function handleAuthBtn() {
+  if (authTab === 'login') authLogin();
+  else authRegister();
+}
+
+function switchAuthTab(tab) {
+  authTab = tab;
+  const isLogin = tab === 'login';
+  document.getElementById('tab-login').style.background = isLogin ? '#F5A623' : 'transparent';
+  document.getElementById('tab-login').style.color = isLogin ? '#111' : '#888';
+  document.getElementById('tab-login').style.border = isLogin ? 'none' : '1px solid #2A2A2A';
+  document.getElementById('tab-register').style.background = isLogin ? 'transparent' : '#F5A623';
+  document.getElementById('tab-register').style.color = isLogin ? '#888' : '#111';
+  document.getElementById('tab-register').style.border = isLogin ? '1px solid #2A2A2A' : 'none';
+  const btn = document.getElementById('auth-btn');
+  btn.textContent = isLogin ? 'ENTRAR' : 'CADASTRAR';
+  document.getElementById('auth-forgot').style.display = isLogin ? '' : 'none';
+  document.getElementById('auth-err').textContent = '';
+}
+
+// Traduz o erro do Supabase para algo acionável. O caso que mais dói é o de rede:
+// "Failed to fetch" não diz nada e costuma ser o projeto pausado por inatividade
+// (plano free do Supabase hiberna depois de ~1 semana sem requisição).
+function mensagemErroAuth(e) {
+  if (!navigator.onLine) return '📡 Você está sem internet. Conecte e tente de novo.';
+  var msg = String((e && e.message) || e || '');
+  var m = msg.toLowerCase();
+  var falhaDeRede = ['failed to fetch', 'networkerror', 'network request failed', 'load failed', 'fetch failed'];
+  if (falhaDeRede.some(function(t) { return m.indexOf(t) >= 0; })) {
+    return '🔌 Não consegui falar com o servidor. Sua internet parece ok, então o banco pode estar hibernando — abra o painel do Supabase e use "Restore project". Costuma voltar em 1 a 3 minutos.';
+  }
+  if (m.indexOf('invalid login credentials') >= 0) return 'Email ou senha incorretos.';
+  if (m.indexOf('email not confirmed') >= 0) return 'Confirme seu email pelo link que enviamos antes de entrar.';
+  if (m.indexOf('user already registered') >= 0 || m.indexOf('already been registered') >= 0) return 'Esse email já tem conta. Toque em ENTRAR.';
+  if (m.indexOf('password should be at least') >= 0) return 'Senha mínima: 6 caracteres.';
+  if (m.indexOf('unable to validate email') >= 0 || m.indexOf('invalid email') >= 0) return 'Email inválido — confira se não falta algo.';
+  if (m.indexOf('for security purposes') >= 0 || m.indexOf('rate limit') >= 0 || m.indexOf('too many requests') >= 0) {
+    return 'Muitas tentativas seguidas. Espere alguns instantes e tente de novo.';
+  }
+  if (m.indexOf('timeout') >= 0 || m.indexOf('timed out') >= 0) return '⏱️ O servidor demorou demais para responder. Tente de novo.';
+  if (/^5\d\d/.test(msg) || m.indexOf('service unavailable') >= 0 || m.indexOf('bad gateway') >= 0) {
+    return '🔧 O servidor respondeu com erro. Tente de novo em instantes.';
+  }
+  return msg || 'Não consegui completar. Tente de novo.';
+}
+
+async function authLogin() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const err   = document.getElementById('auth-err');
+  if (!email || !pass) { err.textContent = 'Preencha email e senha.'; return; }
+  err.textContent = '';
+  const btn = document.getElementById('auth-btn');
+  btn.disabled = true;
+  let data, error;
+  // Falha de rede pode lançar em vez de voltar em `error`; sem o finally o botão
+  // ficava desabilitado e a tela travava sem explicação.
+  try {
+    ({ data, error } = await supa.auth.signInWithPassword({ email, password: pass }));
+  } catch (e) {
+    error = e;
+  } finally {
+    btn.disabled = false;
+  }
+  if (error) { err.textContent = mensagemErroAuth(error); return; }
+  currentUser = data.user;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-root').style.display = '';
+  iniciarApp();
+}
+
+async function authRegister() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const err   = document.getElementById('auth-err');
+  if (!email || !pass) { err.textContent = 'Preencha email e senha.'; return; }
+  if (pass.length < 6) { err.textContent = 'Senha mínima: 6 caracteres.'; return; }
+  err.textContent = '';
+  const btn = document.getElementById('auth-btn');
+  btn.disabled = true;
+  let data, error;
+  try {
+    ({ data, error } = await supa.auth.signUp({ email, password: pass }));
+  } catch (e) {
+    error = e;
+  } finally {
+    btn.disabled = false;
+  }
+  if (error) { err.textContent = mensagemErroAuth(error); return; }
+  currentUser = data.user;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-root').style.display = '';
+  iniciarApp();
+}
+
+async function authLogout() {
+  await supa.auth.signOut();
+  currentUser = null;
+  veiculos = []; abastecimentos = []; manutencoes = []; planoTroca = null;
+  veiculoSelecionadoId = null;
+  manutAlertsHomeCache = { t: 0, html: '' };
+  document.getElementById('auth-screen').style.display = '';
+  document.getElementById('app-root').style.display = 'none';
+}
+
+// Envia o email de recuperação de senha (usa o email já digitado no login)
+async function authForgotPassword() {
+  const email = document.getElementById('auth-email').value.trim();
+  const err = document.getElementById('auth-err');
+  if (!email) { err.textContent = 'Digite seu email acima e toque em "Esqueci minha senha".'; return; }
+  err.textContent = '';
+  const btn = document.getElementById('auth-btn'); btn.disabled = true;
+  const redirectTo = window.location.origin + window.location.pathname;
+  let error;
+  try {
+    ({ error } = await supa.auth.resetPasswordForEmail(email, { redirectTo }));
+  } catch (e) {
+    error = e;
+  } finally {
+    btn.disabled = false;
+  }
+  if (error) { err.style.color = '#F44336'; err.textContent = mensagemErroAuth(error); return; }
+  err.style.color = '#4CAF50';
+  err.textContent = '✓ Enviamos um link para ' + email + '. Confira o email (e o spam).';
+  setTimeout(function () { err.style.color = '#F44336'; err.textContent = ''; }, 9000);
+}
+
+// Mostra o painel de "definir nova senha" (após clicar no link do email)
+function showRecoveryUI() {
+  document.getElementById('auth-screen').style.display = '';
+  document.getElementById('app-root').style.display = 'none';
+  document.getElementById('auth-normal').style.display = 'none';
+  document.getElementById('auth-recovery').style.display = 'flex';
+  document.getElementById('auth-recovery-err').textContent = '';
+}
+
+// Salva a nova senha durante a recuperação e entra no app
+async function authSetNewPassword() {
+  const pass = document.getElementById('auth-newpass').value;
+  const err = document.getElementById('auth-recovery-err');
+  if (!pass || pass.length < 6) { err.textContent = 'Senha mínima: 6 caracteres.'; return; }
+  err.textContent = '';
+  let data, error;
+  try {
+    ({ data, error } = await supa.auth.updateUser({ password: pass }));
+  } catch (e) {
+    error = e;
+  }
+  if (error) { err.textContent = mensagemErroAuth(error); return; }
+  currentUser = (data && data.user) || currentUser;
+  document.getElementById('auth-recovery').style.display = 'none';
+  document.getElementById('auth-normal').style.display = '';
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-root').style.display = '';
+  iniciarApp();
+  showToast('✓ Senha atualizada!');
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// VEÍCULOS · COMBUSTÍVEL · MANUTENÇÃO · TROCA
+// ═══════════════════════════════════════════════════════════════════
+var veiculos = [];
+var abastecimentos = [];
+var manutencoes = [];
+var veiculoSelecionadoId = null;
+var veiculoEditandoId = null;
+var abastecimentoEditandoId = null;
+var tipoVeiculoSel = 'carro';
+var emojiVeiculoSel = '🚗';
+
+async function carregarVeiculos() {
+  if (!currentUser) return;
+  var res = await supa.from('veiculos').select('*').eq('user_id', currentUser.id).eq('ativo', true).order('criado_em');
+  veiculos = res.data || [];
+}
+
+async function carregarAbastecimentos(veiculoId) {
+  if (!currentUser || !veiculoId) { abastecimentos = []; return; }
+  var res = await supa.from('abastecimentos').select('*').eq('user_id', currentUser.id).eq('veiculo_id', veiculoId).order('odometro', { ascending: true });
+  abastecimentos = res.data || [];
+}
+
+async function carregarManutencoes(veiculoId) {
+  if (!currentUser || !veiculoId) { manutencoes = []; return; }
+  var res = await supa.from('manutencoes').select('*').eq('user_id', currentUser.id).eq('veiculo_id', veiculoId).order('data', { ascending: false });
+  manutencoes = res.data || [];
+}
+
+var planoTroca = null;
+async function carregarPlanoTroca(veiculoId) {
+  if (!currentUser || !veiculoId) { planoTroca = null; return; }
+  var res = await supa.from('planos_troca').select('*').eq('user_id', currentUser.id).eq('veiculo_id', veiculoId).maybeSingle();
+  planoTroca = res.data || null;
+}
+
+var MANUT_TIPOS = {
+  oleo: '🛢️ Troca de óleo', filtro: '🌀 Filtros', pneu: '🛞 Pneus', alinhamento: '⚖️ Alinham./Balanceamento',
+  freio: '🛑 Freios', correia: '⚙️ Correia', suspensao: '🔩 Suspensão', bateria: '🔋 Bateria', revisao: '🔍 Revisão', outro: '🔧 Outro'
+};
+function manutTipoLabel(tipo) { return MANUT_TIPOS[tipo] || MANUT_TIPOS.outro; }
+
+// Km atual do veículo = maior odômetro registrado (abastecimento ou manutenção)
+function kmAtualVeiculo() {
+  var km = 0;
+  abastecimentos.forEach(function(r) { if (Number(r.odometro) > km) km = Number(r.odometro); });
+  manutencoes.forEach(function(r) { if (Number(r.odometro) > km) km = Number(r.odometro); });
+  return km;
+}
+
+// Lembretes: considera só a manutenção MAIS RECENTE de cada tipo (a nova troca supera a anterior).
+// Retorna [{tipo, label, status:'vencida'|'proxima', texto}]
+function alertasManutencao() {
+  return calcAlertasManutencao(manutencoes, kmAtualVeiculo());
+}
+function calcAlertasManutencao(lista, kmAtual) {
+  var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  var maisRecente = {};
+  lista.forEach(function(r) {
+    var atual = maisRecente[r.tipo];
+    if (!atual || Number(r.odometro) > Number(atual.odometro) || (Number(r.odometro) === Number(atual.odometro) && String(r.data) > String(atual.data))) {
+      maisRecente[r.tipo] = r;
+    }
+  });
+  var fmtKm = function(v) { return Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 0 }); };
+  var alertas = [];
+  Object.keys(maisRecente).forEach(function(tipo) {
+    var r = maisRecente[tipo];
+    var restKm = null, restDias = null;
+    if (r.proxima_km && Number(r.proxima_km) > 0 && kmAtual > 0) restKm = Number(r.proxima_km) - kmAtual;
+    if (r.proxima_data) {
+      var d = parseExpenseDate(r.proxima_data);
+      if (d && !isNaN(d)) { d.setHours(0,0,0,0); restDias = Math.round((d - hoje) / 86400000); }
+    }
+    if (restKm === null && restDias === null) return;
+    var vencida = (restKm !== null && restKm <= 0) || (restDias !== null && restDias <= 0);
+    var proxima = !vencida && ((restKm !== null && restKm <= 500) || (restDias !== null && restDias <= 15));
+    if (!vencida && !proxima) return;
+    var partes = [];
+    if (restKm !== null) partes.push(restKm <= 0 ? 'passou ' + fmtKm(-restKm) + ' km' : 'faltam ' + fmtKm(restKm) + ' km');
+    if (restDias !== null) partes.push(restDias === 0 ? 'vence hoje' : (restDias < 0 ? 'venceu há ' + (-restDias) + ' dia' + (restDias === -1 ? '' : 's') : 'vence em ' + restDias + ' dia' + (restDias === 1 ? '' : 's')));
+    alertas.push({ tipo: tipo, label: manutTipoLabel(tipo), status: vencida ? 'vencida' : 'proxima', texto: partes.join(' · ') });
+  });
+  // Vencidas primeiro
+  alertas.sort(function(a, b) { return (a.status === 'vencida' ? 0 : 1) - (b.status === 'vencida' ? 0 : 1); });
+  return alertas;
+}
+
+// Alertas de manutenção na tela Início — todos os veículos, com cache de 5 min
+var manutAlertsHomeCache = { t: 0, html: '' };
+async function renderAlertasManutencaoHome() {
+  var el = document.getElementById('manut-alerts-home');
+  if (!el || !currentUser) return;
+  if (Date.now() - manutAlertsHomeCache.t < 5 * 60 * 1000) { el.innerHTML = manutAlertsHomeCache.html; return; }
+  try {
+    var rv = await supa.from('veiculos').select('id,nome,emoji').eq('user_id', currentUser.id).eq('ativo', true);
+    var veics = rv.data || [];
+    if (!veics.length) { manutAlertsHomeCache = { t: Date.now(), html: '' }; el.innerHTML = ''; return; }
+    var rm = await supa.from('manutencoes').select('veiculo_id,tipo,data,odometro,proxima_km,proxima_data').eq('user_id', currentUser.id);
+    var manuts = rm.data || [];
+    if (!manuts.length) { manutAlertsHomeCache = { t: Date.now(), html: '' }; el.innerHTML = ''; return; }
+    var ra = await supa.from('abastecimentos').select('veiculo_id,odometro').eq('user_id', currentUser.id);
+    var abasts = ra.data || [];
+    var html = '';
+    veics.forEach(function(v) {
+      var mv = manuts.filter(function(r) { return r.veiculo_id === v.id; });
+      if (!mv.length) return;
+      var km = 0;
+      abasts.forEach(function(r) { if (r.veiculo_id === v.id && Number(r.odometro) > km) km = Number(r.odometro); });
+      mv.forEach(function(r) { if (Number(r.odometro) > km) km = Number(r.odometro); });
+      calcAlertasManutencao(mv, km).forEach(function(a) {
+        var venc = a.status === 'vencida';
+        html += '<div class="alert-banner ' + (venc ? 'danger' : 'warning') + '" onclick="irParaVeiculo(&apos;' + escJs(v.id) + '&apos;, &apos;manutencao&apos;)" style="cursor:pointer;">'
+          + (venc ? '🚨' : '⚠️') + ' ' + esc(a.label) + (venc ? ' vencida' : '') + ' — ' + (v.emoji || '🚗') + ' ' + esc(v.nome) + ' (' + esc(a.texto) + ')</div>';
+      });
+    });
+    manutAlertsHomeCache = { t: Date.now(), html: html };
+    el.innerHTML = html;
+  } catch (e) { console.error('renderAlertasManutencaoHome:', e); }
+}
+
+// Calcula métricas por abastecimento (ordenado por odômetro) + médias
+function calcularMetricasVeiculo(lista) {
+  var arr = lista.slice().sort(function(a, b) { return Number(a.odometro) - Number(b.odometro); });
+  var odoLastFull = null, litrosAcc = 0;
+  var consumos = [];
+  for (var i = 0; i < arr.length; i++) {
+    var r = arr[i];
+    r._kmRodados = (i > 0) ? (Number(r.odometro) - Number(arr[i-1].odometro)) : null;
+    r._consumo = null;
+    r._custoKm = (r._kmRodados && r._kmRodados > 0) ? (Number(r.valor_total) / r._kmRodados) : null;
+    // Método tanque cheio
+    if (odoLastFull !== null) litrosAcc += Number(r.litros);
+    if (r.tanque_cheio) {
+      if (odoLastFull !== null && litrosAcc > 0 && Number(r.odometro) > odoLastFull) {
+        r._consumo = (Number(r.odometro) - odoLastFull) / litrosAcc;
+        consumos.push(r._consumo);
+      }
+      odoLastFull = Number(r.odometro);
+      litrosAcc = 0;
+    }
+  }
+  var somaValor = arr.reduce(function(s, r) { return s + Number(r.valor_total); }, 0);
+  var somaLitros = arr.reduce(function(s, r) { return s + Number(r.litros); }, 0);
+  var mesAtual = new Date().toISOString().slice(0, 7); // YYYY-MM
+  var gastoMes = arr.filter(function(r) { return String(r.data || '').slice(0, 7) === mesAtual; })
+                    .reduce(function(s, r) { return s + Number(r.valor_total); }, 0);
+  return {
+    ordenado: arr,
+    consumoMedio: consumos.length ? consumos.reduce(function(s, c) { return s + c; }, 0) / consumos.length : null,
+    precoMedio: somaLitros > 0 ? somaValor / somaLitros : null,
+    gastoMes: gastoMes,
+    totalGasto: somaValor
+  };
+}
+
+// Agrupa os abastecimentos por mês ou por semana (usa as métricas já calculadas)
+var resumoModoCombustivel = 'mes';
+function setResumoModo(modo) { resumoModoCombustivel = modo; renderCombustivel(); }
+
+function resumoAgrupadoCombustivel(ordenado, modo) {
+  var MES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var pad = function(n) { return String(n).padStart(2, '0'); };
+  var map = {};
+  ordenado.forEach(function(r) {
+    var sortKey, label;
+    if (modo === 'semana') {
+      var d = parseExpenseDate(r.data);
+      var diff = (d.getDay() + 6) % 7; // dias desde a segunda-feira
+      var mon = new Date(d.getFullYear(), d.getMonth(), d.getDate() - diff);
+      var sun = new Date(d.getFullYear(), d.getMonth(), d.getDate() - diff + 6);
+      sortKey = mon.getFullYear() + '-' + pad(mon.getMonth() + 1) + '-' + pad(mon.getDate());
+      label = pad(mon.getDate()) + '/' + pad(mon.getMonth() + 1) + '–' + pad(sun.getDate()) + '/' + pad(sun.getMonth() + 1);
+    } else {
+      var mes = String(r.data || '').slice(0, 7);
+      if (!mes) return;
+      sortKey = mes;
+      var p = mes.split('-');
+      label = MES_ABREV[parseInt(p[1], 10) - 1] + '/' + p[0].slice(2);
+    }
+    if (!map[sortKey]) map[sortKey] = { label: label, gasto: 0, litros: 0, km: 0, consumos: [] };
+    map[sortKey].gasto += Number(r.valor_total);
+    map[sortKey].litros += Number(r.litros);
+    if (r._kmRodados && r._kmRodados > 0) map[sortKey].km += r._kmRodados;
+    if (r._consumo != null) map[sortKey].consumos.push(r._consumo);
+  });
+  return Object.keys(map).sort().reverse().map(function(k) {
+    var o = map[k];
+    o.consumo = o.consumos.length ? o.consumos.reduce(function(s, c) { return s + c; }, 0) / o.consumos.length : null;
+    return o;
+  });
+}
+
+function selecionarVeiculo(id) {
+  veiculoSelecionadoId = id;
+  renderTelaVeiculo();
+}
+
+function renderCombustivel() {
+  var el = document.getElementById('combustivel-content');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:#555;">Carregando...</div>';
+  carregarVeiculos().then(function() {
+    if (veiculos.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#555;"><div style="font-size:48px;margin-bottom:16px;">🚗</div><div style="font-size:14px;">Nenhum veículo cadastrado</div><div style="font-size:12px;margin-top:8px;color:#444;">Cadastre um veículo para registrar abastecimentos e acompanhar o consumo.</div><button class="empty-cta" style="margin-top:16px;" onclick="abrirModalVeiculo()">+ Cadastrar veículo</button></div>';
+      return;
+    }
+    if (!veiculoSelecionadoId || !veiculos.find(function(v) { return v.id === veiculoSelecionadoId; })) {
+      veiculoSelecionadoId = veiculos[0].id;
+    }
+    Promise.all([carregarAbastecimentos(veiculoSelecionadoId), carregarManutencoes(veiculoSelecionadoId)]).then(function() {
+      var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
+      var m = calcularMetricasVeiculo(abastecimentos);
+      var html = '';
+
+      html += chipsVeiculo();
+
+      // Card de estatísticas
+      var fmtNum = function(v, dec) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec }); };
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+      html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:18px;color:#F5F5F5;">' + (vSel.emoji || '🚗') + ' ' + esc(vSel.nome) + '</div>';
+      html += '<button onclick="editarVeiculo(&apos;' + escJs(vSel.id) + '&apos;)" style="background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;">⚙️ Editar</button>';
+      html += '</div>';
+
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">';
+      html += statBox('Consumo médio', m.consumoMedio != null ? fmtNum(m.consumoMedio, 1) + ' km/L' : '—', '#4CAF50');
+      html += statBox('Preço médio/L', m.precoMedio != null ? 'R$ ' + fmtNum(m.precoMedio, 2) : '—', '#F5A623');
+      html += statBox('Gasto no mês', 'R$ ' + fmtNum(m.gastoMes, 2), '#F44336');
+      html += statBox('Abastecimentos', String(abastecimentos.length), '#4A9EDF');
+      html += '</div>';
+
+      // Atalho para a tela de Manutenção — leva junto o aviso quando há algo vencendo.
+      var nAlertas = alertasManutencao().length;
+      html += '<div onclick="showPage(&apos;manutencao&apos;)" style="display:flex;align-items:center;gap:12px;background:' + (nAlertas ? 'rgba(244,67,54,0.10)' : '#1C1C1C') + ';border:1px solid ' + (nAlertas ? 'rgba(244,67,54,0.35)' : '#2A2A2A') + ';border-radius:12px;padding:12px 14px;margin-bottom:12px;cursor:pointer;">';
+      html += '<div style="font-size:20px;">🔧</div>';
+      html += '<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#F5F5F5;">Manutenção</div>';
+      html += '<div style="font-size:12px;color:' + (nAlertas ? '#F44336' : '#888') + ';margin-top:2px;">' + (nAlertas ? nAlertas + ' lembrete' + (nAlertas > 1 ? 's' : '') + ' de revisão' : (manutencoes.length ? manutencoes.length + ' registro' + (manutencoes.length > 1 ? 's' : '') : 'Nenhum registro ainda')) + '</div></div>';
+      html += '<div style="font-size:18px;color:#888;">›</div>';
+      html += '</div>';
+
+
+      // Resumo por mês/semana (evolução) + enviar por mensagem
+      var resumo = resumoAgrupadoCombustivel(m.ordenado, resumoModoCombustivel);
+      if (resumo.length) {
+        var chip = function(modo, txt) { var on = resumoModoCombustivel === modo; return '<div onclick="setResumoModo(&apos;' + modo + '&apos;)" style="cursor:pointer;padding:5px 14px;border-radius:16px;font-size:12px;font-weight:600;background:' + (on ? '#F5A623' : '#1C1C1C') + ';color:' + (on ? '#111' : '#888') + ';border:1px solid ' + (on ? '#F5A623' : '#2A2A2A') + ';">' + txt + '</div>'; };
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 8px;">';
+        html += '<div style="display:flex;gap:6px;">' + chip('mes', 'Mês') + chip('semana', 'Semana') + '</div>';
+        html += '<div style="display:flex;gap:6px;">';
+        html += '<button onclick="compartilharResumoCombustivel()" style="background:rgba(76,175,80,0.12);color:#4CAF50;border:1px solid rgba(76,175,80,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">📤 Enviar</button>';
+        html += '<button onclick="enviarPdfRelatorioCombustivel()" style="background:rgba(244,67,54,0.10);color:#E57373;border:1px solid rgba(244,67,54,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">📄 PDF</button>';
+        html += '<button onclick="imprimirRelatorioCombustivel()" style="background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px solid rgba(74,158,223,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">🖨️ Imprimir</button>';
+        html += '</div>';
+        html += '</div>';
+        html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;overflow:hidden;margin-bottom:16px;">';
+        resumo.forEach(function(o, i) {
+          // Métrica em célula com alinhamento e valor grande (aproveita as laterais)
+          var metCel = function(label, valor, align) {
+            return '<div style="text-align:' + align + ';"><div style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:0.04em;">' + esc(label) + '</div><div style="font-size:16px;color:#F5F5F5;font-family:IBM Plex Mono,monospace;font-weight:600;">' + esc(valor) + '</div></div>';
+          };
+          html += '<div style="display:flex;align-items:center;gap:14px;padding:13px 14px;' + (i > 0 ? 'border-top:1px solid #2A2A2A;' : '') + '">';
+          html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;color:#F5F5F5;min-width:46px;">' + esc(o.label) + '</div>';
+          // Grade 2x2 esticada: coluna esquerda à esquerda, direita à direita — sem vão lateral
+          html += '<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:11px 16px;">';
+          html += metCel('Gasto', 'R$ ' + fmtNum(o.gasto, 2), 'left');
+          html += metCel('Litros', fmtNum(o.litros, 1) + 'L', 'right');
+          html += metCel('Rodou', o.km > 0 ? fmtNum(o.km, 0) + ' km' : '—', 'left');
+          html += metCel('Consumo', o.consumo != null ? fmtNum(o.consumo, 1) + ' km/L' : '—', 'right');
+          html += '</div></div>';
+        });
+        html += '</div>';
+      }
+
+      // Lista de abastecimentos (mais recente primeiro)
+      if (abastecimentos.length === 0) {
+        html += '<div style="text-align:center;padding:40px 20px;color:#555;"><div style="font-size:13px;">Nenhum abastecimento ainda</div><div style="font-size:12px;margin-top:6px;color:#444;">Toque em "+ Abastecer" para registrar o primeiro. O consumo aparece a partir do 2º.</div></div>';
+      } else {
+        html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Histórico</div>';
+        m.ordenado.slice().reverse().forEach(function(r) {
+          html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:12px 14px;margin-bottom:10px;">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
+          html += '<div>';
+          html += '<div style="font-family:IBM Plex Mono,monospace;font-size:15px;font-weight:700;color:#F5F5F5;">' + fmtNum(r.odometro, 0) + ' km</div>';
+          html += '<div style="font-size:11px;color:#888;margin-top:2px;">' + String(r.data || '').split('-').reverse().join('/') + ' · ' + fmtNum(r.litros, 2) + 'L' + (r.tanque_cheio ? '' : ' (parcial)') + (r.posto ? ' · ' + esc(r.posto) : '') + '</div>';
+          html += '</div>';
+          html += '<div style="text-align:right;"><div style="font-family:IBM Plex Mono,monospace;font-size:15px;font-weight:700;color:#F44336;">R$ ' + fmtNum(r.valor_total, 2) + '</div><div style="font-size:11px;color:#888;margin-top:2px;">R$ ' + fmtNum(r.preco_litro, 3) + '/L</div></div>';
+          html += '</div>';
+          // Métricas do leg
+          html += '<div style="display:flex;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid #2A2A2A;">';
+          html += legMetric('Rodou', r._kmRodados != null ? fmtNum(r._kmRodados, 0) + ' km' : '—');
+          html += legMetric('Consumo', r._consumo != null ? fmtNum(r._consumo, 1) + ' km/L' : '—');
+          html += legMetric('Custo/km', r._custoKm != null ? 'R$ ' + fmtNum(r._custoKm, 2) : '—');
+          html += '<div style="margin-left:auto;display:flex;gap:6px;">';
+          html += '<button onclick="abrirModalAbastecimento(&apos;' + escJs(r.id) + '&apos;)" style="background:#2A2A2A;color:#888;border:none;border-radius:6px;padding:5px 9px;font-size:12px;cursor:pointer;">✏️</button>';
+          html += '<button onclick="excluirAbastecimento(&apos;' + escJs(r.id) + '&apos;)" style="background:rgba(244,67,54,0.12);color:#F44336;border:none;border-radius:6px;padding:5px 9px;font-size:12px;cursor:pointer;">🗑️</button>';
+          html += '</div>';
+          html += '</div>';
+          html += '</div>';
+        });
+      }
+
+
+      el.innerHTML = html;
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MANUTENÇÃO — tela própria (Combustível cuida só de abastecimento)
+// ═══════════════════════════════════════════════════════════════════
+
+// Chips de seleção de veículo — compartilhados pelas telas de Combustível e Manutenção.
+function chipsVeiculo() {
+  var html = '<div style="display:flex;gap:8px;overflow-x:auto;padding:12px 0 14px;">';
+  veiculos.forEach(function(v) {
+    var ativo = v.id === veiculoSelecionadoId;
+    html += '<div onclick="selecionarVeiculo(&apos;' + escJs(v.id) + '&apos;)" style="flex:0 0 auto;display:flex;align-items:center;gap:6px;background:' + (ativo ? '#F5A623' : '#1C1C1C') + ';color:' + (ativo ? '#111' : '#F5F5F5') + ';border:1px solid ' + (ativo ? '#F5A623' : '#2A2A2A') + ';border-radius:20px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;">' + (v.emoji || '🚗') + ' ' + esc(v.nome) + '</div>';
+  });
+  html += '<div onclick="abrirModalVeiculo()" style="flex:0 0 auto;display:flex;align-items:center;background:#1C1C1C;color:#888;border:1px dashed #2A2A2A;border-radius:20px;padding:8px 14px;cursor:pointer;font-size:13px;">+ Veículo</div>';
+  html += '</div>';
+  return html;
+}
+
+// Re-renderiza a tela de veículo que estiver aberta. Salvar/excluir manutenção
+// pode ser disparado da tela de Manutenção, da de Combustível ou do alerta na Início.
+function renderTelaVeiculo() {
+  var p = paginaAtiva();
+  if (p === 'manutencao') renderManutencao();
+  else if (p === 'troca') renderTroca();
+  else if (p === 'home') renderInicio();
+  else renderCombustivel();
+}
+
+// Total gasto em manutenção e rateio por km rodado (os km vêm dos abastecimentos).
+function metricasManutencao() {
+  var total = manutencoes.reduce(function(s, r) { return s + Number(r.valor || 0); }, 0);
+  var m = calcularMetricasVeiculo(abastecimentos);
+  var totalKm = m.ordenado.reduce(function(s, r) { return s + (r._kmRodados > 0 ? r._kmRodados : 0); }, 0);
+  var gastoComKm = m.ordenado.reduce(function(s, r) { return s + (r._kmRodados > 0 ? Number(r.valor_total) : 0); }, 0);
+  return {
+    total: total,
+    totalKm: totalKm,
+    custoKm: totalKm > 0 ? total / totalKm : null,
+    custoKmCombustivel: totalKm > 0 ? gastoComKm / totalKm : null
+  };
+}
+
+function renderManutencao() {
+  var el = document.getElementById('manutencao-content');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:#555;">Carregando...</div>';
+  carregarVeiculos().then(function() {
+    if (veiculos.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#555;"><div style="font-size:48px;margin-bottom:16px;">🔧</div><div style="font-size:14px;">Nenhum veículo cadastrado</div><div style="font-size:12px;margin-top:8px;color:#444;">Cadastre um veículo para registrar revisões, peças e receber os lembretes.</div><button class="empty-cta" style="margin-top:16px;" onclick="abrirModalVeiculo()">+ Cadastrar veículo</button></div>';
+      return;
+    }
+    if (!veiculoSelecionadoId || !veiculos.find(function(v) { return v.id === veiculoSelecionadoId; })) {
+      veiculoSelecionadoId = veiculos[0].id;
+    }
+    // Abastecimentos entram no cálculo: são eles que dizem quantos km o carro rodou.
+    Promise.all([carregarManutencoes(veiculoSelecionadoId), carregarAbastecimentos(veiculoSelecionadoId)]).then(function() {
+      var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
+      var fmtNum = function(v, dec) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec }); };
+      var mm = metricasManutencao();
+      var kmAtual = kmAtualVeiculo();
+      var html = '';
+
+      html += chipsVeiculo();
+
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+      html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:18px;color:#F5F5F5;">' + (vSel.emoji || '🚗') + ' ' + esc(vSel.nome) + '</div>';
+      html += '<button onclick="editarVeiculo(&apos;' + escJs(vSel.id) + '&apos;)" style="background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;">⚙️ Editar</button>';
+      html += '</div>';
+
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">';
+      html += statBox('Total em manutenção', 'R$ ' + fmtNum(mm.total, 2), '#F44336');
+      html += statBox('Registros', String(manutencoes.length), '#60a5fa');
+      html += statBox('Custo/km manutenção', mm.custoKm != null ? 'R$ ' + fmtNum(mm.custoKm, 2) : '—', '#F5A623');
+      html += statBox('Km atual', kmAtual > 0 ? fmtNum(kmAtual, 0) + ' km' : '—', '#4CAF50');
+      html += '</div>';
+
+      // Lembretes (vencidos / próximos do vencimento)
+      var alertas = alertasManutencao();
+      if (alertas.length) {
+        alertas.forEach(function(a) {
+          var venc = a.status === 'vencida';
+          var cor = venc ? '#F44336' : '#F5A623';
+          var bg = venc ? 'rgba(244,67,54,0.10)' : 'rgba(245,166,35,0.10)';
+          html += '<div style="display:flex;align-items:center;gap:10px;background:' + bg + ';border:1px solid ' + cor + '44;border-radius:12px;padding:12px 14px;margin-bottom:10px;">';
+          html += '<div style="font-size:20px;">' + (venc ? '🚨' : '⚠️') + '</div>';
+          html += '<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:' + cor + ';">' + esc(a.label) + (venc ? ' vencida' : '') + '</div>';
+          html += '<div style="font-size:12px;color:#888;margin-top:2px;">' + esc(a.texto) + '</div></div>';
+          html += '<button onclick="abrirModalManutencao(null, &apos;' + escJs(a.tipo) + '&apos;)" style="background:' + cor + '22;color:' + cor + ';border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;">Registrar</button>';
+          html += '</div>';
+        });
+      }
+
+      if (manutencoes.length === 0) {
+        html += '<div style="text-align:center;padding:24px 20px;color:#555;background:#1C1C1C;border:1px dashed #2A2A2A;border-radius:12px;"><div style="font-size:13px;">Nenhuma manutenção registrada</div><div style="font-size:12px;margin-top:6px;color:#444;">Registre troca de óleo, pneus etc. e informe a próxima (km ou data) para receber o lembrete aqui.</div></div>';
+        el.innerHTML = html;
+        return;
+      }
+
+      // Ações do relatório — só de manutenção.
+      html += '<div style="display:flex;gap:6px;justify-content:flex-end;margin:4px 0 12px;">';
+      html += '<button onclick="compartilharResumoManutencao()" style="background:rgba(76,175,80,0.12);color:#4CAF50;border:1px solid rgba(76,175,80,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">📤 Enviar</button>';
+      html += '<button onclick="enviarPdfRelatorioManutencao()" style="background:rgba(244,67,54,0.10);color:#E57373;border:1px solid rgba(244,67,54,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">📄 PDF</button>';
+      html += '<button onclick="imprimirRelatorioManutencao()" style="background:rgba(74,158,223,0.12);color:#4A9EDF;border:1px solid rgba(74,158,223,0.3);border-radius:16px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">🖨️ Imprimir</button>';
+      html += '</div>';
+
+      // Gasto por tipo de serviço — mostra onde o dinheiro do carro está indo.
+      var porTipo = {};
+      manutencoes.forEach(function(r) {
+        var t = r.tipo || 'outro';
+        if (!porTipo[t]) porTipo[t] = { valor: 0, qtd: 0 };
+        porTipo[t].valor += Number(r.valor || 0);
+        porTipo[t].qtd++;
+      });
+      var tipos = Object.entries(porTipo).sort(function(a, b) { return b[1].valor - a[1].valor; });
+      if (tipos.length > 1) {
+        html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:14px;margin-bottom:16px;">';
+        html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Por tipo de serviço</div>';
+        tipos.forEach(function(entry) {
+          var pct = mm.total > 0 ? (entry[1].valor / mm.total * 100) : 0;
+          html += '<div style="margin-bottom:10px;">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+          html += '<span style="font-size:13px;color:#F5F5F5;">' + esc(manutTipoLabel(entry[0])) + '<span style="font-size:10px;color:#555;margin-left:6px;">' + entry[1].qtd + 'x</span></span>';
+          html += '<div style="text-align:right;"><span style="font-size:13px;color:#60a5fa;font-family:IBM Plex Mono,monospace;font-weight:600;">R$ ' + fmtNum(entry[1].valor, 2) + '</span><span style="font-size:10px;color:#555;margin-left:6px;">' + pct.toFixed(0) + '%</span></div>';
+          html += '</div>';
+          html += '<div style="height:5px;background:#2A2A2A;border-radius:3px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:#60a5fa;border-radius:3px;"></div></div>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Histórico</div>';
+      manutencoes.forEach(function(r) {
+        var prox = [];
+        if (r.proxima_km) prox.push(fmtNum(r.proxima_km, 0) + ' km');
+        if (r.proxima_data) prox.push(String(r.proxima_data).split('-').reverse().join('/'));
+        html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:12px 14px;margin-bottom:10px;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
+        html += '<div>';
+        html += '<div style="font-size:14px;font-weight:700;color:#F5F5F5;">' + esc(manutTipoLabel(r.tipo)) + '</div>';
+        html += '<div style="font-size:11px;color:#888;margin-top:2px;">' + String(r.data || '').split('-').reverse().join('/') + ' · ' + fmtNum(r.odometro, 0) + ' km' + (r.oficina ? ' · ' + esc(r.oficina) : '') + '</div>';
+        if (r.descricao) html += '<div style="font-size:12px;color:#AAA;margin-top:4px;">' + esc(r.descricao) + '</div>';
+        html += '</div>';
+        html += '<div style="font-family:IBM Plex Mono,monospace;font-size:15px;font-weight:700;color:#F44336;">R$ ' + fmtNum(r.valor, 2) + '</div>';
+        html += '</div>';
+        html += '<div style="display:flex;align-items:center;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid #2A2A2A;">';
+        html += legMetric('Próxima', prox.length ? prox.join(' ou ') : '—');
+        html += '<div style="margin-left:auto;display:flex;gap:6px;">';
+        html += '<button onclick="abrirModalManutencao(&apos;' + escJs(r.id) + '&apos;)" style="background:#2A2A2A;color:#888;border:none;border-radius:6px;padding:5px 9px;font-size:12px;cursor:pointer;">✏️</button>';
+        html += '<button onclick="excluirManutencao(&apos;' + escJs(r.id) + '&apos;)" style="background:rgba(244,67,54,0.12);color:#F44336;border:none;border-radius:6px;padding:5px 9px;font-size:12px;cursor:pointer;">🗑️</button>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+      });
+
+      el.innerHTML = html;
+    });
+  });
+}
+
+// Resumo de manutenção em texto puro (WhatsApp / compartilhar).
+function compartilharResumoManutencao() {
+  var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
+  if (!manutencoes.length) { showToast('Nada para enviar ainda.'); return; }
+  var fmtNum = function(v, d) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }); };
+  var mm = metricasManutencao();
+  var linhas = ['🔧 Manutenção — ' + (vSel ? vSel.nome : '')];
+  linhas.push('Total gasto: R$ ' + fmtNum(mm.total, 2) + ' em ' + manutencoes.length + ' registro' + (manutencoes.length > 1 ? 's' : ''));
+  if (mm.custoKm != null) linhas.push('Custo/km: R$ ' + fmtNum(mm.custoKm, 2) + ' (sobre ' + fmtNum(mm.totalKm, 0) + ' km rodados)');
+  var kmAtual = kmAtualVeiculo();
+  if (kmAtual > 0) linhas.push('Km atual: ' + fmtNum(kmAtual, 0) + ' km');
+
+  var alertas = alertasManutencao();
+  if (alertas.length) {
+    linhas.push('');
+    linhas.push('Lembretes:');
+    alertas.forEach(function(a) {
+      linhas.push((a.status === 'vencida' ? '🚨 ' : '⚠️ ') + a.label + ': ' + a.texto);
+    });
+  }
+
+  linhas.push('');
+  linhas.push('Últimas manutenções:');
+  manutencoes.slice(0, 10).forEach(function(r) {
+    linhas.push('• ' + String(r.data || '').split('-').reverse().join('/') + ' · ' + manutTipoLabel(r.tipo) + ' — R$ ' + fmtNum(r.valor, 2));
+  });
+  linhas.push('');
+  linhas.push('— GastosIA');
+  var texto = linhas.join('\n');
+
+  if (navigator.share) {
+    navigator.share({ text: texto }).catch(function(e) {
+      if (e && e.name === 'AbortError') return;
+      var win = window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+      if (!win) showToast('⚠️ Permita pop-ups para abrir o WhatsApp.');
+    });
+    return;
+  }
+  var win = window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+  if (!win) showToast('⚠️ Permita pop-ups para abrir o WhatsApp.');
+}
+
+// Documento A4 (tema claro) só de manutenção — irmão de relatorioCombustivelDoc().
+function relatorioManutencaoDoc() {
+  var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
+  var fmtNum = function(v, d) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }); };
+  var brl = function(v) { return 'R$ ' + fmtNum(v, 2); };
+  var mm = metricasManutencao();
+  var kmAtual = kmAtualVeiculo();
+  var hoje = new Date().toLocaleDateString('pt-BR');
+  var veic = vSel ? ((vSel.emoji || '🚗') + ' ' + esc(vSel.nome)) : 'Veículo';
+  var card = function(rot, val) { return '<div class="card"><div class="cl">' + rot + '</div><div class="cv">' + val + '</div></div>'; };
+
+  var d = '';
+  d += '<h1>Relatório de Manutenções</h1>';
+  d += '<div class="sub">' + veic + ' · gerado em ' + hoje + '</div>';
+
+  d += '<div class="cards">';
+  d += card('Total em manutenção', brl(mm.total));
+  d += card('Registros', String(manutencoes.length));
+  d += card('Km atual', kmAtual > 0 ? fmtNum(kmAtual, 0) + ' km' : '—');
+  d += card('Custo/km manutenção', mm.custoKm != null ? brl(mm.custoKm) + '/km' : '—');
+  d += '</div>';
+
+  if (mm.custoKm != null) {
+    d += '<div class="note">O custo/km rateia o total gasto em manutenção pelos ' + fmtNum(mm.totalKm, 0) + ' km medidos entre tanques cheios nos abastecimentos.'
+      + (mm.custoKmCombustivel != null ? ' Somado ao combustível (' + brl(mm.custoKmCombustivel) + '/km), rodar custa ' + brl(mm.custoKm + mm.custoKmCombustivel) + '/km.' : '')
+      + '</div>';
+  }
+
+  var alertas = alertasManutencao();
+  if (alertas.length) {
+    d += '<h2>Lembretes em aberto</h2>';
+    d += '<table><thead><tr><th>Serviço</th><th>Situação</th></tr></thead><tbody>';
+    alertas.forEach(function(a) {
+      d += '<tr><td>' + esc(a.label) + (a.status === 'vencida' ? ' (vencida)' : '') + '</td><td>' + esc(a.texto) + '</td></tr>';
+    });
+    d += '</tbody></table>';
+  }
+
+  var porTipo = {};
+  manutencoes.forEach(function(r) {
+    var t = r.tipo || 'outro';
+    if (!porTipo[t]) porTipo[t] = { valor: 0, qtd: 0 };
+    porTipo[t].valor += Number(r.valor || 0);
+    porTipo[t].qtd++;
+  });
+  var tipos = Object.entries(porTipo).sort(function(a, b) { return b[1].valor - a[1].valor; });
+  if (tipos.length > 1) {
+    d += '<h2>Por tipo de serviço</h2>';
+    d += '<table><thead><tr><th>Tipo</th><th class="r">Vezes</th><th class="r">Total</th><th class="r">% do gasto</th></tr></thead><tbody>';
+    tipos.forEach(function(entry) {
+      var pct = mm.total > 0 ? (entry[1].valor / mm.total * 100) : 0;
+      d += '<tr><td>' + esc(manutTipoLabel(entry[0])) + '</td><td class="r">' + entry[1].qtd + '</td><td class="r">' + brl(entry[1].valor) + '</td><td class="r">' + pct.toFixed(0) + '%</td></tr>';
+    });
+    d += '</tbody></table>';
+  }
+
+  d += '<h2>Histórico completo</h2>';
+  d += '<table><thead><tr><th>Data</th><th class="r">Odômetro</th><th>Tipo</th><th>Descrição / peça</th><th>Oficina</th><th class="r">Valor</th><th>Próxima</th></tr></thead><tbody>';
+  manutencoes.slice().sort(function(a, b) { return String(a.data).localeCompare(String(b.data)); }).forEach(function(r) {
+    var prox = [];
+    if (r.proxima_km) prox.push(fmtNum(r.proxima_km, 0) + ' km');
+    if (r.proxima_data) prox.push(String(r.proxima_data).split('-').reverse().join('/'));
+    d += '<tr>';
+    d += '<td>' + String(r.data || '').split('-').reverse().join('/') + '</td>';
+    d += '<td class="r">' + fmtNum(r.odometro, 0) + '</td>';
+    d += '<td>' + esc(manutTipoLabel(r.tipo)) + '</td>';
+    d += '<td>' + esc(r.descricao || '—') + '</td>';
+    d += '<td>' + esc(r.oficina || '—') + '</td>';
+    d += '<td class="r">' + brl(r.valor) + '</td>';
+    d += '<td>' + (prox.length ? prox.join(' ou ') : '—') + '</td>';
+    d += '</tr>';
+  });
+  d += '<tr><td colspan="5"><b>Total</b></td><td class="r"><b>' + brl(mm.total) + '</b></td><td></td></tr>';
+  d += '</tbody></table>';
+
+  d += '<div class="foot"><span>Oderli Garcia &copy; 2026</span><span>·</span><b>RitmoProd</b><span>·</span><span>GastosIA</span></div>';
+
+  return { html: d, css: cssRelatorioVeiculo(), nome: vSel ? vSel.nome : '' };
+}
+
+function imprimirRelatorioManutencao() {
+  if (!manutencoes.length) { showToast('Nada para imprimir ainda.'); return; }
+  var doc = relatorioManutencaoDoc();
+  var pageHtml = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Manutenções' + (doc.nome ? ' - ' + esc(doc.nome) : '') + '</title><style>' + doc.css + '</style></head><body>' + doc.html + '<script>window.onload=function(){window.print();}<\/script></body></html>';
+  var blobUrl = URL.createObjectURL(new Blob([pageHtml], { type: 'text/html' }));
+  var win = window.open(blobUrl, '_blank');
+  if (!win) { URL.revokeObjectURL(blobUrl); showToast('⚠️ Permita pop-ups para imprimir.'); return; }
+  setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 60000);
+}
+
+function compartilharResumoCombustivel() {
+  var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
+  var m = calcularMetricasVeiculo(abastecimentos);
+  var resumo = resumoAgrupadoCombustivel(m.ordenado, resumoModoCombustivel);
+  var fmtNum = function(v, d) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }); };
+  var linhas = ['⛽ Combustível — ' + (vSel ? vSel.nome : '')];
+  if (m.consumoMedio != null) linhas.push('Consumo médio: ' + fmtNum(m.consumoMedio, 1) + ' km/L');
+  if (m.precoMedio != null) linhas.push('Preço médio: R$ ' + fmtNum(m.precoMedio, 2) + '/L');
+  linhas.push('Gasto no mês: R$ ' + fmtNum(m.gastoMes, 2));
+  linhas.push('');
+  linhas.push(resumoModoCombustivel === 'semana' ? 'Por semana:' : 'Por mês:');
+  resumo.forEach(function(o) {
+    linhas.push('• ' + o.label + ': R$ ' + fmtNum(o.gasto, 2) + ' · ' + fmtNum(o.litros, 1) + 'L'
+      + (o.consumo != null ? ' · ' + fmtNum(o.consumo, 1) + ' km/L' : ''));
+  });
+  var texto = linhas.join('\n');
+  if (navigator.share) {
+    navigator.share({ title: 'Combustível', text: texto }).catch(function() {});
+  } else if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(texto).then(
+      function() { showToast('📋 Resumo copiado! Cole na mensagem.'); },
+      function() { showToast('⚠️ Não foi possível copiar.'); }
+    );
+  } else {
+    showToast('⚠️ Compartilhamento não suportado neste navegador.');
+  }
+}
+
+// Gera um relatório de abastecimentos em tema claro (A4) e abre a janela de impressão / salvar PDF
+function relatorioCombustivelDoc() {
+  var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
+  var m = calcularMetricasVeiculo(abastecimentos);
+  var porMes = resumoAgrupadoCombustivel(m.ordenado, 'mes');
+  var fmtNum = function(v, d) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }); };
+  var brl = function(v) { return 'R$ ' + fmtNum(v, 2); };
+  var card = function(l, v) { return '<div class="card"><div class="cl">' + l + '</div><div class="cv">' + v + '</div></div>'; };
+  var totalLitros = m.ordenado.reduce(function(s, r) { return s + Number(r.litros); }, 0);
+  var totalKm = m.ordenado.reduce(function(s, r) { return s + (r._kmRodados > 0 ? r._kmRodados : 0); }, 0);
+  var hoje = new Date().toLocaleDateString('pt-BR');
+  var veic = vSel ? ((vSel.emoji || '🚗') + ' ' + esc(vSel.nome)) : 'Veículo';
+
+  var d = '';
+  d += '<h1>Relatório de Abastecimentos</h1>';
+  d += '<div class="sub">' + veic + ' · gerado em ' + hoje + '</div>';
+
+  d += '<div class="cards">';
+  d += card('Consumo médio', m.consumoMedio != null ? fmtNum(m.consumoMedio, 1) + ' km/L' : '—');
+  d += card('Preço médio/L', m.precoMedio != null ? brl(m.precoMedio) : '—');
+  d += card('Gasto total', brl(m.totalGasto));
+  d += card('Gasto no mês', brl(m.gastoMes));
+  d += card('Abastecimentos', String(abastecimentos.length));
+  d += card('Litros (total)', fmtNum(totalLitros, 1) + ' L');
+  d += card('Km rodados', totalKm > 0 ? fmtNum(totalKm, 0) + ' km' : '—');
+  d += '</div>';
+
+  // Custo por km só do combustível — manutenção tem relatório próprio.
+  if (totalKm > 0) {
+    // Numerador só do combustível dos abastecimentos COM km medido (mesma base do
+    // denominador). Usar m.totalGasto aqui incluiria o 1º abastecimento (sem km) e
+    // inflaria o custo/km — bate com o Custo/km por abastecimento (weighted average).
+    var gastoComKm = m.ordenado.reduce(function(s, r) { return s + (r._kmRodados > 0 ? Number(r.valor_total) : 0); }, 0);
+    d += '<h2>Custo por km (combustível)</h2>';
+    d += '<div class="cards">';
+    d += card('Combustível', brl(gastoComKm / totalKm) + '/km');
+    d += '</div>';
+    d += '<div class="note">Calculado sobre ' + fmtNum(totalKm, 0) + ' km rodados (medidos entre tanques cheios). O custo de manutenção está no relatório de Manutenções.</div>';
+  }
+
+  if (porMes.length) {
+    d += '<h2>Resumo por mês</h2>';
+    d += '<table><thead><tr><th>Mês</th><th class="r">Gasto</th><th class="r">Litros</th><th class="r">Rodou</th><th class="r">Consumo</th></tr></thead><tbody>';
+    porMes.forEach(function(o) {
+      d += '<tr><td>' + esc(o.label) + '</td><td class="r">' + brl(o.gasto) + '</td><td class="r">' + fmtNum(o.litros, 1) + ' L</td><td class="r">' + (o.km > 0 ? fmtNum(o.km, 0) + ' km' : '—') + '</td><td class="r">' + (o.consumo != null ? fmtNum(o.consumo, 1) + ' km/L' : '—') + '</td></tr>';
+    });
+    d += '</tbody></table>';
+  }
+
+  d += '<h2>Histórico completo</h2>';
+  d += '<table><thead><tr><th>Data</th><th class="r">Odômetro</th><th class="r">Litros</th><th class="r">R$/L</th><th class="r">Valor</th><th class="r">Rodou</th><th class="r">km/L</th><th class="r">Custo/km</th><th>Posto</th></tr></thead><tbody>';
+  m.ordenado.forEach(function(r) {
+    var dataFmt = String(r.data || '').split('-').reverse().join('/');
+    d += '<tr>';
+    d += '<td>' + dataFmt + '</td>';
+    d += '<td class="r">' + fmtNum(r.odometro, 0) + '</td>';
+    d += '<td class="r">' + fmtNum(r.litros, 2) + (r.tanque_cheio ? '' : ' *') + '</td>';
+    d += '<td class="r">' + brl(r.preco_litro) + '</td>';
+    d += '<td class="r">' + brl(r.valor_total) + '</td>';
+    d += '<td class="r">' + (r._kmRodados != null ? fmtNum(r._kmRodados, 0) : '—') + '</td>';
+    d += '<td class="r">' + (r._consumo != null ? fmtNum(r._consumo, 1) : '—') + '</td>';
+    d += '<td class="r">' + (r._custoKm != null ? brl(r._custoKm) : '—') + '</td>';
+    d += '<td>' + esc(r.posto || '—') + '</td>';
+    d += '</tr>';
+  });
+  d += '</tbody></table>';
+  d += '<div class="note">* abastecimento parcial (tanque não cheio) — não entra no cálculo de consumo.</div>';
+
+  d += '<div class="foot"><span>Oderli Garcia &copy; 2026</span><span>·</span><b>RitmoProd</b><span>·</span><span>GastosIA</span></div>';
+
+  return { html: d, css: cssRelatorioVeiculo(), nome: vSel ? vSel.nome : '' };
+}
+
+// Folha de estilo A4 compartilhada pelos relatórios de veículo (combustível e manutenção).
+function cssRelatorioVeiculo() {
+  return '@import url(https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Barlow:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap);'
+    + '*{margin:0;padding:0;box-sizing:border-box}'
+    + 'body{font-family:Barlow,Arial,sans-serif;color:#111;padding:24px}'
+    + 'h1{font-family:Barlow Condensed,sans-serif;font-size:26px;letter-spacing:.06em;text-transform:uppercase}'
+    + '.sub{font-size:13px;color:#666;margin:2px 0 18px}'
+    + '.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}'
+    + '.card{border:1px solid #ddd;border-radius:8px;padding:10px 12px}'
+    + '.cl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888}'
+    + '.cv{font-family:IBM Plex Mono,monospace;font-size:16px;font-weight:700;margin-top:4px}'
+    + 'h2{font-family:Barlow Condensed,sans-serif;font-size:16px;text-transform:uppercase;letter-spacing:.05em;margin:18px 0 8px;color:#333}'
+    + 'table{width:100%;border-collapse:collapse;font-size:12px}'
+    + 'th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #eee}'
+    + 'th{background:#f4f4f4;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#666}'
+    + 'td.r,th.r{text-align:right;font-family:IBM Plex Mono,monospace}'
+    + '.note{font-size:10px;color:#999;margin-top:6px}'
+    + '.foot{margin-top:24px;padding-top:10px;border-top:1px solid #ddd;font-size:11px;color:#888;display:flex;gap:8px;align-items:center}'
+    + '.foot b{color:#F5A623;font-family:Barlow Condensed,sans-serif;letter-spacing:1px}'
+    + '@media print{body{padding:0}@page{size:A4 portrait;margin:12mm}thead{display:table-header-group}tr{break-inside:avoid}}';
+}
+
+function imprimirRelatorioCombustivel() {
+  if (!abastecimentos.length) { showToast('Nada para imprimir ainda.'); return; }
+  var doc = relatorioCombustivelDoc();
+  var pageHtml = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório do Veículo' + (doc.nome ? ' - ' + esc(doc.nome) : '') + '</title><style>' + doc.css + '</style></head><body>' + doc.html + '<script>window.onload=function(){window.print();}<\/script></body></html>';
+  // Blob URL em vez de document.write: no Chrome Android o document.write numa
+  // janela '_blank' abre em branco (a aba fica em about:blank).
+  var blobUrl = URL.createObjectURL(new Blob([pageHtml], { type: 'text/html' }));
+  var win = window.open(blobUrl, '_blank');
+  if (!win) { URL.revokeObjectURL(blobUrl); showToast('⚠️ Permita pop-ups para imprimir.'); return; }
+  setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 60000);
+}
+
+// Gera o PDF no aparelho e abre o compartilhar (WhatsApp etc.); sem suporte, baixa o arquivo.
+// Compartilhado pelos relatórios de combustível e de manutenção.
+async function enviarPdfRelatorioVeiculo(doc, prefixoArq, titulo) {
+  showToast('⏳ Gerando PDF...');
+  try {
+    await new Promise(function(resolve, reject) {
+      if (window.html2pdf) { resolve(); return; }
+      var sc = document.createElement('script');
+      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+      sc.onload = resolve;
+      sc.onerror = function() { reject(new Error('Falha ao carregar gerador de PDF')); };
+      document.head.appendChild(sc);
+    });
+    // O wrapper fica absoluto (invisível atrás do app), mas o elemento passado ao html2pdf
+    // precisa ser ESTÁTICO: elemento position:absolute colapsa a altura no container interno
+    // do html2pdf e o PDF sai em branco (canvas de altura 0).
+    var wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:absolute;left:0;top:0;width:794px;background:#fff;z-index:-9999;';
+    // Escopa a regra de body do CSS do relatório para não afetar o app durante a geração.
+    // Sem largura fixa no alvo: o html2pdf redimensiona o clone para a largura útil da página.
+    var cssPdf = doc.css.replace(/body\{/g, '.pdfdoc{');
+    wrapper.innerHTML = '<style>' + cssPdf + '</style><div class="pdfdoc" style="font-family:Barlow,Arial,sans-serif;color:#111;padding:8px;background:#fff;">' + doc.html + '</div>';
+    document.body.appendChild(wrapper);
+    var alvo = wrapper.lastElementChild;
+    var nomeArq = prefixoArq + (doc.nome ? '-' + doc.nome.toLowerCase().replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') : '') + '.pdf';
+    var blob = await html2pdf().set({
+      margin: [10, 8, 10, 8],
+      image: { type: 'jpeg', quality: 0.92 },
+      html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] }
+    }).from(alvo).outputPdf('blob');
+    wrapper.remove();
+    var file = new File([blob], nomeArq, { type: 'application/pdf' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: titulo });
+    } else {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = nomeArq; a.click();
+      setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
+      showToast('📄 PDF baixado — anexe na mensagem.');
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return; // usuário cancelou o compartilhar
+    console.error('enviarPdfRelatorioVeiculo:', e);
+    showToast('⚠️ Não consegui gerar o PDF. Use Imprimir → Salvar como PDF.');
+  }
+}
+
+function enviarPdfRelatorioCombustivel() {
+  if (!abastecimentos.length) { showToast('Nada para enviar ainda.'); return; }
+  return enviarPdfRelatorioVeiculo(relatorioCombustivelDoc(), 'relatorio-abastecimentos', 'Relatório de abastecimentos');
+}
+
+function enviarPdfRelatorioManutencao() {
+  if (!manutencoes.length) { showToast('Nada para enviar ainda.'); return; }
+  return enviarPdfRelatorioVeiculo(relatorioManutencaoDoc(), 'relatorio-manutencoes', 'Relatório de manutenções');
+}
+
+function statBox(label, valor, cor) {
+  return '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:14px;"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">' + esc(label) + '</div><div style="font-family:IBM Plex Mono,monospace;font-size:18px;font-weight:700;color:' + cor + ';">' + esc(valor) + '</div></div>';
+}
+function legMetric(label, valor) {
+  return '<div><div style="font-size:10px;color:#555;text-transform:uppercase;">' + esc(label) + '</div><div style="font-size:13px;color:#F5F5F5;font-family:IBM Plex Mono,monospace;font-weight:600;">' + esc(valor) + '</div></div>';
+}
+
+// ─── Modal Veículo ───
+function selecionarTipoVeiculo(elx) {
+  tipoVeiculoSel = elx.getAttribute('data-tipo');
+  emojiVeiculoSel = elx.getAttribute('data-emoji');
+  var chips = document.querySelectorAll('#v-tipo-chips > div');
+  chips.forEach(function(c) { c.style.border = (c === elx) ? '1px solid #F5A623' : '1px solid #2A2A2A'; });
+}
+
+function abrirModalVeiculo() {
+  veiculoEditandoId = null;
+  document.getElementById('modal-veiculo-title').textContent = 'Novo Veículo';
+  document.getElementById('v-nome').value = '';
+  document.getElementById('v-combustivel').value = 'gasolina';
+  document.getElementById('v-excluir-btn').style.display = 'none';
+  document.getElementById('modal-veiculo-err').textContent = '';
+  var carroChip = document.querySelector('#v-tipo-chips > div[data-tipo="carro"]');
+  if (carroChip) selecionarTipoVeiculo(carroChip);
+  document.getElementById('modal-veiculo').style.display = 'flex';
+}
+
+function fecharModalVeiculo() {
+  document.getElementById('modal-veiculo').style.display = 'none';
+}
+
+function editarVeiculo(id) {
+  var v = veiculos.find(function(x) { return x.id === id; });
+  if (!v) return;
+  veiculoEditandoId = id;
+  document.getElementById('modal-veiculo-title').textContent = 'Editar Veículo';
+  document.getElementById('v-nome').value = v.nome || '';
+  document.getElementById('v-combustivel').value = v.combustivel_padrao || 'gasolina';
+  document.getElementById('v-excluir-btn').style.display = '';
+  document.getElementById('modal-veiculo-err').textContent = '';
+  var chip = document.querySelector('#v-tipo-chips > div[data-tipo="' + (v.tipo || 'carro') + '"]');
+  if (chip) selecionarTipoVeiculo(chip);
+  document.getElementById('modal-veiculo').style.display = 'flex';
+}
+
+async function salvarVeiculo() {
+  return semDuploToque('veiculo', 'btn-salvar-veiculo', _salvarVeiculo);
+}
+
+async function _salvarVeiculo() {
+  var nome = document.getElementById('v-nome').value.trim();
+  var err = document.getElementById('modal-veiculo-err');
+  if (!nome) { err.textContent = 'Informe o nome do veículo.'; return; }
+  var payload = {
+    nome: nome, tipo: tipoVeiculoSel, emoji: emojiVeiculoSel,
+    combustivel_padrao: document.getElementById('v-combustivel').value,
+    user_id: currentUser.id, ativo: true
+  };
+  if (veiculoEditandoId) {
+    await supa.from('veiculos').update(payload).eq('id', veiculoEditandoId);
+  } else {
+    var ins = await supa.from('veiculos').insert(payload).select();
+    if (ins.data && ins.data[0]) veiculoSelecionadoId = ins.data[0].id;
+  }
+  fecharModalVeiculo();
+  renderTelaVeiculo();
+  showToast('✓ Veículo salvo!');
+}
+
+async function excluirVeiculo() {
+  if (!veiculoEditandoId) return;
+  if (!confirm('Excluir este veículo? Ele sai do app; os registros dele continuam guardados.')) return;
+  await supa.from('veiculos').update({ ativo: false }).eq('id', veiculoEditandoId);
+  veiculoSelecionadoId = null;
+  fecharModalVeiculo();
+  renderTelaVeiculo();
+  showToast('🗑️ Veículo removido');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PLANO DE TROCA — meta, diagnóstico, viabilidade e simulação
+// ═══════════════════════════════════════════════════════════════════
+var modoTrocaSel = 'avista';
+
+// Média mensal de gastos (janela de 90 dias, mesma lógica de predictSpending)
+
+// Meses entre hoje e uma data (mínimo 1)
+function mesesAte(dataStr) {
+  if (!dataStr) return 1;
+  var alvo = parseExpenseDate(dataStr);
+  var hoje = new Date();
+  var meses = (alvo.getFullYear() - hoje.getFullYear()) * 12 + (alvo.getMonth() - hoje.getMonth());
+  return Math.max(1, meses);
+}
+
+// Custo mensal médio de rodar (combustível + manutenção) sobre o histórico registrado
+function custoMensalVeiculo(metrics) {
+  var datas = [];
+  metrics.ordenado.forEach(function(r) { if (r.data) datas.push(r.data); });
+  manutencoes.forEach(function(r) { if (r.data) datas.push(r.data); });
+  if (!datas.length) return null;
+  datas.sort();
+  var d0 = parseExpenseDate(datas[0]);
+  var hoje = new Date();
+  var meses = Math.max(1, (hoje.getFullYear() - d0.getFullYear()) * 12 + (hoje.getMonth() - d0.getMonth()) + 1);
+  var totalManut = manutencoes.reduce(function(s, r) { return s + Number(r.valor); }, 0);
+  var combMensal = metrics.totalGasto / meses;
+  var manutMensal = totalManut / meses;
+  return { combMensal: combMensal, manutMensal: manutMensal, total: combMensal + manutMensal, meses: meses };
+}
+
+// Tendência de manutenção: soma dos últimos 6 meses vs 6 meses anteriores
+function tendenciaManutencao() {
+  var hoje = new Date();
+  var lim6 = new Date(hoje.getFullYear(), hoje.getMonth() - 6, hoje.getDate());
+  var lim12 = new Date(hoje.getFullYear(), hoje.getMonth() - 12, hoje.getDate());
+  var rec = 0, ant = 0;
+  manutencoes.forEach(function(r) {
+    if (!r.data) return;
+    var d = parseExpenseDate(r.data);
+    if (d >= lim6 && d <= hoje) rec += Number(r.valor);
+    else if (d >= lim12 && d < lim6) ant += Number(r.valor);
+  });
+  if (rec === 0 && ant === 0) return null;
+  if (rec > ant * 1.2) return { dir: 'up', rec: rec, ant: ant };
+  if (rec < ant * 0.8) return { dir: 'down', rec: rec, ant: ant };
+  return { dir: 'flat', rec: rec, ant: ant };
+}
+
+function renderAbaTroca(m, vSel) {
+  var fmtNum = function(v, d) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }); };
+  var brl = function(v) { return 'R$ ' + fmtNum(v, 2); };
+  var html = '';
+
+  if (!planoTroca) {
+    html += '<div style="text-align:center;padding:40px 20px;color:#555;">'
+      + '<div style="font-size:48px;margin-bottom:16px;">🔄</div>'
+      + '<div style="font-size:14px;">Nenhum plano de troca para ' + esc(vSel.nome) + '</div>'
+      + '<div style="font-size:12px;margin-top:8px;color:#444;">Diga o carro que você quer, quanto custa e até quando — o app calcula quanto guardar por mês e simula financiamento ou consórcio.</div>'
+      + '<button class="empty-cta" style="margin-top:16px;" onclick="abrirModalPlanoTroca()">+ Criar plano de troca</button></div>';
+    return html;
+  }
+
+  var p = planoTroca;
+  var atualVal = Number(p.valor_atual_estimado || 0);
+  var guardadoVal = Number(p.guardado || 0);
+  var entrada = atualVal + guardadoVal;
+  var alvo = Number(p.valor_alvo || 0);
+  var falta = Math.max(0, alvo - entrada);
+  var mesesRest = mesesAte(p.data_alvo);
+  var guardarMes = falta / mesesRest;
+  var progresso = alvo > 0 ? Math.min(100, entrada / alvo * 100) : 0;
+  // O app de carro não conhece a renda: sem "cabe no orçamento?", e a
+  // simulação mostra só os números da parcela (cabeMsg devolve vazio).
+  var renda = 0, sobra = 0;
+
+  // Cabeçalho + editar
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin:2px 0 12px;">';
+  html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;color:#F5F5F5;">🔄 ' + (p.modelo_desejado ? esc(p.modelo_desejado) : 'Novo veículo') + '</div>';
+  html += '<button onclick="abrirModalPlanoTroca(&apos;' + escJs(p.id) + '&apos;)" style="background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;">✏️ Editar</button>';
+  html += '</div>';
+
+  // (a) Meta de poupança
+  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:12px;">';
+  html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🎯 Meta de poupança</div>';
+  html += '<div style="height:10px;background:#111;border-radius:6px;overflow:hidden;margin-bottom:6px;"><div style="height:100%;width:' + progresso.toFixed(1) + '%;background:#F5A623;"></div></div>';
+  html += '<div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:12px;"><span>' + brl(entrada) + ' de entrada</span><span>' + progresso.toFixed(0) + '% de ' + brl(alvo) + '</span></div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+  html += statBox('Falta juntar', brl(falta), '#F44336');
+  html += statBox('Guardar por mês', brl(guardarMes), '#F5A623');
+  html += '</div>';
+  html += '<div style="font-size:11px;color:#666;margin-top:8px;">Entrada = carro atual (' + brl(atualVal) + ') + guardado (' + brl(guardadoVal) + '). Prazo: ' + mesesRest + ' ' + (mesesRest === 1 ? 'mês' : 'meses') + (p.data_alvo ? ' (até ' + String(p.data_alvo).split('-').reverse().join('/') + ')' : '') + '.</div>';
+  html += '</div>';
+
+  // (b) Diagnóstico do carro atual
+  var cm = custoMensalVeiculo(m);
+  var tend = tendenciaManutencao();
+  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:12px;">';
+  html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🩺 Diagnóstico do carro atual</div>';
+  if (!cm) {
+    html += '<div style="font-size:13px;color:#888;">Sem histórico suficiente. Registre abastecimentos e manutenções para ver o custo de manter o carro.</div>';
+  } else {
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">';
+    html += statBox('Custo/mês de rodar', brl(cm.total), '#F44336');
+    html += statBox('Km atual', fmtNum(kmAtualVeiculo(), 0) + ' km', '#4CAF50');
+    html += statBox('Combustível/mês', brl(cm.combMensal), '#4A9EDF');
+    html += statBox('Manutenção/mês', brl(cm.manutMensal), '#F5A623');
+    html += '</div>';
+    var tendTxt = '';
+    if (tend) {
+      if (tend.dir === 'up') tendTxt = '📈 Manutenção subindo (últimos 6m ' + brl(tend.rec) + ' vs ' + brl(tend.ant) + ' antes)';
+      else if (tend.dir === 'down') tendTxt = '📉 Manutenção caindo (últimos 6m ' + brl(tend.rec) + ' vs ' + brl(tend.ant) + ' antes)';
+      else tendTxt = '➡️ Manutenção estável (~' + brl(tend.rec) + ' nos últimos 6m)';
+    }
+    var manutAnual = cm.manutMensal * 12;
+    var compensa = tend && tend.dir === 'up' && atualVal > 0 && manutAnual > atualVal * 0.15;
+    var veredito = compensa
+      ? '🔔 Sinais de que compensa trocar: manutenção subindo e já pesa mais de 15% do valor do carro por ano.'
+      : '👍 Carro ainda relativamente barato de manter — dá pra segurar a troca se quiser.';
+    if (tendTxt) html += '<div style="font-size:12px;color:#AAA;margin-bottom:8px;">' + tendTxt + '</div>';
+    html += '<div style="font-size:12px;color:#F5F5F5;background:#111;border-radius:8px;padding:10px;">' + veredito + '</div>';
+  }
+  html += '</div>';
+
+  // (d) Simulação (financiamento / consórcio)
+  if (p.modo === 'financiamento' || p.modo === 'consorcio') {
+    html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:12px;">';
+    var cabeMsg = function(parcela) {
+      if (renda <= 0) return '';
+      if (parcela <= sobra) return '<div style="font-size:13px;color:#4CAF50;background:rgba(76,175,80,0.10);border-radius:8px;padding:10px;">✅ A parcela cabe na sua sobra mensal (' + brl(sobra) + ').</div>';
+      return '<div style="font-size:13px;color:#F44336;background:rgba(244,67,54,0.10);border-radius:8px;padding:10px;">⚠️ A parcela (' + brl(parcela) + ') passa da sua sobra mensal (' + brl(sobra) + ').</div>';
+    };
+    if (p.modo === 'financiamento') {
+      html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🏦 Simulação — financiamento</div>';
+      var n = Number(p.parcelas || 0), i = Number(p.juros_am || 0) / 100, pv = falta;
+      if (n <= 0 || i <= 0) {
+        html += '<div style="font-size:13px;color:#888;">Preencha parcelas e juros (% a.m.) no editar para simular a parcela.</div>';
+      } else if (pv <= 0) {
+        html += '<div style="font-size:13px;color:#4CAF50;">Com a entrada, você já cobre o valor — não precisa financiar.</div>';
+      } else {
+        var parcela = pv * i / (1 - Math.pow(1 + i, -n));
+        var totalPago = parcela * n;
+        var juros = totalPago - pv;
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">';
+        html += statBox('Parcela (' + n + 'x)', brl(parcela), '#F5A623');
+        html += statBox('Financiado', brl(pv), '#4A9EDF');
+        html += statBox('Total pago', brl(totalPago), '#F44336');
+        html += statBox('Juros totais', brl(juros), '#F44336');
+        html += '</div>';
+        html += cabeMsg(parcela);
+        html += '<div style="font-size:11px;color:#666;margin-top:8px;">Tabela Price a ' + fmtNum(Number(p.juros_am), 2) + '% a.m. — simulação; a taxa real depende do banco.</div>';
+      }
+    } else {
+      html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">🧩 Simulação — consórcio</div>';
+      var nc = Number(p.parcelas || 0), taxa = Number(p.taxa_admin || 0);
+      if (nc <= 0) {
+        html += '<div style="font-size:13px;color:#888;">Preencha parcelas e taxa de administração no editar para simular a parcela.</div>';
+      } else {
+        var totalC = alvo * (1 + taxa / 100);
+        var parcelaC = totalC / nc;
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">';
+        html += statBox('Parcela (' + nc + 'x)', brl(parcelaC), '#F5A623');
+        html += statBox('Carta de crédito', brl(alvo), '#4A9EDF');
+        html += statBox('Total c/ taxa', brl(totalC), '#F44336');
+        html += statBox('Taxa adm.', fmtNum(taxa, 1) + '%', '#F44336');
+        html += '</div>';
+        html += cabeMsg(parcelaC);
+        html += '<div style="font-size:11px;color:#666;margin-top:8px;">⚠️ Consórcio não entrega o carro na hora — depende de sorteio/lance (contemplação incerta). Sem juros, mas com taxa de administração.</div>';
+      }
+    }
+    html += '</div>';
+  }
+
+  return html;
+}
+
+function selecionarModoTroca(el) {
+  modoTrocaSel = el.getAttribute('data-modo');
+  var chips = document.querySelectorAll('#p-modo-chips > div');
+  chips.forEach(function(c) { c.style.borderColor = '#2A2A2A'; });
+  el.style.borderColor = '#F5A623';
+  document.getElementById('p-fin-fields').style.display = modoTrocaSel === 'financiamento' ? 'grid' : 'none';
+  document.getElementById('p-cons-fields').style.display = modoTrocaSel === 'consorcio' ? 'grid' : 'none';
+}
+
+function abrirModalPlanoTroca(id) {
+  if (!veiculoSelecionadoId) { showToast('Selecione um veículo primeiro.'); return; }
+  var err = document.getElementById('modal-plano-err'); err.textContent = '';
+  var p = (id && planoTroca && planoTroca.id === id) ? planoTroca : null;
+  document.getElementById('modal-plano-title').textContent = p ? 'Editar plano de troca' : 'Plano de troca';
+  document.getElementById('p-modelo').value = p ? (p.modelo_desejado || '') : '';
+  document.getElementById('p-alvo').value = p && p.valor_alvo ? p.valor_alvo : '';
+  document.getElementById('p-atual').value = p && p.valor_atual_estimado ? p.valor_atual_estimado : '';
+  document.getElementById('p-guardado').value = p && p.guardado ? p.guardado : '';
+  document.getElementById('p-data').value = p ? (p.data_alvo || '') : '';
+  document.getElementById('p-fin-parcelas').value = p && p.parcelas ? p.parcelas : '';
+  document.getElementById('p-fin-juros').value = p && p.juros_am ? p.juros_am : '';
+  document.getElementById('p-cons-parcelas').value = p && p.parcelas ? p.parcelas : '';
+  document.getElementById('p-cons-taxa').value = p && p.taxa_admin ? p.taxa_admin : '';
+  document.getElementById('p-excluir-btn').style.display = p ? '' : 'none';
+  var modo = p ? (p.modo || 'avista') : 'avista';
+  var chip = document.querySelector('#p-modo-chips > div[data-modo="' + modo + '"]');
+  if (chip) selecionarModoTroca(chip);
+  document.getElementById('modal-plano-troca').style.display = 'flex';
+}
+
+function fecharModalPlanoTroca() {
+  document.getElementById('modal-plano-troca').style.display = 'none';
+}
+
+async function salvarPlanoTroca() {
+  return semDuploToque('planoTroca', 'btn-salvar-plano', _salvarPlanoTroca);
+}
+
+async function _salvarPlanoTroca() {
+  var err = document.getElementById('modal-plano-err');
+  var alvo = parseFloat(document.getElementById('p-alvo').value);
+  if (!(alvo > 0)) { err.textContent = 'Informe o valor do carro pretendido.'; return; }
+  var num = function(id) { var v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; };
+  var intOrNull = function(id) { var v = parseInt(document.getElementById(id).value, 10); return isNaN(v) ? null : v; };
+  var floatOrNull = function(id) { var v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
+  var parcelas = modoTrocaSel === 'financiamento' ? intOrNull('p-fin-parcelas')
+    : modoTrocaSel === 'consorcio' ? intOrNull('p-cons-parcelas') : null;
+  var payload = {
+    user_id: currentUser.id,
+    veiculo_id: veiculoSelecionadoId,
+    modelo_desejado: document.getElementById('p-modelo').value.trim() || null,
+    valor_alvo: alvo,
+    valor_atual_estimado: num('p-atual'),
+    guardado: num('p-guardado'),
+    data_alvo: document.getElementById('p-data').value || null,
+    modo: modoTrocaSel,
+    parcelas: parcelas,
+    juros_am: modoTrocaSel === 'financiamento' ? floatOrNull('p-fin-juros') : null,
+    taxa_admin: modoTrocaSel === 'consorcio' ? floatOrNull('p-cons-taxa') : null,
+    atualizado_em: new Date().toISOString()
+  };
+  if (planoTroca && planoTroca.id) {
+    await supa.from('planos_troca').update(payload).eq('id', planoTroca.id);
+  } else {
+    await supa.from('planos_troca').insert(payload);
+  }
+  fecharModalPlanoTroca();
+  renderTelaVeiculo();
+  showToast('✓ Plano de troca salvo!');
+}
+
+async function excluirPlanoTroca() {
+  if (!planoTroca || !planoTroca.id) return;
+  if (!confirm('Excluir o plano de troca deste veículo?')) return;
+  await supa.from('planos_troca').delete().eq('id', planoTroca.id);
+  planoTroca = null;
+  fecharModalPlanoTroca();
+  renderTelaVeiculo();
+  showToast('🗑️ Plano removido');
+}
+
+// ─── Modal Abastecimento ───
+function recalcValorAbast() {
+  var litros = parseFloat(document.getElementById('a-litros').value);
+  var preco = parseFloat(document.getElementById('a-preco').value);
+  if (litros > 0 && preco > 0) {
+    document.getElementById('a-valor').value = (litros * preco).toFixed(2);
+  }
+}
+
+function popularSelectVeiculos() {
+  var sel = document.getElementById('a-veiculo');
+  sel.innerHTML = '';
+  veiculos.forEach(function(v) {
+    sel.innerHTML += '<option value="' + esc(v.id) + '">' + (v.emoji || '🚗') + ' ' + esc(v.nome) + '</option>';
+  });
+}
+
+function abrirModalAbastecimento(id) {
+  if (veiculos.length === 0) { showToast('Cadastre um veículo primeiro.'); abrirModalVeiculo(); return; }
+  popularSelectVeiculos();
+  var err = document.getElementById('modal-abast-err');
+  err.textContent = '';
+  var ss = document.getElementById('a-scan-status'); if (ss) ss.style.display = 'none';
+  if (id) {
+    var r = abastecimentos.find(function(x) { return x.id === id; });
+    if (!r) return;
+    abastecimentoEditandoId = id;
+    document.getElementById('modal-abast-title').textContent = 'Editar Abastecimento';
+    document.getElementById('a-veiculo').value = r.veiculo_id;
+    document.getElementById('a-data').value = r.data || '';
+    document.getElementById('a-odometro').value = r.odometro;
+    document.getElementById('a-litros').value = r.litros;
+    document.getElementById('a-preco').value = r.preco_litro;
+    document.getElementById('a-valor').value = r.valor_total;
+    document.getElementById('a-combustivel').value = r.combustivel || 'gasolina';
+    document.getElementById('a-posto').value = r.posto || '';
+    document.getElementById('a-tanque-cheio').checked = !!r.tanque_cheio;
+  } else {
+    abastecimentoEditandoId = null;
+    document.getElementById('modal-abast-title').textContent = 'Novo Abastecimento';
+    document.getElementById('a-veiculo').value = veiculoSelecionadoId || (veiculos[0] && veiculos[0].id);
+    document.getElementById('a-data').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('a-odometro').value = '';
+    document.getElementById('a-litros').value = '';
+    document.getElementById('a-preco').value = '';
+    document.getElementById('a-valor').value = '';
+    var vv = veiculos.find(function(x) { return x.id === (veiculoSelecionadoId || veiculos[0].id); });
+    document.getElementById('a-combustivel').value = (vv && vv.combustivel_padrao) || 'gasolina';
+    document.getElementById('a-posto').value = '';
+    document.getElementById('a-tanque-cheio').checked = true;
+  }
+  document.getElementById('modal-abastecimento').style.display = 'flex';
+}
+
+function fecharModalAbastecimento() {
+  document.getElementById('modal-abastecimento').style.display = 'none';
+}
+
+// Escaneia a nota do posto e preenche os campos (odômetro fica manual — não vem na nota)
+async function scanNotaAbastecimento(file) {
+  var statusEl = document.getElementById('a-scan-status');
+  var mostra = function(txt, cor) { statusEl.style.display = 'block'; statusEl.style.color = cor || '#4A9EDF'; statusEl.textContent = txt; };
+  if (!getApiKey()) { showToast('⚠️ Configure a chave de IA em Config para escanear.'); return; }
+  mostra('🔎 Lendo a nota com IA...');
+  try {
+    var dataUrl = await new Promise(function(resolve, reject) {
+      var r = new FileReader(); r.onload = function(e) { resolve(e.target.result); }; r.onerror = reject; r.readAsDataURL(file);
+    });
+    var compressed = await compressImage(dataUrl, 1200, 0.75);
+    var base64 = compressed.split(',')[1];
+    var prompt = 'Você extrai dados de notas/cupons fiscais de POSTO DE COMBUSTÍVEL brasileiros. '
+      + 'Analise a imagem e devolva SOMENTE um JSON exato (sem markdown, sem texto):\n'
+      + '{\n'
+      + '  "litros": <número decimal, ex: 35.11>,\n'
+      + '  "preco_litro": <número decimal, ex: 3.29>,\n'
+      + '  "valor_total": <número decimal, ex: 115.51>,\n'
+      + '  "combustivel": "<uma de: gasolina, etanol, diesel, gnv>",\n'
+      + '  "posto": "<nome do posto/estabelecimento>"\n'
+      + '}\n'
+      + 'Regras: use ponto decimal. Se o litro não aparecer mas houver total e preço/litro, calcule. '
+      + 'Etanol/álcool→etanol; gasolina comum/aditivada→gasolina. Campo não identificado: null.';
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'x-api-key':getApiKey(), 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001', max_tokens: 512,
+        messages: [{ role:'user', content: [
+          { type:'image', source:{ type:'base64', media_type:'image/jpeg', data:base64 } },
+          { type:'text', text:prompt }
+        ] }]
+      })
+    });
+    if (!resp.ok) {
+      var eb = await resp.json().catch(function(){ return {}; });
+      throw new Error((eb.error && eb.error.message) || ('API ' + resp.status));
+    }
+    var data = await resp.json();
+    var text = data.content[0].text.trim().replace(/```json?/g, '').replace(/```/g, '').trim();
+    var json = JSON.parse(text);
+    if (json.litros)       document.getElementById('a-litros').value = json.litros;
+    if (json.preco_litro)  document.getElementById('a-preco').value = json.preco_litro;
+    if (json.valor_total)  document.getElementById('a-valor').value = json.valor_total;
+    else recalcValorAbast();
+    if (json.combustivel && ['gasolina','etanol','diesel','gnv'].indexOf(String(json.combustivel).toLowerCase()) >= 0)
+      document.getElementById('a-combustivel').value = String(json.combustivel).toLowerCase();
+    if (json.posto)        document.getElementById('a-posto').value = json.posto;
+    document.getElementById('a-data').value = new Date().toISOString().slice(0, 10);
+    // Confere coerência: numa nota de posto, valor = litros × preço. Se o OCR errou
+    // um dígito (ex.: 42,04 no lugar de 42,94), os três não fecham — avisa antes de salvar.
+    var _f = function(v, dec) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec }); };
+    var _l = parseFloat(document.getElementById('a-litros').value);
+    var _p = parseFloat(document.getElementById('a-preco').value);
+    var _v = parseFloat(document.getElementById('a-valor').value);
+    if (_l > 0 && _p > 0 && _v > 0 && Math.abs(_v - _l * _p) > Math.max(0.10, _v * 0.01)) {
+      mostra('⚠️ Confira: ' + _f(_l, 2) + 'L × R$ ' + _f(_p, 3) + ' = R$ ' + _f(_l * _p, 2)
+        + ', mas a nota diz R$ ' + _f(_v, 2) + '. Litros seriam ' + _f(_v / _p, 2)
+        + '. Ajuste antes de salvar.', '#F5A623');
+    } else {
+      mostra('✓ Preenchido! Confira e informe o odômetro (km do painel).', '#4CAF50');
+    }
+  } catch (err) {
+    console.error('scanNotaAbastecimento:', err);
+    mostra('⚠️ Não consegui ler. Preencha manualmente.', '#F44336');
+  }
+}
+
+// Trava de duplo-toque para ação async que grava no banco. Sem isso, cada toque
+// repetido enquanto a rede responde vira um registro NOVO: foi assim que 5 cópias
+// da mesma troca de óleo e 2 do mesmo abastecimento entraram nas tabelas.
+// O botão também fica desabilitado, para o usuário ver que está em andamento.
+var _gravacoesEmVoo = {};
+async function semDuploToque(chave, botaoId, acao) {
+  if (_gravacoesEmVoo[chave]) return;
+  _gravacoesEmVoo[chave] = true;
+  var btn = botaoId ? document.getElementById(botaoId) : null;
+  var textoOriginal = btn ? btn.textContent : null;
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.textContent = 'SALVANDO...'; }
+  try {
+    return await acao();
+  } finally {
+    _gravacoesEmVoo[chave] = false;
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.textContent = textoOriginal; }
+  }
+}
+
+async function salvarAbastecimento() {
+  return semDuploToque('abastecimento', 'btn-salvar-abast', _salvarAbastecimento);
+}
+
+async function _salvarAbastecimento() {
+  var err = document.getElementById('modal-abast-err');
+  var veiculoId = document.getElementById('a-veiculo').value;
+  var data = document.getElementById('a-data').value;
+  var odometro = parseFloat(document.getElementById('a-odometro').value);
+  var litros = parseFloat(document.getElementById('a-litros').value);
+  var preco = parseFloat(document.getElementById('a-preco').value);
+  var valorTotal = parseFloat(document.getElementById('a-valor').value);
+  var combustivel = document.getElementById('a-combustivel').value;
+  var posto = document.getElementById('a-posto').value.trim();
+  var tanqueCheio = document.getElementById('a-tanque-cheio').checked;
+
+  if (!veiculoId) { err.textContent = 'Selecione o veículo.'; return; }
+  if (!data) { err.textContent = 'Informe a data.'; return; }
+  if (!odometro || odometro <= 0) { err.textContent = 'Informe o odômetro (km do painel).'; return; }
+  if (!litros || litros <= 0) { err.textContent = 'Informe os litros.'; return; }
+  if (!valorTotal || valorTotal <= 0) {
+    if (litros > 0 && preco > 0) { valorTotal = litros * preco; }
+    else { err.textContent = 'Informe o valor total ou o preço por litro.'; return; }
+  }
+  if (!preco || preco <= 0) preco = valorTotal / litros;
+
+  var payload = {
+    veiculo_id: veiculoId, data: normalizeDateString(data),
+    odometro: odometro, litros: litros, preco_litro: preco, valor_total: valorTotal,
+    combustivel: combustivel, tanque_cheio: tanqueCheio, posto: posto || null,
+    user_id: currentUser.id
+  };
+
+  if (abastecimentoEditandoId) {
+    var updAbast = await supa.from('abastecimentos').update(payload).eq('id', abastecimentoEditandoId);
+    if (updAbast && updAbast.error) { err.textContent = 'Não consegui salvar: ' + updAbast.error.message; return; }
+  } else {
+    var insAbast = await supa.from('abastecimentos').insert(payload);
+    // Sem checar o erro, uma falha de rede terminava em "✓ salvo" e o usuário
+    // tentava de novo — segundo caminho para o registro duplicado.
+    if (insAbast && insAbast.error) { err.textContent = 'Não consegui salvar: ' + insAbast.error.message; return; }
+  }
+
+  fecharModalAbastecimento();
+  renderTelaVeiculo();
+  showToast('✓ Abastecimento salvo!');
+}
+
+async function excluirAbastecimento(id) {
+  var r = abastecimentos.find(function(x) { return x.id === id; });
+  if (!r) return;
+  if (!confirm('Excluir este abastecimento?')) return;
+  var del = await supa.from('abastecimentos').delete().eq('id', id);
+  if (del && del.error) { showToast('⚠️ Não consegui excluir: ' + del.error.message); return; }
+  renderTelaVeiculo();
+  showToast('🗑️ Abastecimento removido');
+}
+
+// ─── Manutenção ───
+var manutencaoEditandoId = null;
+
+function abrirModalManutencao(id, tipoPre) {
+  if (veiculos.length === 0) { showToast('Cadastre um veículo primeiro.'); abrirModalVeiculo(); return; }
+  var sel = document.getElementById('m-veiculo');
+  sel.innerHTML = '';
+  veiculos.forEach(function(v) {
+    sel.innerHTML += '<option value="' + esc(v.id) + '">' + (v.emoji || '🚗') + ' ' + esc(v.nome) + '</option>';
+  });
+  document.getElementById('modal-manut-err').textContent = '';
+  var mss = document.getElementById('m-scan-status'); if (mss) mss.style.display = 'none';
+  if (id) {
+    var r = manutencoes.find(function(x) { return x.id === id; });
+    if (!r) return;
+    manutencaoEditandoId = id;
+    document.getElementById('modal-manut-title').textContent = 'Editar Manutenção';
+    document.getElementById('m-veiculo').value = r.veiculo_id;
+    document.getElementById('m-data').value = r.data || '';
+    document.getElementById('m-odometro').value = r.odometro;
+    document.getElementById('m-tipo').value = MANUT_TIPOS[r.tipo] ? r.tipo : 'outro';
+    document.getElementById('m-valor').value = r.valor;
+    document.getElementById('m-descricao').value = r.descricao || '';
+    document.getElementById('m-oficina').value = r.oficina || '';
+    document.getElementById('m-proxima-km').value = r.proxima_km || '';
+    document.getElementById('m-proxima-data').value = r.proxima_data || '';
+  } else {
+    manutencaoEditandoId = null;
+    document.getElementById('modal-manut-title').textContent = 'Nova Manutenção';
+    document.getElementById('m-veiculo').value = veiculoSelecionadoId || (veiculos[0] && veiculos[0].id);
+    document.getElementById('m-data').value = new Date().toISOString().slice(0, 10);
+    var km = kmAtualVeiculo();
+    document.getElementById('m-odometro').value = km > 0 ? km : '';
+    document.getElementById('m-tipo').value = (tipoPre && MANUT_TIPOS[tipoPre]) ? tipoPre : 'oleo';
+    document.getElementById('m-valor').value = '';
+    document.getElementById('m-descricao').value = '';
+    document.getElementById('m-oficina').value = '';
+    document.getElementById('m-proxima-km').value = '';
+    document.getElementById('m-proxima-data').value = '';
+  }
+  document.getElementById('modal-manutencao').style.display = 'flex';
+}
+
+function fecharModalManutencao() {
+  document.getElementById('modal-manutencao').style.display = 'none';
+}
+
+// Escaneia a nota da oficina/loja e preenche os campos (odômetro e "próxima" ficam manuais)
+async function scanNotaManutencao(file) {
+  var statusEl = document.getElementById('m-scan-status');
+  var mostra = function(txt, cor) { statusEl.style.display = 'block'; statusEl.style.color = cor || '#4A9EDF'; statusEl.textContent = txt; };
+  if (!getApiKey()) { showToast('⚠️ Configure a chave de IA em Config para escanear.'); return; }
+  mostra('🔎 Lendo a nota com IA...');
+  try {
+    var dataUrl = await new Promise(function(resolve, reject) {
+      var r = new FileReader(); r.onload = function(e) { resolve(e.target.result); }; r.onerror = reject; r.readAsDataURL(file);
+    });
+    var compressed = await compressImage(dataUrl, 1200, 0.75);
+    var base64 = compressed.split(',')[1];
+    var prompt = 'Você extrai dados de notas fiscais/recibos de OFICINA MECÂNICA, auto center ou loja de autopeças brasileiros. '
+      + 'Analise a imagem e devolva SOMENTE um JSON exato (sem markdown, sem texto):\n'
+      + '{\n'
+      + '  "valor_total": <número decimal, ex: 250.00>,\n'
+      + '  "tipo": "<uma de: oleo, filtro, pneu, alinhamento, freio, correia, suspensao, bateria, revisao, outro>",\n'
+      + '  "descricao": "<resumo curto das peças/serviços, ex: óleo 5W30 + filtro de óleo>",\n'
+      + '  "oficina": "<nome do estabelecimento>"\n'
+      + '}\n'
+      + 'Regras: use ponto decimal. tipo = serviço predominante (troca de óleo→oleo; '
+      + 'alinhamento/balanceamento→alinhamento; pastilha/disco→freio). Campo não identificado: null.';
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'x-api-key':getApiKey(), 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001', max_tokens: 512,
+        messages: [{ role:'user', content: [
+          { type:'image', source:{ type:'base64', media_type:'image/jpeg', data:base64 } },
+          { type:'text', text:prompt }
+        ] }]
+      })
+    });
+    if (!resp.ok) {
+      var eb = await resp.json().catch(function(){ return {}; });
+      throw new Error((eb.error && eb.error.message) || ('API ' + resp.status));
+    }
+    var data = await resp.json();
+    var text = data.content[0].text.trim().replace(/```json?/g, '').replace(/```/g, '').trim();
+    var json = JSON.parse(text);
+    if (json.valor_total) document.getElementById('m-valor').value = json.valor_total;
+    if (json.tipo && MANUT_TIPOS[String(json.tipo).toLowerCase()]) document.getElementById('m-tipo').value = String(json.tipo).toLowerCase();
+    if (json.descricao)   document.getElementById('m-descricao').value = json.descricao;
+    if (json.oficina)     document.getElementById('m-oficina').value = json.oficina;
+    document.getElementById('m-data').value = new Date().toISOString().slice(0, 10);
+    mostra('✓ Preenchido! Confira, ajuste o odômetro e informe a próxima (km ou data).', '#4CAF50');
+  } catch (err) {
+    console.error('scanNotaManutencao:', err);
+    mostra('⚠️ Não consegui ler. Preencha manualmente.', '#F44336');
+  }
+}
+
+// Chips de preenchimento rápido da "próxima" no modal de manutenção
+function manutProximaKm(delta) {
+  var odo = parseFloat(document.getElementById('m-odometro').value);
+  if (!odo || odo <= 0) { showToast('Informe o odômetro primeiro.'); return; }
+  document.getElementById('m-proxima-km').value = odo + delta;
+}
+function manutProximaMeses(meses) {
+  var base = document.getElementById('m-data').value;
+  var d = base ? parseExpenseDate(base) : new Date();
+  if (!d || isNaN(d)) d = new Date();
+  d.setMonth(d.getMonth() + meses);
+  document.getElementById('m-proxima-data').value = d.toISOString().slice(0, 10);
+}
+
+async function salvarManutencao() {
+  return semDuploToque('manutencao', 'btn-salvar-manut', _salvarManutencao);
+}
+
+async function _salvarManutencao() {
+  var err = document.getElementById('modal-manut-err');
+  var veiculoId = document.getElementById('m-veiculo').value;
+  var data = document.getElementById('m-data').value;
+  var odometro = parseFloat(document.getElementById('m-odometro').value);
+  var tipo = document.getElementById('m-tipo').value;
+  var valor = parseFloat(document.getElementById('m-valor').value);
+  var descricao = document.getElementById('m-descricao').value.trim();
+  var oficina = document.getElementById('m-oficina').value.trim();
+  var proximaKm = parseFloat(document.getElementById('m-proxima-km').value);
+  var proximaData = document.getElementById('m-proxima-data').value;
+
+  if (!veiculoId) { err.textContent = 'Selecione o veículo.'; return; }
+  if (!data) { err.textContent = 'Informe a data.'; return; }
+  if (!odometro || odometro <= 0) { err.textContent = 'Informe o odômetro (km do painel).'; return; }
+  if (isNaN(valor) || valor < 0) { err.textContent = 'Informe o valor (0 se não houve custo).'; return; }
+  if (proximaKm > 0 && proximaKm <= odometro) { err.textContent = 'A próxima (km) deve ser maior que o odômetro atual.'; return; }
+
+  var payload = {
+    veiculo_id: veiculoId, data: normalizeDateString(data),
+    odometro: odometro, tipo: tipo, valor: valor,
+    descricao: descricao || null, oficina: oficina || null,
+    proxima_km: proximaKm > 0 ? proximaKm : null,
+    proxima_data: proximaData ? normalizeDateString(proximaData) : null,
+    user_id: currentUser.id
+  };
+
+  if (manutencaoEditandoId) {
+    var updManut = await supa.from('manutencoes').update(payload).eq('id', manutencaoEditandoId);
+    if (updManut && updManut.error) { err.textContent = 'Não consegui salvar: ' + updManut.error.message; return; }
+  } else {
+    var insManut = await supa.from('manutencoes').insert(payload);
+    if (insManut && insManut.error) { err.textContent = 'Não consegui salvar: ' + insManut.error.message; return; }
+  }
+
+  fecharModalManutencao();
+  manutAlertsHomeCache.t = 0;
+  renderTelaVeiculo();
+  showToast('✓ Manutenção salva!');
+}
+
+async function excluirManutencao(id) {
+  var r = manutencoes.find(function(x) { return x.id === id; });
+  if (!r) return;
+  if (!confirm('Excluir esta manutenção?')) return;
+  var del = await supa.from('manutencoes').delete().eq('id', id);
+  if (del && del.error) { showToast('⚠️ Não consegui excluir: ' + del.error.message); return; }
+  manutAlertsHomeCache.t = 0;
+  renderTelaVeiculo();
+  showToast('🗑️ Manutenção removida');
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// RELATÓRIO MENSAL
+// ═══════════════════════════════════════════════════════════════════
+
+
+// ═══════════════════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ═══════════════════════════════════════════════════════════════════
+var PAGINAS = ['home', 'combustivel', 'manutencao', 'troca', 'config'];
+
+function paginaAtiva() {
+  var el = document.querySelector('.page.active');
+  return el ? el.id.replace('page-', '') : 'home';
+}
+
+function showPage(nome) {
+  if (PAGINAS.indexOf(nome) < 0) nome = 'home';
+  PAGINAS.forEach(function(p) {
+    var pg = document.getElementById('page-' + p);
+    if (pg) pg.classList.toggle('active', p === nome);
+    var nav = document.getElementById('nav-' + p);
+    if (nav) nav.classList.toggle('active', p === nome);
+  });
+  window.scrollTo(0, 0);
+  if (nome === 'home') renderInicio();
+  else if (nome === 'combustivel') renderCombustivel();
+  else if (nome === 'manutencao') renderManutencao();
+  else if (nome === 'troca') renderTroca();
+  else if (nome === 'config') renderConfig();
+}
+
+// Chamado pelo módulo de veículos depois de gravar; só redesenha a Início se ela estiver aberta.
+function renderHome() { if (paginaAtiva() === 'home') renderInicio(); }
+
+function irParaVeiculo(id, pagina) {
+  veiculoSelecionadoId = id;
+  showPage(pagina);
+}
+
+// Garante veículos carregados e um selecionado. Devolve false se não há nenhum.
+async function prepararVeiculo() {
+  await carregarVeiculos();
+  if (!veiculos.length) return false;
+  if (!veiculoSelecionadoId || !veiculos.find(function(v) { return v.id === veiculoSelecionadoId; })) {
+    veiculoSelecionadoId = veiculos[0].id;
+  }
+  return true;
+}
+
+function vazioSemVeiculo(icone, texto) {
+  return '<div style="text-align:center;padding:60px 20px;color:#555;"><div style="font-size:48px;margin-bottom:16px;">' + icone + '</div>'
+    + '<div style="font-size:14px;">Nenhum veículo cadastrado</div>'
+    + '<div style="font-size:12px;margin-top:8px;color:#444;">' + texto + '</div>'
+    + '<button class="empty-cta" style="margin-top:16px;" onclick="abrirModalVeiculo()">+ Cadastrar veículo</button></div>';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INÍCIO — o carro selecionado em uma tela
+// ═══════════════════════════════════════════════════════════════════
+async function renderInicio() {
+  var el = document.getElementById('home-content');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:#555;">Carregando...</div>';
+  renderAlertasManutencaoHome();
+  if (!(await prepararVeiculo())) {
+    el.innerHTML = vazioSemVeiculo('🚗', 'Cadastre seu carro para registrar abastecimentos, manutenções e receber os lembretes de revisão.');
+    return;
+  }
+  await Promise.all([carregarAbastecimentos(veiculoSelecionadoId), carregarManutencoes(veiculoSelecionadoId)]);
+  var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
+  var fmtNum = function(v, d) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }); };
+  var brl = function(v) { return 'R$ ' + fmtNum(v, 2); };
+  var m = calcularMetricasVeiculo(abastecimentos);
+  var mm = metricasManutencao();
+  var kmAtual = kmAtualVeiculo();
+
+  var hoje = new Date();
+  var mesKey = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0');
+  var doMes = function(r) { return normalizeDateString(r.data).slice(0, 7) === mesKey; };
+  var combMes = abastecimentos.filter(doMes).reduce(function(s, r) { return s + Number(r.valor_total || 0); }, 0);
+  var manutMes = manutencoes.filter(doMes).reduce(function(s, r) { return s + Number(r.valor || 0); }, 0);
+  var custoKmTotal = (mm.custoKmCombustivel != null) ? mm.custoKmCombustivel + (mm.custoKm || 0) : null;
+
+  var html = chipsVeiculo();
+
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+  html += '<div style="font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:18px;color:#F5F5F5;">' + (vSel.emoji || '🚗') + ' ' + esc(vSel.nome) + '</div>';
+  html += '<button onclick="editarVeiculo(&apos;' + escJs(vSel.id) + '&apos;)" style="background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;">⚙️ Editar</button>';
+  html += '</div>';
+
+  // Gasto do mês, separado por natureza
+  html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:12px;">';
+  html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;">Gasto com o carro neste mês</div>';
+  html += '<div style="font-family:IBM Plex Mono,monospace;font-size:28px;font-weight:700;color:#F44336;margin:6px 0 10px;">' + brl(combMes + manutMes) + '</div>';
+  html += '<div style="display:flex;gap:16px;font-size:12px;color:#888;">';
+  html += '<span>⛽ Combustível <b style="color:#F5F5F5;font-family:IBM Plex Mono,monospace;">' + brl(combMes) + '</b></span>';
+  html += '<span>🔧 Manutenção <b style="color:#F5F5F5;font-family:IBM Plex Mono,monospace;">' + brl(manutMes) + '</b></span>';
+  html += '</div></div>';
+
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">';
+  html += statBox('Consumo médio', m.consumoMedio != null ? fmtNum(m.consumoMedio, 1) + ' km/L' : '—', '#4CAF50');
+  html += statBox('Custo por km', custoKmTotal != null ? brl(custoKmTotal) : '—', '#F5A623');
+  html += statBox('Km atual', kmAtual > 0 ? fmtNum(kmAtual, 0) + ' km' : '—', '#4A9EDF');
+  html += statBox('Preço médio/L', m.precoMedio != null ? brl(m.precoMedio) : '—', '#60a5fa');
+  html += '</div>';
+  if (custoKmTotal != null) {
+    html += '<div style="font-size:11px;color:#666;margin:-8px 0 16px;">Custo por km = combustível ' + brl(mm.custoKmCombustivel) + ' + manutenção ' + brl(mm.custoKm || 0) + ', sobre ' + fmtNum(mm.totalKm, 0) + ' km medidos entre tanques cheios.</div>';
+  }
+
+  // Ações rápidas
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">';
+  html += '<button onclick="abrirModalAbastecimento()" style="background:#F5A623;color:#111;border:none;border-radius:12px;padding:16px 8px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;letter-spacing:0.02em;white-space:nowrap;cursor:pointer;">⛽ ABASTECI</button>';
+  html += '<button onclick="abrirModalManutencao()" style="background:#1C1C1C;color:#60a5fa;border:1px solid rgba(96,165,250,0.4);border-radius:12px;padding:16px 8px;font-family:Barlow Condensed,sans-serif;font-weight:700;font-size:16px;letter-spacing:0.02em;white-space:nowrap;cursor:pointer;">🔧 MANUTENÇÃO</button>';
+  html += '</div>';
+
+  // Últimos registros, os dois tipos juntos
+  var ult = abastecimentos.map(function(r) { return { tipo: 'a', data: normalizeDateString(r.data), r: r }; })
+    .concat(manutencoes.map(function(r) { return { tipo: 'm', data: normalizeDateString(r.data), r: r }; }))
+    .sort(function(a, b) { return b.data.localeCompare(a.data); })
+    .slice(0, 6);
+  if (ult.length) {
+    html += '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Últimos registros</div>';
+    html += '<div style="background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;overflow:hidden;margin-bottom:16px;">';
+    ult.forEach(function(it, i) {
+      var r = it.r, titulo, sub, valor;
+      if (it.tipo === 'a') {
+        titulo = '⛽ ' + fmtNum(r.litros, 2) + ' L' + (r.posto ? ' · ' + esc(r.posto) : '');
+        valor = Number(r.valor_total || 0);
+      } else {
+        titulo = esc(manutTipoLabel(r.tipo)) + (r.oficina ? ' · ' + esc(r.oficina) : '');
+        valor = Number(r.valor || 0);
+      }
+      sub = it.data.split('-').reverse().join('/') + ' · ' + fmtNum(r.odometro, 0) + ' km';
+      html += '<div onclick="showPage(&apos;' + (it.tipo === 'a' ? 'combustivel' : 'manutencao') + '&apos;)" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;' + (i ? 'border-top:1px solid #2A2A2A;' : '') + '">';
+      html += '<div style="min-width:0;"><div style="font-size:13px;color:#F5F5F5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + titulo + '</div><div style="font-size:11px;color:#666;">' + sub + '</div></div>';
+      html += '<div style="font-family:IBM Plex Mono,monospace;font-size:14px;font-weight:600;color:#F44336;white-space:nowrap;">' + brl(valor) + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  } else {
+    html += '<div style="text-align:center;padding:24px 20px;color:#555;background:#1C1C1C;border:1px dashed #2A2A2A;border-radius:12px;"><div style="font-size:13px;">Nada registrado ainda</div><div style="font-size:12px;margin-top:6px;color:#444;">Toque em ABASTECI na próxima ida ao posto. O consumo aparece a partir do 2º tanque cheio.</div></div>';
+  }
+
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TROCA — plano de troca do veículo selecionado
+// ═══════════════════════════════════════════════════════════════════
+async function renderTroca() {
+  var el = document.getElementById('troca-content');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:#555;">Carregando...</div>';
+  if (!(await prepararVeiculo())) {
+    el.innerHTML = vazioSemVeiculo('🔄', 'Cadastre o carro atual para planejar a troca.');
+    return;
+  }
+  await Promise.all([carregarAbastecimentos(veiculoSelecionadoId), carregarManutencoes(veiculoSelecionadoId), carregarPlanoTroca(veiculoSelecionadoId)]);
+  var vSel = veiculos.find(function(v) { return v.id === veiculoSelecionadoId; });
+  el.innerHTML = chipsVeiculo() + renderAbaTroca(calcularMetricasVeiculo(abastecimentos), vSel);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════════
+function renderConfig() {
+  var el = document.getElementById('config-content');
+  if (!el) return;
+  var temChave = !!getApiKey();
+  var card = 'background:#1C1C1C;border:1px solid #2A2A2A;border-radius:12px;padding:16px;margin-bottom:14px;';
+  var rotulo = 'font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;';
+  var html = '';
+
+  html += '<div style="' + card + '"><div style="' + rotulo + '">Conta</div>';
+  html += '<div style="font-size:14px;color:#F5F5F5;margin-bottom:12px;word-break:break-all;">' + esc((currentUser && currentUser.email) || '—') + '</div>';
+  html += '<button onclick="authLogout()" style="background:rgba(244,67,54,0.12);color:#F44336;border:1px solid rgba(244,67,54,0.3);border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;">Sair da conta</button></div>';
+
+  html += '<div style="' + card + '"><div style="' + rotulo + '">Leitura de nota com IA</div>';
+  html += '<div style="font-size:12px;color:#888;margin-bottom:10px;">Com a chave, o 📷 dos modais lê o cupom do posto ou da oficina e preenche os campos. Sem ela, tudo funciona digitando.</div>';
+  html += '<div style="font-size:13px;margin-bottom:10px;color:' + (temChave ? '#4CAF50' : '#F5A623') + ';">' + (temChave ? '✓ Chave configurada neste aparelho' : '⚠️ Sem chave configurada') + '</div>';
+  html += '<input id="cfg-api-key" type="password" placeholder="sk-ant-..." autocomplete="off" style="width:100%;background:#111;border:1px solid #2A2A2A;border-radius:8px;color:#F5F5F5;font-size:14px;padding:10px 12px;outline:none;margin-bottom:10px;" />';
+  html += '<div style="display:flex;gap:8px;">';
+  html += '<button onclick="salvarApiKey()" style="flex:1;background:#F5A623;color:#111;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">Salvar chave</button>';
+  if (temChave) html += '<button onclick="removerApiKey()" style="background:#2A2A2A;color:#888;border:none;border-radius:8px;padding:10px 14px;font-size:13px;cursor:pointer;">Remover</button>';
+  html += '</div></div>';
+
+  html += '<div style="' + card + '"><div style="' + rotulo + '">Sobre</div>';
+  html += '<div style="font-size:13px;color:#F5F5F5;">GastosIA Auto <span style="font-family:IBM Plex Mono,monospace;color:#888;">v' + APP_VERSAO + '</span></div>';
+  html += '<div style="font-size:12px;color:#666;margin-top:6px;">Combustível, manutenção e plano de troca. Dados sincronizados na sua conta.</div></div>';
+
+  el.innerHTML = html;
+}
+
+function salvarApiKey() {
+  var v = (document.getElementById('cfg-api-key').value || '').trim();
+  if (!v) { showToast('Cole a chave antes de salvar.'); return; }
+  try { localStorage.setItem('gastosIa_apiKey', v); } catch (e) { showToast('⚠️ Não consegui salvar neste aparelho.'); return; }
+  showToast('✓ Chave salva');
+  renderConfig();
+}
+
+function removerApiKey() {
+  try { localStorage.removeItem('gastosIa_apiKey'); } catch (e) {}
+  showToast('Chave removida');
+  renderConfig();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// COMPARTILHAR → APP (Web Share Target)
+// ═══════════════════════════════════════════════════════════════════
+// O SW guarda a foto compartilhada e redireciona para /?shared=1. Nota de posto
+// é o caso comum: abre o abastecimento e manda a foto direto para a leitura.
+async function consumeSharedPayload() {
+  try {
+    if (new URLSearchParams(location.search).get('shared') !== '1') return;
+    history.replaceState(null, '', location.pathname);
+    if (!('caches' in window)) return;
+    var cache = await caches.open('gastosAuto-share');
+    var imgResp = await cache.match('shared-image');
+    await cache.delete('shared-text');
+    if (!imgResp || !imgResp.ok) return;
+    var blob = await imgResp.blob();
+    await cache.delete('shared-image');
+    if (!(await prepararVeiculo())) { abrirModalVeiculo(); return; }
+    abrirModalAbastecimento();
+    scanNotaAbastecimento(new File([blob], 'compartilhada.jpg', { type: blob.type || 'image/jpeg' }));
+  } catch (err) { console.error('consumeSharedPayload:', err); }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════════
+function iniciarApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-root').style.display = '';
+  showPage('home');
+  consumeSharedPayload();
+}
+
+async function initAuth() {
+  var session = null;
+  try {
+    var r = await supa.auth.getSession();
+    session = r && r.data && r.data.session;
+  } catch (e) { console.error('initAuth:', e); }
+  if (session) {
+    currentUser = session.user;
+    iniciarApp();
+  } else {
+    document.getElementById('auth-screen').style.display = '';
+    document.getElementById('app-root').style.display = 'none';
+  }
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(function(reg) { reg.update(); }).catch(function() {});
+  // Quando um SW novo assume, recarrega para exibir a versão nova imediatamente
+  var hadController = !!navigator.serviceWorker.controller;
+  var swReloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function() {
+    if (hadController && !swReloaded) { swReloaded = true; location.reload(); }
+  });
+}
+
+initAuth();
+
+</script>
+</body>
+</html>
