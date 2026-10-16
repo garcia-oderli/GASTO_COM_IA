@@ -11,47 +11,47 @@
 - Resposta direta, em português. Recomendação clara em vez de lista de opções neutras.
 
 ## Projeto
-- **GastosIA Auto** — controle de combustível, manutenção e plano de troca do carro.
-  PWA num único `index.html` (HTML+CSS+JS inline) + `sw.js` + `manifest.json`, deploy
-  na Vercel. Telas: Início, Combustível, Manutenção, Troca, Config.
-- **Histórico:** até a v4.8.3 era o GastosIA de finanças pessoais (gastos, rendas,
-  cartões, orçamento, relatório). Na v5.0.0 virou só carro, na mesma URL e com o mesmo
-  login. O app antigo está no git (último commit dele: `f430e6e`).
+- App de finanças pessoais **GastosIA**, PWA num único `index.html` (HTML+CSS+JS inline)
+  + `sw.js` (service worker) + `manifest.json`, deploy na Vercel.
 - Pasta `ritmorec/` é um app separado (gravador de reunião) — não mexer salvo pedido.
-- **Backend:** Supabase (projeto `vfrgmjhguzukraqsmduo`). Auth email/senha. Tabelas em
-  uso: `veiculos`, `abastecimentos`, `manutencoes`, `planos_troca`. RLS endurecido: toda
-  tabela exige `auth.uid() = user_id`. Supabase é a **fonte única** (não usar
-  localStorage para dados do carro).
-- **Tabelas legadas** `gastos`, `rendas`, `cartoes`, `faturas`, `categorias`: o app não
-  lê nem escreve mais. Backup feito (pasta "Backup GastosIA - 2026-10-16" no Drive do
-  dono) e o dono decidiu apagar. A coluna `gasto_id` em abastecimentos/manutenções é
-  sobra do antigo espelho em `gastos` — texto sem FK, o app não grava mais.
-- **IA:** chamada direta do browser à API Anthropic (`claude-haiku-4-5`) só para ler
-  nota de posto e de oficina (vision). Chave em `localStorage` (`gastosIa_apiKey`, mesma
-  chave do app antigo). Sem chave, tudo funciona digitando.
-- **Compartilhar → app:** foto compartilhada pelo Android (share target do manifest)
-  abre o modal de abastecimento e vai direto para a leitura da nota.
+- Pasta `gastosia-auto/` é o **GastosIA Auto**, app separado só de carro (combustível,
+  manutenção, plano de troca), com projeto e endereço próprios na Vercel. Mesmo Supabase
+  e mesmo login do GastosIA; usa só `veiculos`, `abastecimentos`, `manutencoes` e
+  `planos_troca`. Versão própria (começou em 1.0.0): bumpar o cache em
+  `gastosia-auto/sw.js` e os 4 pontos do `gastosia-auto/index.html` (`<title>`,
+  `.logo-version`, subtítulo da página Config, `var APP_VERSAO`). Caminhos são relativos
+  ao escopo (manifest, SW, ícones) — não trocar por `/...`, senão numa subpasta ele pega
+  o SW e o manifest do GastosIA.
+- **Os dois apps escrevem nas tabelas de carro, mas só o GastosIA espelha em `gastos`.**
+  O que é lançado no Auto não aparece nos gastos/relatório do GastosIA. Foi escolha
+  (o Auto nasceu sem o espelho); religar é decisão do dono.
+- **Backend:** Supabase (projeto `vfrgmjhguzukraqsmduo`). Auth email/senha; tabelas
+  `gastos`, `rendas`, `cartoes`, `faturas`. RLS já endurecido: toda tabela exige
+  `auth.uid() = user_id`. Supabase é a **fonte única** dos dados (não usar localStorage
+  para dados de gasto/renda).
+- **IA:** chamadas diretas do browser à API Anthropic (`claude-haiku-4-5`) para scan de
+  nota (vision), análise consultor e import de PDF. Chave fica em `localStorage`
+  (`gastosIa_apiKey`). Fallback local sem chave.
 
 ## Convenções
-- **Versão:** bumpar JUNTOS a cada release o cache em `sw.js` (`const CACHE`) e os 4
-  pontos em `index.html`: `<title>`, badge `.logo-version`, o "vX.X.X" no subtítulo da
-  página Config e `var APP_VERSAO`. Produção só atualiza com merge na `main`.
+- **Versão:** bumpar JUNTOS a cada release o cache em `sw.js` (`const CACHE`) e os 3
+  pontos visíveis em `index.html`: `<title>`, badge `.logo-version` e o "vX.X.X" em
+  Config → Sobre. Produção só atualiza quando faz merge na `main` (Vercel auto-deploy).
 - **XSS:** todo dado de usuário/IA renderizado via `innerHTML` passa por `esc()`;
   valores em atributos `onclick="fn('...')"` usam `escJs()`. Já existem no arquivo.
-- **Datas:** usar `normalizeDateString()` / `parseExpenseDate()`; datas gravadas são
-  texto `YYYY-MM-DD`.
-- **Gravações:** todo botão que faz `insert` passa por `semDuploToque(chave, botaoId,
-  fn)` e confere o `error` do Supabase antes de dizer "salvo". Sem isso o toque repetido
-  com rede lenta duplicava registros (aconteceu: 5 cópias da mesma troca de óleo).
-- **Km e custo/km:** km rodado vem dos abastecimentos, medido entre tanques cheios
-  (`calcularMetricasVeiculo`). Custo/km de manutenção rateia sobre esses mesmos km.
-  `kmAtualVeiculo()` = maior odômetro entre abastecimentos e manutenções.
-- **Re-render:** depois de gravar, chamar `renderTelaVeiculo()`, que redesenha a tela
-  aberta (não assumir qual é).
+- **Datas:** usar `parseExpenseDate()` em todo o app. Exceção proposital: módulo de
+  cartões usa `new Date(data+'T00:00:00')` por causa das bordas de ciclo (meia-noite).
+- **Escopo de período:** Início, Gastos, Análise e Relatório contam o **mês atual**
+  (`getMonthExpenses`). Manter consistente entre telas.
 - **Scan de nota:** a data é sempre forçada para hoje (OCR de data era ruim); usuário
   ajusta manual. A IA não extrai mais data.
+- **Gravações:** botão que faz `insert` passa por `semDuploToque(chave, botaoId, fn)` e
+  confere o `error` do Supabase antes de dizer "salvo". Sem isso o toque repetido com rede
+  lenta duplicava registros (aconteceu: 5 cópias da mesma troca de óleo).
 - **SQL destrutivo:** `delete`/`restore` pelo MCP do Supabase é bloqueado neste ambiente.
   Preparar o SQL (com backup antes) e o dono roda no SQL Editor.
+- **Não apagar `gastos`/`rendas`/`cartoes`:** chegou a ser decidido quando o plano era
+  transformar o GastosIA no app de carro; com dois apps, o GastosIA continua usando.
 
 ## Fluxo de trabalho
 - Branch de dev: `claude/fervent-babbage-nl2veu`. Commitar, push, abrir PR (não-draft),
@@ -63,8 +63,3 @@
 - **Sem manual de usuário extenso** (ROI baixo, desatualiza rápido). Preferir **dicas
   contextuais curtas nas telas vazias / no momento de uso**. Manual longo só se o
   objetivo for distribuir o app para terceiros.
-- **App só de carro (out/2026):** sem renda, sem orçamento, sem gastos gerais. Por isso
-  o plano de troca não tem mais o bloco "cabe no orçamento?" — mostra quanto guardar
-  por mês e a simulação, e o dono julga.
-- **Mesma URL do antigo:** escolhido para o PWA instalado virar o app novo sem
-  reinstalar nem refazer login.

@@ -1,7 +1,7 @@
 {
-  "name": "GastosIA Auto",
-  "short_name": "GastosIA Auto",
-  "description": "Combustível, manutenção e plano de troca do seu carro",
+  "name": "GastosIA · R$",
+  "short_name": "GastosIA",
+  "description": "Controle financeiro inteligente com IA",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F5A623",
@@ -16,12 +16,7 @@
       "text": "text",
       "url": "url",
       "files": [
-        {
-          "name": "image",
-          "accept": [
-            "image/*"
-          ]
-        }
+        { "name": "image", "accept": ["image/*"] }
       ]
     }
   },
