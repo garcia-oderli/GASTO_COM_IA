@@ -19,7 +19,10 @@
   mesmo domínio (um projeto próprio na Vercel, como o `meetrec`, é opcional). No mesmo
   domínio ele compartilha a sessão do Supabase e a chave de IA, porque localStorage é por
   origem: quem entrou no GastosIA abre o Auto já logado. Usa só `veiculos`,
-  `abastecimentos`, `manutencoes` e `planos_troca`. Versão própria (começou em 1.0.0): bumpar o cache em
+  `abastecimentos`, `manutencoes` e `planos_troca`.
+- **Não recolocar `"trailingSlash": false` no `vercel.json` da raiz.** A Vercel tira a
+  barra de `/gastosia-auto/`, os caminhos relativos do Auto passam a resolver na raiz e
+  o "Instalar app" instala o GastosIA no lugar do Auto (aconteceu na v1.0.0). Versão própria (começou em 1.0.0): bumpar o cache em
   `gastosia-auto/sw.js` e os 4 pontos do `gastosia-auto/index.html` (`<title>`,
   `.logo-version`, subtítulo da página Config, `var APP_VERSAO`). Caminhos são relativos
   ao escopo (manifest, SW, ícones) — não trocar por `/...`, senão numa subpasta ele pega

@@ -1,4 +1,4 @@
-const CACHE = 'gastosAuto-v1.0.0';
+const CACHE = 'gastosAuto-v1.0.1';
 // Cache separado (sem versão) para o payload do Web Share Target — não é
 // apagado no activate para sobreviver ao redirect que entrega a foto ao app.
 const SHARE_CACHE = 'gastosAuto-share';
@@ -7,7 +7,7 @@ const SHARE_CACHE = 'gastosAuto-share';
 const BASE = new URL(self.registration.scope).pathname;
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './index.html', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png'])));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png'])));
   self.skipWaiting();
 });
 
@@ -50,7 +50,7 @@ self.addEventListener('fetch', e => {
         const copy = r.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy));
         return r;
-      }).catch(() => caches.match(e.request).then(r => r || caches.match(BASE + 'index.html')))
+      }).catch(() => caches.match(e.request).then(r => r || caches.match(BASE)))
     );
   } else {
     e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));

@@ -2,6 +2,12 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<script>
+// Os caminhos (manifest, SW, ícones) são relativos. Sem a barra final, "/gastosia-auto"
+// resolveria "manifest.json" na raiz e instalaria o GastosIA no lugar deste app.
+if (location.pathname !== '/' && !location.pathname.endsWith('/') && !/\.[a-z0-9]+$/i.test(location.pathname))
+  location.replace(location.pathname + '/' + location.search + location.hash);
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0a0f1c">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -10,7 +16,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>GastosIA Auto v1.0.0</title>
+<title>GastosIA Auto v1.0.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -204,7 +210,7 @@
 
 <div class="topbar">
   <span class="logo">GASTOSIA<small>AUTO</small></span>
-  <span class="logo-version">v1.0.0</span>
+  <span class="logo-version">v1.0.1</span>
 </div>
 
 <div class="page" id="page-home">
@@ -260,7 +266,7 @@
 <div class="page" id="page-config">
   <div class="page-header">
     <div class="page-title">⚙️ Config</div>
-    <div class="page-subtitle">Conta, leitura de nota e versão v1.0.0</div>
+    <div class="page-subtitle">Conta, leitura de nota e versão v1.0.1</div>
   </div>
   <div id="config-content" style="margin-top:12px;"></div>
 </div>
@@ -545,7 +551,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-var APP_VERSAO = '1.0.0';
+var APP_VERSAO = '1.0.1';
 const SUPA_URL = 'https://vfrgmjhguzukraqsmduo.supabase.co';
 const SUPA_KEY = 'sb_publishable_zWIDdXlUEP3hGwih7bD8JA_eNB911je';
 const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
